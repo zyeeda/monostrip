@@ -1,15 +1,11 @@
 package com.zyeeda.framework.ws.base;
 
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
 import javax.servlet.ServletContext;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.ServletContextAware;
 
 import com.zyeeda.framework.entities.User;
 import com.zyeeda.framework.ftp.FtpService;
@@ -20,18 +16,14 @@ import com.zyeeda.framework.managers.UserPersistException;
 import com.zyeeda.framework.managers.internal.DefaultUserManager;
 import com.zyeeda.framework.nosql.MongoDbService;
 import com.zyeeda.framework.persistence.PersistenceService;
-import com.zyeeda.framework.persistence.internal.DefaultPersistenceServiceProvider;
 import com.zyeeda.framework.scheduler.SchedulerService;
 import com.zyeeda.framework.security.SecurityService;
 import com.zyeeda.framework.sync.UserSyncService;
 
-public class ResourceService implements ServletContextAware {
+public class ResourceService {
 
 	protected ServletContext ctx;
 	
-	private EntityManager entityManager = null;
-    private EntityManagerFactory entityManagerFactory = null;
-    
     private SecurityService<?> securityService = null;
     private LdapService ldapService = null;
     private UserSyncService userSyncService = null;
@@ -43,24 +35,14 @@ public class ResourceService implements ServletContextAware {
         return this.ctx;
     }
 
-    @Override
-    public void setServletContext(ServletContext servletContext) {
-        this.ctx = servletContext;
-    }
+//    @Override
+//    public void setServletContext(ServletContext servletContext) {
+//        this.ctx = servletContext;
+//    }
 
     @Autowired
     public void setSecurityService(SecurityService<?> securityService) {
         this.securityService = securityService;
-    }
-
-    @PersistenceContext
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
-    @Autowired
-    public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
-        this.entityManagerFactory = entityManagerFactory;
     }
 
     @Autowired
@@ -91,12 +73,16 @@ public class ResourceService implements ServletContextAware {
     public UserSyncService getUserSyncService() {
         return userSyncService;
     }
+    
+    private PersistenceService persistenceService;
 
     protected PersistenceService getPersistenceService() {
-        DefaultPersistenceServiceProvider service = new DefaultPersistenceServiceProvider();
-        service.setEntityManager(entityManager);
-        service.setEntityManagerFactory(entityManagerFactory);
-        return service;
+        return persistenceService;
+    }
+    
+    @Autowired
+    public void sePersistenceService(PersistenceService persistenceService) {
+    	this.persistenceService = persistenceService;
     }
 
     protected SecurityService<?> getSecurityService() {
@@ -246,4 +232,14 @@ public class ResourceService implements ServletContextAware {
 		String deptName = detp.substring(deptLength + 1, detp.length());
 		return deptName;
 	}
+    
+    protected void copyServicesTo(ResourceService another) {
+    	another.setFtpService(ftpService);
+    	another.setKnowledgeService(knowledgeService);
+    	another.setLdapService(ldapService);
+    	another.setMongoDbService(mongoDbService);
+    	another.setSecurityService(securityService);
+    	another.ctx = ctx;
+    	another.setUserSyncService(userSyncService);
+    }
 }

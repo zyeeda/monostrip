@@ -152,6 +152,7 @@ public class DroolsKnowledgeServiceProvider extends AbstractService implements K
 			rtLogger = KnowledgeRuntimeLoggerFactory.newThreadedFileLogger(ksession, auditLogFilePath, this.auditLogFlushInterval);
 			DefaultPersistenceServiceProvider persistenceServiceProvider = new DefaultPersistenceServiceProvider();
 			persistenceServiceProvider.setEntityManager(entityManager);
+			persistenceServiceProvider.setEntityManagerFactory(entityManagerFactory);
 			new HistoryLogger(ksession, persistenceServiceProvider, this.kbase);
 			
 			T result = command.execute(ksession);
