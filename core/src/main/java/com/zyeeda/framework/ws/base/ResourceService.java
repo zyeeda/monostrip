@@ -35,10 +35,11 @@ public class ResourceService {
         return this.ctx;
     }
 
-//    @Override
-//    public void setServletContext(ServletContext servletContext) {
-//        this.ctx = servletContext;
-//    }
+    //@Override
+    @Autowired
+    public void setServletContext(ServletContext servletContext) {
+        this.ctx = servletContext;
+    }
 
     @Autowired
     public void setSecurityService(SecurityService<?> securityService) {

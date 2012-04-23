@@ -13,8 +13,8 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Query;
 
 import com.googlecode.genericdao.dao.jpa.GenericDAOImpl;
-import com.googlecode.genericdao.search.jpa.JPAAnnotationMetadataUtil;
 import com.googlecode.genericdao.search.jpa.JPASearchProcessor;
+import com.zyeeda.framework.genericdao.JPAAnnotationMetadataUtil;
 import com.zyeeda.framework.persistence.PersistenceService;
 import com.zyeeda.framework.viewmodels.QueryResult;
 

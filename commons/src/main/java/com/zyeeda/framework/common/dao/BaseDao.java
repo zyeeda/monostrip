@@ -1,4 +1,4 @@
-package com.zyeeda.coala.base.dao;
+package com.zyeeda.framework.common.dao;
 
 import java.io.Serializable;
 import java.util.Collection;
