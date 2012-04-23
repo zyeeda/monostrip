@@ -12,12 +12,9 @@ import java.util.List;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Query;
 
-import org.hibernate.ejb.HibernateEntityManagerFactory;
-
 import com.googlecode.genericdao.dao.jpa.GenericDAOImpl;
-import com.googlecode.genericdao.search.MetadataUtil;
+import com.googlecode.genericdao.search.jpa.JPAAnnotationMetadataUtil;
 import com.googlecode.genericdao.search.jpa.JPASearchProcessor;
-import com.googlecode.genericdao.search.jpa.hibernate.HibernateMetadataUtil;
 import com.zyeeda.framework.persistence.PersistenceService;
 import com.zyeeda.framework.viewmodels.QueryResult;
 
@@ -36,8 +33,9 @@ public class DomainEntityManager<T, ID extends Serializable> extends GenericDAOI
 	public DomainEntityManager(PersistenceService persistenceSvc) {
 		this.persistenceSvc = persistenceSvc;
 		this.setEntityManager(this.persistenceSvc.getCurrentSession());
-		HibernateEntityManagerFactory emf = (HibernateEntityManagerFactory) this.persistenceSvc.getSessionFactory();
-		MetadataUtil util = HibernateMetadataUtil.getInstanceForEntityManagerFactory(emf);
+		//HibernateEntityManagerFactory emf = (HibernateEntityManagerFactory) this.persistenceSvc.getSessionFactory();
+		//MetadataUtil util = HibernateMetadataUtil.getInstanceForEntityManagerFactory(emf);
+		JPAAnnotationMetadataUtil util = new JPAAnnotationMetadataUtil();
 		JPASearchProcessor processor = new JPASearchProcessor(util);
 		this.setSearchProcessor(processor);
 		
