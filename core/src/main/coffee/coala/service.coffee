@@ -29,8 +29,9 @@ exports.createService = (entityClass) ->
         dao[name] args[0]
 
 exports.servicesAnnotationHandler = (context, attributes, fn, args) ->
-    attributes = [attributes] if type(attributes) is 'string'
-    throw new Error('attributes must be a string or an string array') if type(attributes) isnt 'array'
-    services = (require(m).createService() for m in attributes)
-    args = services.concat args
+    if attributes
+        attributes = [attributes] if type(attributes) is 'string'
+        throw new Error('attributes must be a string or an string array') if type(attributes) isnt 'array'
+        services = (require(m).createService() for m in attributes)
+        args = services.concat args
     fn.apply null, args

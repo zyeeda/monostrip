@@ -21,20 +21,22 @@ handlers =
 
     services: servicesAnnotationHandler
 
-    manager: (context, attributes, fn, args) ->
-        service = createService()
-        attr = if type(attributes) == 'array' then attributes else [attributes]
-        managers = []
+    managers: (context, attributes, fn, args) ->
+        if attributes
+            service = createService()
+            attr = if type(attributes) == 'array' then attributes else [attributes]
+            managers = []
 
-        managers.push service.createManager clazz for clazz in managers
-        args = managers.concat args
+            managers.push service.createManager clazz for clazz in managers
+            args = managers.concat args
         fn.apply null, args
 
     inject: (context, attributes, fn, args) ->
-        attr = if type(attributes) == 'array' then attributes else [attributes]
-        beans = []
-        beans.push((if type(name) == 'string' then context.getBean else context.getBeanByClass)(name)) for name in attr
-        args = beans.concat args
+        if attributes
+            attr = if type(attributes) == 'array' then attributes else [attributes]
+            beans = []
+            beans.push((if type(name) == 'string' then context.getBean else context.getBeanByClass)(name)) for name in attr
+            args = beans.concat args
         fn.apply null, args
 
     test: (context, attributes, fn, args) ->
@@ -51,7 +53,7 @@ object =
     mark: (name, attributes) ->
         throw new Error('one annotation once') if object.keys.indexOf(name) isnt -1
         throw new Error("annotation #{name} is not supported") unless name of handlers
-        object.annos.push {attributes: attributes or {}, name: name}
+        object.annos.push {attributes: attributes, name: name}
         object.keys.push name
         object
 

@@ -50,7 +50,7 @@ exports.tx = (callback) ->
         doInTransaction: (status) ->
             return callback status
 
-exports.txAnnotationHandler = (context, attributes, fn, args) ->
+exports.txAnnotationHandler = (context, attributes = {}, fn, args) ->
     needStatus = attributes.needStatus
     attributes.callback = (status) ->
         args.unshift status if needStatus is true
