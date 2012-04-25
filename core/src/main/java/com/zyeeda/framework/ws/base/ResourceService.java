@@ -35,7 +35,6 @@ public class ResourceService {
         return this.ctx;
     }
 
-    //@Override
     @Autowired
     public void setServletContext(ServletContext servletContext) {
         this.ctx = servletContext;
