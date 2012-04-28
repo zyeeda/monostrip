@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.zyeeda.framework.common.dao;
+package com.zyeeda.framework.commons.manager;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -29,12 +29,12 @@ import org.hibernate.criterion.Example;
  * @author guyong
  *
  */
-public class AbstractBaseDao<T, ID extends Serializable> implements BaseDao<T, ID> {
+public class AbstractBaseManager<T, ID extends Serializable> implements BaseManager<T, ID> {
     
     private Class<T> entityClass = null;
     private EntityManager entityManager = null;
     
-    public AbstractBaseDao() {
+    public AbstractBaseManager() {
         entityClass = getObjectClass();
     }
     

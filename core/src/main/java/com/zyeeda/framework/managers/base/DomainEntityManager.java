@@ -18,7 +18,7 @@ import com.zyeeda.framework.genericdao.JPAAnnotationMetadataUtil;
 import com.zyeeda.framework.persistence.PersistenceService;
 import com.zyeeda.framework.viewmodels.QueryResult;
 
-@SuppressWarnings("unchecked")
+@Deprecated
 public class DomainEntityManager<T, ID extends Serializable> extends GenericDAOImpl<T, ID> {
 
 	private PersistenceService persistenceSvc;

@@ -1,6 +1,5 @@
 package com.zyeeda.framework.ws.base;
 
-
 import javax.servlet.ServletContext;
 
 import org.apache.shiro.SecurityUtils;
@@ -20,6 +19,7 @@ import com.zyeeda.framework.scheduler.SchedulerService;
 import com.zyeeda.framework.security.SecurityService;
 import com.zyeeda.framework.sync.UserSyncService;
 
+@Deprecated
 public class ResourceService {
 
 	protected ServletContext ctx;

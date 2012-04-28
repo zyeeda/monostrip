@@ -1,4 +1,4 @@
-package com.zyeeda.framework.common.dao;
+package com.zyeeda.framework.commons.manager;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -16,7 +16,7 @@ import java.util.Map;
  * @param <T>
  * @param <ID>
  */
-public interface BaseDao<T, ID extends Serializable> {
+public interface BaseManager<T, ID extends Serializable> {
 
     /**
      * 根据指定id获取实体对象

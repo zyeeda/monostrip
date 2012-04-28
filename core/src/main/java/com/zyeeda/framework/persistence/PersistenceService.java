@@ -5,6 +5,7 @@ import javax.persistence.EntityManagerFactory;
 
 import com.zyeeda.framework.service.Service;
 
+@Deprecated
 public interface PersistenceService extends Service {
 
 	public EntityManagerFactory getSessionFactory();
