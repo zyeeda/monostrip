@@ -5,6 +5,7 @@
 {json,html} = require 'coala/response'
 {createService} = require 'coala/dynamic/service'
 {createConvertor} = require 'coala/dynamic/convertor'
+{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet;
 
 exports.createRouter = ->
     app = new Application()
@@ -44,33 +45,39 @@ ID_SUFFIX = '/:id'
 
 attachDomain = (app, path, clazz, options = {}) ->
     descriptor = DynamicModuleHelper.resolveEntity path, clazz
+    path = descriptor.getPath()
 
-    listUrl = new RegExp("#{url.replace '/', '\\/'}#{ORDER_BY_AND_PAGE_PARAMS_REGEXP_SUFFIX}")
-    removeUrl = updateUrl = getUrl = url + ID_SUFFIX
-    createUrl = url
-    batchRemoveUrl = url + '/delete'
+    listUrl = new RegExp("#{path.replace '/', '\\/'}#{ORDER_BY_AND_PAGE_PARAMS_REGEXP_SUFFIX}")
+    removeUrl = updateUrl = getUrl = path + ID_SUFFIX
+    createUrl = path
+    batchRemoveUrl = path + '/delete'
 
-    app.get listUrl, handlers.list.bind handlers, options, descriptor
-    app.get getUrl, handlers.get.bind handlers, options, descriptor
-    app.post createUrl, handlers.create.bind handlers, options, descriptor
-    app.put updateUrl, handlers.update.bind handlers, options, descriptor
-    app.del removeUrl, handlers.remove.bind handlers, options, descriptor
-    app.post batchRemoveUrl, handlers.batchRemove.bind handlers, options, descriptor
+    excludes = {}
+    excludes[name] = true for name in options.exclude or []
+
+    service = getService options, descriptor
+    app.get listUrl, handlers.list.bind handlers, options, service, descriptor unless excludes.list
+    app.get getUrl, handlers.get.bind handlers, options, service, descriptor unless excludes.get
+    app.post createUrl, handlers.create.bind handlers, options, service, descriptor unless excludes.create
+    app.put updateUrl, handlers.update.bind handlers, options, service, descriptor unless excludes.update
+    app.del removeUrl, handlers.remove.bind handlers, options, service, descriptor unless excludes.remove
+    app.post batchRemoveUrl, handlers.batchRemove.bind handlers, options, service, descriptor unless excludes.batchRemove
 
     app
 
 
 getService = (options, descriptor) ->
+    print "getService entity class: #{descriptor.entityClass}";
     options.service or createService descriptor.entityClass
 
 
 getJsonFilter = (options, type) ->
-    options[type + 'JsonFilter'] or options.jsonFilter or {}
+    return {} unless options.filters
+    options.filters[type] or options.filters.defaults or {}
 
 
 handlers =
-    list: (options, descriptor, request, orders, page) ->
-        service = getService options, descriptor
+    list: (options, service, descriptor, request, orders, page) ->
         result = {}
 
         entity = DynamicModuleHelper.newInstance descriptor.entityClass
@@ -94,27 +101,22 @@ handlers =
 
         json result, getJsonFilter(options, 'list')
 
-    get: (options, descriptor, request, id) ->
-        service = getService options, descriptor
+    get: (options, service, descriptor, request, id) ->
         json service.get(id), getJsonFilter(options, 'get')
 
-    create: (options, descriptor, request) ->
-        service = getService options, descriptor
+    create: (options, service, descriptor, request) ->
         entity = DynamicModuleHelper.newInstance descriptor.entityClass
         mergeEntityAndParameter options, request.params, descriptor, 'create', entity
         json service.create(entity), getJsonFilter(options, 'create')
 
-    update: (options, descriptor, request, id) ->
-        service = getService options, descriptor
+    update: (options, service, descriptor, request, id) ->
         entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, descriptor, 'update')
         json entity, getJsonFilter(options, 'update')
 
-    remove: (options, descriptor, request, id) ->
-        service = getService options, descriptor
+    remove: (options, service, descriptor, request, id) ->
         json service.del(id), getJsonFilter(options, 'remove')
 
-    batchRemove: (options, descriptor, request) ->
-        service = getService options, descriptor
+    batchRemove: (options, service, descriptor, request) ->
         result = service.del.apply service, request.params.ids
         json result, getJsonFilter(options, 'batchRemove')
 
@@ -123,10 +125,11 @@ handlers =
 # when update, the arguments before entity are all bound
 mergeEntityAndParameter = (options, params, descriptor, type, entity) ->
     convertor = createConvertor options.convertors
+    context = Context.getInstance()
     for key, value of params
         continue if not descriptor.containsField key
         entity[key] = convertor.convert value, key, descriptor.getFieldClass(key), descriptor.isEntity(key), context
-    extension.afterMerge? entity, type
+    options.afterMerge? entity, type
     entity
 
 

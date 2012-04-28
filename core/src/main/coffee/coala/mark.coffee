@@ -10,7 +10,7 @@
 # execute sequence is c -> b ->a
 # arguments sequence is a, b, c
 ###
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet;
+{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
 {objects,type} = require 'coala/util'
 {txAnnotationHandler} = require 'coala/tx'
@@ -39,10 +39,6 @@ handlers =
             args = beans.concat args
         fn.apply null, args
 
-    test: (context, attributes, fn, args) ->
-        print "test #{attributes}:#{args}"
-        fn.apply null, args
-
 object =
     annos: []
     keys: []
@@ -60,7 +56,7 @@ object =
     ###
     # the end of the at chain, returns an function which wrapped the argument fn
     ###
-    on: (fn) ->
+    on: (fn, me) ->
         result = (anno for anno in object.annos)
         object.annos = []
         object.keys = []
@@ -70,6 +66,8 @@ object =
             handler = handlers[anno.name]
             attributes = anno.attributes
             (args...) ->
-                handler.apply(null,[context, attributes, memo, args])), fn
+                handler.apply(null,[context, attributes, memo, args])), fn.bind me
 
 exports.mark = object.mark
+
+exports[name] = object.mark.bind object, name for name of handlers

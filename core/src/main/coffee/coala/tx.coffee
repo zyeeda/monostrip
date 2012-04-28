@@ -55,4 +55,4 @@ exports.txAnnotationHandler = (context, attributes = {}, fn, args) ->
     attributes.callback = (status) ->
         args.unshift status if needStatus is true
         fn.apply null, args
-    exports.tx context, attributes
+    exports.tx attributes

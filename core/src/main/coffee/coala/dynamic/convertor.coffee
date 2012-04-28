@@ -12,22 +12,21 @@ parseDate = (desiredType, stringDate, pattern) ->
     if desiredType is Calendar then format.getCalendar() else date
 
 
-    inner = {}
-    inner['java.util.Date'] = (value, fieldName, clazz, isEntity, context, pattern = env.dateFormat) ->
+inner =
+    'java.util.Date': (value, fieldName, clazz, isEntity, context, pattern = env.dateFormat) ->
         parseDate Date, value, pattern
-    inner['java.util.Calendar'] = (value, fieldName, clazz, isEntity, context, pattern = env.dateFormat) ->
+    'java.util.Calendar': (value, fieldName, clazz, isEntity, context, pattern = env.dateFormat) ->
         parseDate Calendar, value, pattern
 
-    defaultConvertor = (value, fieldName, clazz, isEntity, context) ->
-        if isEntity
-            service = createService()
-            dao = service.createDao clazz
-            dao.find value
-        else
-            DynamicModuleHelper.constructByString clazz, value
+defaultConvertor = (value, fieldName, clazz, isEntity, context) ->
+    if isEntity
+        service = createService()
+        dao = service.createDao clazz
+        dao.find value
+    else
+        DynamicModuleHelper.constructByString clazz, value
 
 exports.createConvertor = (convertors = {}) ->
-
 
     _inner: objects.extend {}, inner, convertors
     convert: (value, fieldName, clazz, isEntity, context) ->

@@ -1,6 +1,6 @@
 
 {Example, Order, Projections} = org.hibernate.criterion
-{BaseDaoHelper} = com.zyeeda.framework.common.dao
+{Configuration} = org.hibernate.cfg;
 {env} = require 'config'
 
 exports.createManager = (em, entityClass) ->
@@ -70,7 +70,7 @@ exports.createManager = (em, entityClass) ->
         query = builder.createQuery @_entityClass
         root = query.from @_entityClass;
 
-        pageInfo = getAndCleanPageInfo option
+        pageInfo = getPageInfo option
         fillPageInfo query, pageInfo
 
         if option.orderBy
@@ -88,7 +88,7 @@ exports.createManager = (em, entityClass) ->
             criteria.setProjection Projections.rowCount()
             criteria.list().get(0)
         else
-            pageInfo = getAndCleanPageInfo option
+            pageInfo = getPageInfo option
             fillPageInfo criteria, pageInfo
 
             if option.orderBy
@@ -100,7 +100,7 @@ exports.createManager = (em, entityClass) ->
         throw new Error 'can only support one argument call' if args?.length > 1
         option = args[0]
 
-        pageInfo = getAndCleanPageInfo option
+        pageInfo = getPageInfo option
 
         query = createQuery @_em, name, option
         fillPageInfo query,pageInfo
@@ -112,7 +112,7 @@ exports.createManager = (em, entityClass) ->
         if singleResult then query.getSingleResult() else query.getResultList()
 
 
-getAndCleanPageInfo = (object) ->
+getPageInfo = (object) ->
     result =
         firstResult: 0
         maxResults: 0
@@ -122,7 +122,6 @@ getAndCleanPageInfo = (object) ->
 
     for name of result
         result[name] = object[name]
-        delete object[name]
     result
 
 fillPageInfo = (query,pageInfo) ->
@@ -139,7 +138,6 @@ if env.development is true
     modifyRecord = []
 
     modified = ->
-        #times = BaseDaoHelper.getLastModified env.orms
         times = (fs.lastModified name for name in env.orms).map (date) -> date.getTime()
         if times.length != modifyRecord.length
             modifiyRecord = times
@@ -150,11 +148,22 @@ if env.development is true
             !result
 
     loadOrms = ->
-        namedQueries = BaseDaoHelper.getNamedQueries env.orms
+        config = new Configuration()
+        config.addFile file for file in env.orms
+        config.buildMappings()
+
+        queries = config.getNamedQueries()
+        namedQueries = {}
+        i = queries.keySet().iterator()
+
+        while i.hasNext()
+            name = i.next()
+            namedQueries[name] = queries.get(name).getQuery()
+        namedQueries
 
     createQuery = (em, name, option) ->
         loadOrms() if modified()
-        query = namedQueries?.get name
+        query = namedQueries[name]
         throw new Error("no query with name:#{name}") unless query?
         em.createQuery query
 else
