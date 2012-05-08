@@ -29,7 +29,7 @@
     </parent>
 
     <artifactId>zyeeda-framework</artifactId>
-    <version>1.8.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>Zyeeda :: Framework</name>
     <url>http://www.zyeeda.com/products/zyeeda-framework</url>
     <packaging>pom</packaging>
