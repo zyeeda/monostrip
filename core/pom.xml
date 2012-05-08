@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.zyeeda</groupId>
         <artifactId>zyeeda-framework</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>zyeeda-framework-core</artifactId>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.zyeeda</groupId>
             <artifactId>zyeeda-framework-commons</artifactId>
-            <version>1.8.0-SNAPSHOT</version>
+            <version>2.0.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>javassist</artifactId>
@@ -336,53 +336,12 @@
             </exclusions>
         </dependency>
 
-    <!-- just for 1.6 start -->
-        
-        <dependency>
-            <groupId>com.googlecode.genericdao</groupId>
-            <artifactId>dao</artifactId>
-            <version>1.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>persistence-api</artifactId>
-                    <groupId>javax.persistence</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.genericdao</groupId>
-            <artifactId>search-jpa-hibernate</artifactId>
-            <version>1.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>hibernate-core</artifactId>
-                    <groupId>org.hibernate</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>2.5</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.1.1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-            
         <dependency>
             <groupId>org.jbpm</groupId>
             <artifactId>jbpm-bpmn2</artifactId>
@@ -525,33 +484,5 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>2.6.3</version>
         </dependency>
-        
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-            <version>2.4.6</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spring-web</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-core</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-            </exclusions>
-            </dependency>
-                    <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-jaxrs</artifactId>
-                <version>1.9.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-xc</artifactId>
-                <version>1.9.0</version>
-            </dependency>
-        
-        <!-- just for 1.6 end-->
     </dependencies>
 </project>
