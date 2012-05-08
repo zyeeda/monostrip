@@ -13,29 +13,11 @@
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
 {objects,type} = require 'coala/util'
-
 handlers =
-    tx: txAnnotationHandler
-
-    services: servicesAnnotationHandler
-
-    managers: (context, attributes, fn, args) ->
-        if attributes
-            service = createService()
-            attr = if type(attributes) == 'array' then attributes else [attributes]
-            managers = []
-
-            managers.push service.createManager clazz for clazz in managers
-            args = managers.concat args
-        fn.apply null, args
-
-    inject: (context, attributes, fn, args) ->
-        if attributes
-            attr = if type(attributes) == 'array' then attributes else [attributes]
-            beans = []
-            beans.push((if type(name) == 'string' then context.getBean else context.getBeanByClass)(name)) for name in attr
-            args = beans.concat args
-        fn.apply null, args
+    tx: require('coala/marker/tx').handler
+    inject: require('coala/marker/inject').handler
+    services: require('coala/marker/services').handler
+    managers: require('coala/marker/managers').handler
 
 obj =
     annos: []

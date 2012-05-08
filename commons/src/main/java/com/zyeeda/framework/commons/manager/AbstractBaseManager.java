@@ -29,7 +29,7 @@ import org.hibernate.criterion.Example;
  * @author guyong
  *
  */
-public class AbstractBaseManager<T, ID extends Serializable> implements BaseManager<T, ID> {
+public abstract class AbstractBaseManager<T, ID extends Serializable> implements BaseManager<T, ID> {
     
     private Class<T> entityClass = null;
     private EntityManager entityManager = null;
