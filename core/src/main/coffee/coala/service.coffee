@@ -2,13 +2,11 @@
 {EntityManagerFactoryUtils} = org.springframework.orm.jpa;
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet;
 {createManager} = require 'coala/manager'
-{objects,type} = require 'coala/util'
-{tx} = require 'coala/tx'
 
-exports.createService = (entityClass) ->
+exports.createService = ->
 
     context: Context.getInstance()
-    entityClass: entityClass
+
     # parameter name is the name of EntityManagerFactory which is configed in spring context
     getEntityManager: (name = false) ->
         emf = if name then @context.getBean name else @context.getBeanByClass EntityManagerFactory
@@ -18,20 +16,10 @@ exports.createService = (entityClass) ->
 
     createManager: (entityClass, entityManagerFactoryName = false) ->
         em = @getEntityManager entityManagerFactoryName
-        clazz = @entityClass or entityClass
-        createManager em, clazz
+        createManager em, entityClass
 
-    tx: (cb) ->
-        tx @context, cb
-
+    # invoke manager's __noSuchMethod__
+    # args[0] is entity class, args[1] is query options
     __noSuchMethod__: (name,args) ->
-        dao = @createManager @entityClass
-        dao[name] args[0]
-
-exports.servicesAnnotationHandler = (context, attributes, fn, args) ->
-    if attributes
-        attributes = [attributes] if type(attributes) is 'string'
-        throw new Error('attributes must be a string or an string array') if type(attributes) isnt 'array'
-        services = (require(m).createService() for m in attributes)
-        args = services.concat args
-    fn.apply null, args
+        dao = @createManager args[0]
+        dao[name] args[1]

@@ -1,6 +1,6 @@
 
 {Example, Order, Projections} = org.hibernate.criterion
-{Configuration} = org.hibernate.cfg;
+{Configuration} = org.hibernate.cfg
 {env} = require 'config'
 
 exports.createManager = (em, entityClass) ->
@@ -124,12 +124,14 @@ getPageInfo = (object) ->
         result[name] = object[name]
     result
 
+
 fillPageInfo = (query,pageInfo) ->
     if pageInfo?
         query.setFirstResult pageInfo.firstResult
         query.setMaxResults pageInfo.maxResults
         return true
     false
+
 
 if env.development is true
     fs = require 'fs'

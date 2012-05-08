@@ -1,20 +1,18 @@
 ###
 # this module aims to support java-annotation-like features
 # just like this:
-# app.get(at('services',['someservice','anotherservice']).on(function(){}));
+# app.get(mark('services',['someservice','anotherservice']).on(function(){}));
 #
 # if annotation handler want pass arguments to function must use prepend
-# the execution of annotations if first-at-last-run
-# the sequence of arguments which passed by handlers if first-at-first-get
-# at('a').at('b').at('c').on(function(a, b, c){})
+# the execution of annotations if first-mark-last-run
+# the sequence of arguments which passed by handlers is first-mark-first-get
+# mark('a').mark('b').mark('c').on(function(a, b, c){})
 # execute sequence is c -> b ->a
 # arguments sequence is a, b, c
 ###
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
 {objects,type} = require 'coala/util'
-{txAnnotationHandler} = require 'coala/tx'
-{servicesAnnotationHandler, createService} = require 'coala/service'
 
 handlers =
     tx: txAnnotationHandler
@@ -39,7 +37,7 @@ handlers =
             args = beans.concat args
         fn.apply null, args
 
-object =
+obj =
     annos: []
     keys: []
     ###
@@ -47,19 +45,19 @@ object =
     # parameter attributes will pass into the handler which is found by name
     ###
     mark: (name, attributes) ->
-        throw new Error('one annotation once') if object.keys.indexOf(name) isnt -1
+        throw new Error('one annotation once') if obj.keys.indexOf(name) isnt -1
         throw new Error("annotation #{name} is not supported") unless name of handlers
-        object.annos.push {attributes: attributes, name: name}
-        object.keys.push name
-        object
+        obj.annos.push {attributes: attributes, name: name}
+        obj.keys.push name
+        obj
 
     ###
     # the end of the at chain, returns an function which wrapped the argument fn
     ###
     on: (fn, me) ->
-        result = (anno for anno in object.annos)
-        object.annos = []
-        object.keys = []
+        result = (anno for anno in obj.annos)
+        obj.annos = []
+        obj.keys = []
 
         context = Context.getInstance()
         result.reduce ((memo, anno) ->
@@ -68,6 +66,6 @@ object =
             (args...) ->
                 handler.apply(null,[context, attributes, memo, args])), fn.bind me
 
-exports.mark = object.mark
+exports.mark = obj.mark
 
-exports[name] = object.mark.bind object, name for name of handlers
+exports[name] = obj.mark.bind obj, name for name of handlers

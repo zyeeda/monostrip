@@ -5,7 +5,7 @@
 {json,html} = require 'coala/response'
 {createService} = require 'coala/dynamic/service'
 {createConvertor} = require 'coala/dynamic/convertor'
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet;
+{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
 exports.createRouter = ->
     app = new Application()
@@ -67,7 +67,6 @@ attachDomain = (app, path, clazz, options = {}) ->
 
 
 getService = (options, descriptor) ->
-    print "getService entity class: #{descriptor.entityClass}";
     options.service or createService descriptor.entityClass
 
 
