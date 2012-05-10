@@ -13,11 +13,24 @@
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
 {objects,type} = require 'coala/util'
+
 handlers =
     tx: require('coala/marker/tx').handler
     inject: require('coala/marker/inject').handler
     services: require('coala/marker/services').handler
     managers: require('coala/marker/managers').handler
+
+loadExtraHandler = (moduleId) ->
+    try
+        m = require moduleId
+        throw new Error("marker extension module:#{moduleId} has no exports named handler") unless m.handler
+
+        unless type m.handler is 'function'
+            throw new Error("marker extension module:#{moduleId} has export a handler which is not a function")
+
+        return m.handler
+    catch e
+        throw new Error("marker extension module:#{moduleId} is not found")
 
 obj =
     annos: []
@@ -43,7 +56,7 @@ obj =
 
         context = Context.getInstance()
         result.reduce ((memo, anno) ->
-            handler = handlers[anno.name]
+            handler = handlers[anno.name] or loadExtraHandler anno.name
             attributes = anno.attributes
             (args...) ->
                 handler.apply(null,[context, attributes, memo, args])), fn.bind me
