@@ -1,7 +1,7 @@
 
 {Example, Order, Projections} = org.hibernate.criterion
 {Configuration} = org.hibernate.cfg
-{env} = require 'config'
+{env} = require 'coala/config'
 
 exports.createManager = (em, entityClass) ->
     _em: em,

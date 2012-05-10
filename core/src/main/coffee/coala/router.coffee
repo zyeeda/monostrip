@@ -1,21 +1,46 @@
-{DynamicModuleHelper} = com.zyeeda.framework.web.jsgi
-{Application} = require 'stick'
-{objects} = require 'coala/util'
-{env} = require 'config'
-{json,html} = require 'coala/response'
-{createService} = require 'coala/dynamic/service'
-{createConvertor} = require 'coala/dynamic/convertor'
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{Application} = require 'stick'
+{objects, type} = require 'coala/util'
+{env} = require 'coala/config'
+{json,html} = require 'coala/response'
+{createService} = require 'coala/scaffold/service'
+{createConverter} = require 'coala/scaffold/converter'
+
+log = require('ringo/logging').getLogger module.id
+entityMetaResovler = Context.getInstance().getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
+
+exports.createModuleRouter = ->
+    router = new Application()
+    router.configure 'mount'
+    router.autoMount = (ctx) ->
+        autoMount.call ctx, router
+    router
 
 exports.createRouter = ->
-    app = new Application()
-    app.configure 'params', 'route'
-    extendApp app
+    router = new Application()
+    router.configure 'params', 'route'
+    extendRouter router
+    router
 
-    app
+autoMount = (router)->
+    repos = @getRepository('./').getRepositories()
+    for repo in repos
+        resource = repo.getResource 'router.js'
+        try
+            router.mount "/#{repo.getName()}", resource.getModuleName() if resource.exists()
+        catch e
+            log.warn "can't mount #{resource.getModuleName()}, it had not export an router"
 
-extendApp = (app) ->
-    app.attachDomain = attachDomain.bind app, app
+extendRouter = (router) ->
+    router.attachDomain = attachDomain.bind router, router
+    router.resolveEntity = resolveEntity.bind router
+    return
+
+resolveEntity = (entityClass, params, converters) ->
+    entityMeta = entityMetaResovler.resolveEntity clazz
+    entity = createEntity entityMeta.entityClass
+
+    mergeEntityAndParameter converters: converters, params, entityMeta, 'resolve', entity
 
 # By default, the relationship of action, domain operate and url map is:
 # create: insert a domain, url is POST path
@@ -25,27 +50,39 @@ extendApp = (app) ->
 # remove: remove a domain by id, url is DELETE path/domain_id
 # batchRemove: batch remove domains, url is POST path/delete
 
+# can supply handlers to override default action handlers
+# ex.
+#   handlers: {
+#       get: function(options, service, entityMeta, request, id){
+#           ...
+#       }
+#   }
+
 # These actions metioned above are auto generated.
 # You can exclude some of them by add parameter 'deny' into options,
-# ex. deny: ['create', 'list']
+# ex. exclude: ['create', 'list']
 
 # You must specify json filters in options, these filters are used to generate action results
-# the key named 'jsonFilter' is the default filter for all actions.
-# you can use actionName+JsonFilter to special an action.
+# the key named 'defaults' in filters is the default filter for all actions.
+# you can use actionName to special an action.
 # ex.
-# jsonFilter: {include: {'filter name': ['fields']}, exclude: {'filter name': [fields]}}
-# listJsonFilter: {include: ...
+# filters: {
+#     defaults: {include: {'filter name': ['fields']}, exclude: {'filter name': [fields]}}
+#     list: {include: ...}
+#     get: {...}
+# }
 
 # there also is a way to specifiy some converters to convert request parameters to domain fields
-# converters: { 'field name or class name': (value, fieldName, fieldClass, isEntityClass, context) -> }
+# converters: { 'field name or class name': (value, fieldMeta) -> }
 
 ORDER_BY_AND_PAGE_PARAMS_REGEXP_SUFFIX = '(?:\/by((?:\/(?!page)\\w+(?:\-desc|\-asc)?)*))?(?:\/page\/(\\d+))?'
 ORDER_BY_REGEXP = /\/(\w+)(?:\-(desc|asc))?/g
 ID_SUFFIX = '/:id'
 
-attachDomain = (app, path, clazz, options = {}) ->
-    descriptor = DynamicModuleHelper.resolveEntity path, clazz
-    path = descriptor.getPath()
+attachDomain = (router, path, clazz, options = {}) ->
+    entityMeta = entityMetaResovler.resolveEntity clazz
+    entityMeta.path = path if entityMeta.path is null
+    path = entityMeta.path
 
     listUrl = new RegExp("#{path.replace '/', '\\/'}#{ORDER_BY_AND_PAGE_PARAMS_REGEXP_SUFFIX}")
     removeUrl = updateUrl = getUrl = path + ID_SUFFIX
@@ -55,19 +92,26 @@ attachDomain = (app, path, clazz, options = {}) ->
     excludes = {}
     excludes[name] = true for name in options.exclude or []
 
-    service = getService options, descriptor
-    app.get listUrl, handlers.list.bind handlers, options, service, descriptor unless excludes.list
-    app.get getUrl, handlers.get.bind handlers, options, service, descriptor unless excludes.get
-    app.post createUrl, handlers.create.bind handlers, options, service, descriptor unless excludes.create
-    app.put updateUrl, handlers.update.bind handlers, options, service, descriptor unless excludes.update
-    app.del removeUrl, handlers.remove.bind handlers, options, service, descriptor unless excludes.remove
-    app.post batchRemoveUrl, handlers.batchRemove.bind handlers, options, service, descriptor unless excludes.batchRemove
+    service = getService options, entityMeta
+    handlers = objects.extend {}, defaultHandlers, options.handlers or {}
 
-    app
+    router.get listUrl, handlers.list.bind handlers, options, service, entityMeta unless excludes.list
+    router.get getUrl, handlers.get.bind handlers, options, service, entityMeta unless excludes.get
+    router.post createUrl, handlers.create.bind handlers, options, service, entityMeta unless excludes.create
+    router.put updateUrl, handlers.update.bind handlers, options, service, entityMeta unless excludes.update
+    router.del removeUrl, handlers.remove.bind handlers, options, service, entityMeta unless excludes.remove
+    router.post batchRemoveUrl, handlers.batchRemove.bind handlers, options, service, entityMeta unless excludes.batchRemove
 
+    options.doWithRouter router if type(options.doWithRouter) is 'function'
 
-getService = (options, descriptor) ->
-    options.service or createService descriptor.entityClass
+    router
+
+createEntity = (clazz) ->
+    c = clazz.getConstructor()
+    c.newInstance()
+
+getService = (options, entityMeta) ->
+    options.service or createService entityMeta.entityClass
 
 
 getJsonFilter = (options, type) ->
@@ -75,12 +119,12 @@ getJsonFilter = (options, type) ->
     options.filters[type] or options.filters.defaults or {}
 
 
-handlers =
-    list: (options, service, descriptor, request, orders, page) ->
+defaultHandlers =
+    list: (options, service, entityMeta, request, orders, page) ->
         result = {}
 
-        entity = DynamicModuleHelper.newInstance descriptor.entityClass
-        mergeEntityAndParameter options, request.params, descriptor, 'list', entity
+        entity = createEntity entityMeta.entityClass
+        mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
 
         configs = getPageInfo request, page
         if configs?
@@ -100,34 +144,33 @@ handlers =
 
         json result, getJsonFilter(options, 'list')
 
-    get: (options, service, descriptor, request, id) ->
+    get: (options, service, entityMeta, request, id) ->
         json service.get(id), getJsonFilter(options, 'get')
 
-    create: (options, service, descriptor, request) ->
-        entity = DynamicModuleHelper.newInstance descriptor.entityClass
-        mergeEntityAndParameter options, request.params, descriptor, 'create', entity
+    create: (options, service, entityMeta, request) ->
+        entity = createEntity entityMeta.entityClass
+        mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
         json service.create(entity), getJsonFilter(options, 'create')
 
-    update: (options, service, descriptor, request, id) ->
-        entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, descriptor, 'update')
+    update: (options, service, entityMeta, request, id) ->
+        entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, entityMeta, 'update')
         json entity, getJsonFilter(options, 'update')
 
-    remove: (options, service, descriptor, request, id) ->
-        json service.del(id), getJsonFilter(options, 'remove')
+    remove: (options, service, entityMeta, request, id) ->
+        json service.remove(id), getJsonFilter(options, 'remove')
 
-    batchRemove: (options, service, descriptor, request) ->
-        result = service.del.apply service, request.params.ids
+    batchRemove: (options, service, entityMeta, request) ->
+        result = service.remove.apply service, request.params.ids
         json result, getJsonFilter(options, 'batchRemove')
 
 
 # the reason why put the entity in the end of argument list is that,
 # when update, the arguments before entity are all bound
-mergeEntityAndParameter = (options, params, descriptor, type, entity) ->
-    convertor = createConvertor options.convertors
-    context = Context.getInstance()
+mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
+    converter = createConverter options.converters
     for key, value of params
-        continue if not descriptor.containsField key
-        entity[key] = convertor.convert value, key, descriptor.getFieldClass(key), descriptor.isEntity(key), context
+        continue if not entityMeta.hasField key
+        entity[key] = converter.convert value,entityMeta.getField(key)
     options.afterMerge? entity, type
     entity
 

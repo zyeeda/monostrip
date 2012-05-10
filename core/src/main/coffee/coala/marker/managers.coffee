@@ -13,6 +13,6 @@ exports.handler = (context, attributes, fn, args) ->
         attr = if type(attributes) == 'array' then attributes else [attributes]
         managers = []
 
-        managers.push service.createManager clazz for clazz in managers
+        managers.push service.createManager clazz for clazz in attr
         args = managers.concat args
     fn.apply null, args
