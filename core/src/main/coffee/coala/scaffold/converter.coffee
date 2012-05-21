@@ -1,9 +1,10 @@
+{SimpleDateFormat} = java.text
+{Calendar, Date, ArrayList, HashSet} = java.util
+{ClassUtils} = org.springframework.util
 
 {env} = require 'coala/config'
-{objects} = require 'coala/util'
+{objects, type} = require 'coala/util'
 {createService} = require 'coala/service'
-{SimpleDateFormat} = java.text
-{Calendar, Date} = java.util
 
 parseDate = (pattern, desiredType, stringDate) ->
     format = new SimpleDateFormat pattern
@@ -17,10 +18,19 @@ innerConverters =
         parseData.apply null, [env.dateFormat, Calendar, value]
 
 defaultConverter = (value, fieldMeta) ->
+    service = createService()
+
     if fieldMeta.isEntity()
-        service = createService()
         manager = service.createManager fieldMeta.type
         manager.find value
+    else if fieldMeta.isManyToManyOwner()
+        value = if type(value) is 'string' then [value] else value
+        list = if ClassUtils.isAssignable fieldMeta.type, ArrayList then new ArrayList() else new HashSet()
+
+        manager = service.createManager fieldMeta.manyToManyTarget
+        list.add manager.find id for id in value
+
+        list
     else
         return value if fieldMeta.type is java.lang.String
         c = fieldMeta.type.getConstructor java.lang.String

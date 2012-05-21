@@ -1,7 +1,9 @@
 package com.zyeeda.framework.web.scaffold.provider;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -93,7 +97,14 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                 Class<?> type = field.getType();
                 boolean isEntity = type.getAnnotation(Entity.class) != null;
                 
-                meta.addField(new FieldMeta(name, type, isEntity));
+                if( Collection.class.isAssignableFrom(type)) {
+                    boolean isManyToManyOwner = isManyToManyOwner(field);
+                    if( isManyToManyOwner ) {
+                        meta.addField(new FieldMeta(name, type, isEntity, true, getManyToManyTargetClass(field)));
+                    }
+                } else {
+                    meta.addField(new FieldMeta(name, type, isEntity, false, null));
+                }
             }
             
         }, new ReflectionUtils.FieldFilter() {
@@ -106,7 +117,7 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                 }
                 
                 Class<?> type = field.getType();
-                if( Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ) {
+                if( Map.class.isAssignableFrom(type) ) {
                     return false;
                 }
                 
@@ -141,5 +152,32 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
         return result.toArray(new EntityMeta[result.size()]);
     }
 
+    private boolean isManyToManyOwner(Field field) {
+        boolean result = field.getAnnotation(ManyToMany.class) != null && field.getAnnotation(JoinTable.class) != null;
+        
+        if( !result ) {
+            String name = field.getName();
+            String getter = "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+            try {
+                Method m = field.getDeclaringClass().getMethod(getter);
+                result = m.getAnnotation(ManyToMany.class) != null && m.getAnnotation(JoinTable.class) != null;
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        
+        return result;
+    }
     
+    private Class<?> getManyToManyTargetClass(Field field) {
+        try {
+            
+            ParameterizedType t = (ParameterizedType)field.getGenericType();
+            return (Class<?>)t.getActualTypeArguments()[0];
+            
+        } catch (Exception e) {
+            return null;
+        }
+        
+    }
 }
