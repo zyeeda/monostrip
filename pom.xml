@@ -33,7 +33,7 @@
     <name>Zyeeda :: Framework</name>
     <url>http://www.zyeeda.com/products/zyeeda-framework</url>
     <packaging>pom</packaging>
-    
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -48,7 +48,11 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    
+
+    <scm>
+        <developerConnection>scm:hg:file:///${basedir}/../zyeeda-framework-2.0.STAGE</developerConnection>
+    </scm>
+
     <modules>
         <module>commons</module>
         <module>core</module>
