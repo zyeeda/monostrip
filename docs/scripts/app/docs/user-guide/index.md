@@ -53,7 +53,7 @@ Zyeeda Framework 2.0 是公司的最新框架，通过良好的封装和约束�
 
 ####exports 和 require
 
-exports 和 require 来源于 CommonJS ，分别为提供调用和被调用。
+exports 和 require 来源于 CommonJS ，分别为提供调用和请求调用。
 
 exports 的官方解释是允许标明的脚本向其它标明或未标明的脚本提供属性、函数和对象。通俗的讲，就是如果你定义了需要被外部调用的对象、属性或者方法，那么必须调用 exports 来声明这个方法，这样它才能被外部对象调用到。
 
@@ -80,74 +80,90 @@ var app = require('apps');
 
 require 样例代码给我们展示了如何 require 一个对象。你应该已经注意到了，require 请求的东西首先要被 exports 。
 
-exports 和 require 对于本框架来说非常重要，因为这是基础操作，必须明白切掌握它们的用法才能开始下面的内容。
+exports 和 require 对于本框架来说非常重要，必须明白且掌握它们的用法才能开始下面的内容。
 
 
 框架详细介绍
 ------------
-###最小项目
-为了方便项目的开发，我们提供了作为所有应用 zyeeda-framework-2.0 构建项目的最小项目--   zyeeda-drivebox-2.0 ，所有的项目都将基于此项目扩展而来。 zyeeda-drivebox-2.0 位于14上HG版本管理服务器上，版本库地址为 http://192.168.1.14/hg/zyeeda-drivebox-2.0 ，请自行clone该项目。
 
-#####项目目录结构
-本文档将参照 zyeeda-drivebox-2.0 对项目目录结构做大概的介绍，为下面展开讲解项目的架构及应用做铺垫。
 
-zyeeda-drivebox-2.0的目录结构入下图：
+###zyeeda-drivebox-2.0 最小系统
+
+zyeeda-drivebox-2.0 最小系统是公司在 zyeeda-framework-2.0 和其他开源框架基础上整合的不包括业务代码的可发布的基础平台类项目。
+
+它本身也是一个项目，并且提供完善的框架整合，提供常用的工具类，但是不包括特定的业务代码。基于公司的框架开发的项目都将以 zyeeda-drivebox-2.0 最小系统为基础，在此系统上添加各自项目的业务代码。所以 zyeeda-drivebox-2.0 最小系统是一个基础的技术平台，通过这个平台可以扩展各种各样的项目。
+
+在开始详细介绍 zyeeda-drivebox-2.0 最小系统以前，请和公司的配置管理员联系，从版本库中将源码 Clone 到本地。
+
+###项目目录结构
+
+本文档参照 zyeeda-drivebox-2.0 对项目目录结构做大概的介绍，为下面展开讲解项目的架构及应用做铺垫。
+
+zyeeda-drivebox-2.0的目录结构如下图：
 
    ![](assets/images/user-guide/project.png)
 
-zyeeda-drivebox-2.0 为 maven 项目，文件主目录为 `src/main` ，主目录下面为五个目录，分别为 java  ， resources ， rules ，javascript 和 webapp 。
+zyeeda-drivebox-2.0 为 maven 项目，文件主目录为 `src/main` ，主目录下面有五个目录，分别为 java  ， resources ， rules ，javascript 和 webapp 。
 
-以下将分别介绍各目录的用途：
+各目录用途如下：
 
-- java ： 此目录为 java 文件目录，主用用来存放 Entity
+- java ： java 文件目录，在项目中主要用来存放 Entity 对象文件。
 
-- javascript ： 此目录存放 javascript ，所有的项目业务逻辑代码都在此目录下
+- javascript ： javascript 文件目录，除了 Entity 文件，基本上其他后台文件都下这个目录下。
 
-- resources ： 此目录为配置文件目录，存放各配置文集，例如 spring 、hibernate 等
+- resources ： 配置文件目录，spring 、JPA 等配置文件都在此目录下。
 
-- rules ： 此目录为规则文件目录，主要用来存放 bpmn 配置文件
+- rules ：工作流规则文件目录，主要用来存放 bpmn 配置文件
 
-- webapp ： 此目录为项目的前端文件目录
+- webapp ： 前端文件目录。
 
-接下来，我们将以 zyeeda-drivebox-2.0 为例介绍应用 zyeeda-framework-2.0 开发项目的典型架构。
+接下来，我们将以 zyeeda-drivebox-2.0 为例，介绍基于 zyeeda-framework-2.0 开发的项目的典型架构。
 
-首先将介绍如何定义业务类实体：
+首先将介绍如何定义业务类实体。
 
 ###实体设计
-本框架提供了三个基础实体类，分别为 DomainEntity ，SimpleDomainEntity ，     RevisionDomainEntity 。这三个类都实现了 Serializable 接口，并且定义了一些常用属性，自定义业务实体类可以通过继承以上三个基础类来得到一些常用属性和实现可序列化的目的。我们建议所有的自定义业务实体类都通过继承以上的基础类了实现可序列化，不继承任何基础类也是允许的，但是必须实现 Serializable 接口。
 
-我们将在下面的内容中介绍三个基础类，以及如何定义业务实体类。
+框架提供了三个基础的实体类 ，如下表：
 
+ ![](assets/images/user-guide/entity.png)
+
+
+DomainEntity 、SimpleDomainEntity 、 RevisionDomainEntity 分别定义了一些常用属性，并且这三个基类之间是依次继承的关系。
+
+作为基类 DomainEntity 实现了 Serializable 接口，这样所有继承了 DomainEntity 的实体类就都可序列化了。每个基础实体类实体都拥有一些属性，上表中标示出了每个属性所对应的数据库字段的名称。通过继承，自定义的业务实体可以不用自己实现 Serializable 接口，并且会从父类继承一些常用属性。
+
+我们建议通过继承基础实体类来达到业务实体可序列话的目的，而且通过继承也免去了开发人员反复定义一些常用属性。但是要注意一点，如果自定义业务实体类继承了基础实体类，那么就不要再给业务实体类定义和基础实体类中名称一样的属性了。下面会给出三个实体的代码片段，以便更好的了解这三个基础实体类。
 
 #####DomainEntity
-DomainEntity为所有Entity的基类，它实现了Serializable接口，并且拥有id属性，所有自定义实体类必须继承DomainEntity，无需再定义id属性。<br/>
+
+DomainEntity为所有Entity的基类，它实现了Serializable接口，并且拥有id属性，建议所有自定义业务实体类必须继承 DomainEntity 。
 代码如下：
-```javascript
-		@javax.persistence.MappedSuperclass
-		public class DomainEntity implements Serializable {
+```java
+	@javax.persistence.MappedSuperclass
+	public class DomainEntity implements Serializable {
 
-	    private static final long serialVersionUID = 6570499338336870036L;
+		private static final long serialVersionUID = 6570499338336870036L;
 
-	    private String id;
-	    @javax.persistence.Id
-	    @javax.persistence.Column(name = "F_ID")
-	    @javax.persistence.GeneratedValue(generator="system-uuid")
-	    @org.hibernate.annotations.GenericGenerator(name="system-uuid", strategy = "uuid")
+		private String id;
+		@javax.persistence.Id
+		@javax.persistence.Column(name = "F_ID")
+		@javax.persistence.GeneratedValue(generator="system-uuid")
+		@org.hibernate.annotations.GenericGenerator(name="system-uuid", strategy = "uuid")
 		public String getId() {
 			return id;
 		}
-	    public void setId(String id) {
+		public void setId(String id) {
 			this.id = id;
 		}
-		}
+	}
 ```
 
 #####SimpleDomainEntity
 
-SimpleDomainEntity 继承自 DomainEntity,并且扩展了另外两个属性-- name 和 description
+SimpleDomainEntity 继承自 DomainEntity,并且扩展了 name 和 description 属性。
 
 代码如下:
-```javascript
+```java
 		@javax.persistence.MappedSuperclass
 		public class SimpleDomainEntity extends DomainEntity {
 
@@ -173,10 +189,10 @@ SimpleDomainEntity 继承自 DomainEntity,并且扩展了另外两个属性-- na
 
 #####RevisionDomainEntity
 
-RevisionDomainEntity 继承自 SimpleDomainEntity ,并且扩展了四个属性-- creator ，createdTime ，lastModifier 和 lastModifiedTime
+RevisionDomainEntity 继承自 SimpleDomainEntity ,并且扩展了 creator ，createdTime ，lastModifier 和 lastModifiedTime 四个属性。
 
 代码如下:
-```javascript
+```java
 		@javax.persistence.MappedSuperclass
 		public class RevisionDomainEntity extends SimpleDomainEntity {
 
@@ -211,7 +227,10 @@ RevisionDomainEntity 继承自 SimpleDomainEntity ,并且扩展了四个属性--
 		}
 ```
 
+
 #####如何自定义业务实体类
+
+
 
 假设我们有名为 people 的实体类，这个实体类有 id ，name ，sex ，age 这些属性，那么，我们的实体类代码将如下：
 ```java
@@ -219,38 +238,52 @@ RevisionDomainEntity 继承自 SimpleDomainEntity ,并且扩展了四个属性--
 		@Table(name="ZDA_People")
 		public class People extends DomainEntity {
 
-	    	private static final long serialVersionUID = 2338396716859666598L;
-	    
-	    	@Basic
-	    	@Column(name = "name", length = 32, nullable = false)
-	    	private String name;
-	    
-	    	@Basic
-	    	@Column(name = "age", nullable = false)
-	    	private int age;
-	    
-	    	@Basic
-	    	@Column(name = "sex", length = 32, nullable = false)
-	    	private String sex;
+			private static final long serialVersionUID = 2338396716859666598L;
+		    
+			@Basic
+			@Column(name = "name", length = 32, nullable = false)
+			private String name;
+		    
+			@Basic
+			@Column(name = "age", nullable = false)
+			private int age;
+		    
+			@Basic
+			@Column(name = "sex", length = 32, nullable = false)
+			private String sex;
 			...........
 		}
 ```
 
-通过继承 DomainEntity，我们无需再重复定义 id 属性。
+通过继承 DomainEntity，无需再重复定义 id 属性，并且已经实现了 Serializable 接口。
 
-备注：上例中以 `@` 开头的注解,例如 `@Entity` 、 `@Table` 、 `@Column` 等都来源于     [Hibernate Annotations] [4] ，如果需要了解或者学习也可参考 [hibernate-jpa-annotations] [5] 。
+框架中业务实体类的配置和映射都是通过 Annotation 的方式实现的，所以需要开发人员对 Hinbernate JPA 的注解有所了解。例如上例中以 `@` 开头的注解,例如 `@Entity` 、 `@Table` 、 `@Column` 等都来源于 [Hibernate Annotations](http://www.techferry.com/articles/hibernate-jpa-annotations.html "Hibernate Annotations") ，如果需要了解或者学习也可参考 [hibernate-jpa-annotations](http://docs.jboss.org/hibernate/annotations/3.5/reference/en/html_single/#entity-mapping "hibernate-jpa-annotations") 。
 
 ###框架组成结构###
-本框架后台分三层结构，分别为 router，service 和 manager
 
-- router 用来定义请求规则和处理请求，作为所有请求的入口。router 将调用 service 来处理业务。
+本框架后台分三层结构，分别是 router，service 和 manager 。每一层的职责都不同，并且是依次调用的关系,即 router 调用 servicecc 调用 manager。
 
-- service 作为业务处理类，所有的业务处理将在 service 层完成，包括事务处理。service 处理完业务后调用 manager 层来做数据持久化操作。
+- router ： 定义请求规则和处理请求，作为所有请求的入口。router 调用 service 来处理业务。
 
-- manager 为数据持久层，用来完成数据库交互工作。
+- service ： 作为业务处理类，所有的业务处理将在 service 层完成，包括事务处理。service 处理完业务后调用 manager 层来做数据持久化操作。
+
+- manager ： 数据持久层，用来完成数据库交互工作。
+
+每一个业务模块都应该由这样的三层结构组成，并且不同的业务实体类需要定义不同的 router 、 service 和 manager 。如下图，表示的是项目的层级挂载和调用关系。
+
+![](assets/images/user-guide/call-order.png)
+
+上图中` { ` 表示挂载 ， ` -> ` 表示调用。
+
+由上图可以看出`根 router ` 可以挂载子模块的 ` router ` , 子模块又可以挂载子模块的业务类或者下级子模块的 ` router ` 。 通过这种层层挂载的方式，router 可以形成一个树状结构。经由根 router 可以通过树状结构的路径调用到被请求的叶子 router ，然后叶子 router 再调用 service 来处理业务 ，service 调用 manager 处理数据库请求。
+
+router 的挂载没有层级限制，而且 router 的挂载路径也正是请求的访问路径。
+
+关于如何创建 、挂载 、请求 router 的问题将方法下面 router 的章节去讲。但是在介绍 router 之前，先要介绍一下 main.js 。因为从项目结构上来说，main.js 是整个后台代码的入口。
 
 ####main.js####
-zyeeda-drivebox-2.0 项目的 src/main/javascript 目录结构如下
+
+zyeeda-drivebox-2.0 项目的 `src/main/javascript` 目录结构如下
 
 ![](assets/images/user-guide/main.png)
 
@@ -588,7 +621,7 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 2.在自定义 orm 配置文件中添加自己的查询方法，例如在 test-orm.xml 中添加
 
-```javascript
+```xml
 		<named-query name="queryByName">
 	         	<query>
 	                	from Demo where name = :name
@@ -598,7 +631,7 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 3.在 resources/META-INF 目录下 persistence.xml 文件中注册自定 orm 配置文件，例如添加如代码
 
-```javascript
+```xml
  		<mapping-file>/META-INF/orms/test-orm.xml</mapping-file>
 ```
 
@@ -636,8 +669,9 @@ marker 类提供了两个方法：
 
 mark 和 on 是成对出现的，通过 mark 方法注入的对象必须通过 on 方法接收。mark 注入的对象在 on 的回调方法中的顺序是依次从左到右的，基本用法为：
 
-
-> 		mark('a').mark('b').mark('c').on(function(a, b, c){})
+```javascript
+ mark('a').mark('b').mark('c').on(function(a, b, c){})
+```
 
 通过 mark 方法，很容易实现在 router 中注入 service ，或者在 service 中注入 manager。
 
