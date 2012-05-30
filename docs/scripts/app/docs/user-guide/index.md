@@ -1,47 +1,65 @@
 ![中昱达](assets/images/logo.png "中昱达")
 
 
-**Zyeeda Framework 2.0 用户手册**
+Zyeeda Framework 2.0 用户手册
 =================================
 
-**简介**
---------
+
+##简介
 
 Zyeeda Framework 2.0 是公司的最新框架，通过良好的封装和约束，开发人员可以轻松的完成功能开发，从而使开发人员脱离技术约束，专注于业务功能开发。
 
-**先决条件**
-------------
+
+
+##先决条件#
+
 
 ###Maven
 
-Apache Maven是一款基于项目对象模型（POM）的项目管理工具，本框架的编译需要依赖Apache Maven，如果需要了解相关知识请访问[Maven] [3]官网。
+[Apache Maven](http://maven.apache.org/ "Maven")是一款基于项目对象模型（POM）的项目管理工具，本框架的编译需要依赖Apache Maven。
 
-###HG
-Hg为一款分布式版本管理软件,如果需要下载客户端或者学习Hg的用法，请访问[mercurial] [2]的官网 。HG为公司项目版本管理的标准工具，开始项目前请下载并安装HG。
-
-**Downloads**
-----------
-本框架版本服务器为Hg，下载地址为  http://192.168.1.14/hg/zyeeda-framework-2.0
+请下载并配置 Maven ，并确保配置正确，Maven 详细的用法及命令请参考官方文档。
 
 
-**Overview**
---------------
 
-框架大量使用了基于JavaScript第三方开源框架的再封装，使得前后台的语法比较接近，减少开发人员的学习成本。
+###Mercurial
 
-后台采用 stick ([https://github.com/hns/stick](https://github.com/hns/stick "stick")) 封装而成，stick 基于 ringojs([http://ringojs.org/](http://ringojs.org/ "ringojs")) 实现，rhino([http://www.mozilla.org/rhino/](http://www.mozilla.org/rhino/ "ringo")) 作为 stick 的引擎。在此我们将不对这三者做详细阐述，如果需要了解请参考一下信息：
+[Mercurial](http://mercurial.selenic.com/ "Mercurial") 是一款分布式版本管理软件,通过简单快捷的命令就可以完成所有版本管理的功能。
 
-- rhino  - Rhino是 JavaScript 的一个开源实现，完全用 Java 编写的。它通常被嵌入到Java 应用程序提供脚本给最终用户。
-- ringojs - Ringo 是一个符合 CommonJS 标准的用 Java 实现的运行时，并且是构建在 Mozalla Rhino的JavaScript 引擎之上的。
-- stick- stick 是基于 RingoJS 封装的一个模块化的 JSGI 中间件组成层和应用框架。
+目前公司多数的项目都是采用此版本管理工具，所以此工具也是必备和必会的。
 
+
+
+
+##源码下载
+
+本框架版本服务器为 Mercurial ，下载地址为  http://192.168.1.14/hg/zyeeda-framework-2.0 ，请先将框架源码 clone 到本地。
+
+
+##概述
+
+
+在开始详细介绍框架前，我们需要对框架的部分架构和技术要素做一下简单的说明。因为 zyeeda-framework-2.0 的封装大量使用了 JavaScript 技术，并且基于此框架构建的项目需要编写大量的 JavaScript 代码来替代传统的 Java 代码，也就是说后台的逻辑代码大部分也将由 JavaScript 来完成。这种开发模式对于习惯了传统 Java 项目开发的技术人员来说可能会产生一定的困惑，但这应该不会成为一种阻碍,因为我们要学习的并不是一种新的技术。
+
+####Stick 、 Ringo 和  Rhino
+
+这三种技术都可以看做是本框架的基础技术，但是是否熟悉和理解这三项并不会影响到框架的使用。之所以提供这样的简介，只是为了给开发人员提供了解和学习新技术的一个窗口。
+
+[Stick](https://github.com/hns/stick "Stick") 是一种后端JS，是基于 RingJS 封装的一个模块化的 JSGI 中间件。而本框架则是基于 Stick 封装而来，提供了整套的调用逻辑。
+
+[Ringo](http://ringojs.org/ "Ringo") 是一个符合 CommonJS 标准的运行时，并且这个运行时是完全由 Java 实现的。同时，这个运行时是构建在  Mozalla Rhino 这个 JavaScript 引擎之上的。
+
+[Rhino](http://www.mozilla.org/rhino/ "Rhino") 是一个后端 JavaScript 执行引擎。框架封装的代码就是通过它来解析，并且和 Java 代码进行交互的。
 
 ####exports 和 require
-exports 允许标明的脚本向其它标明或未标明的脚本提供属性、函数和对象。 
-通常情况下标明脚本中的信息仅对对象同主体标明的脚本可用。通过导出属性、函数或对象，标明脚本将使得信息对于任何脚本(标明或未标明的)都可用。
 
-样例代码：
+exports 和 require 来源于 CommonJS ，分别为提供调用和被调用。
+
+exports 的官方解释是允许标明的脚本向其它标明或未标明的脚本提供属性、函数和对象。通俗的讲，就是如果你定义了需要被外部调用的对象、属性或者方法，那么必须调用 exports 来声明这个方法，这样它才能被外部对象调用到。
+
+exports 样例代码：
 ```javascript
+//文件名称为 apps.js
 exports.app = function(req) {
     return {
         status: 200,
@@ -51,20 +69,26 @@ exports.app = function(req) {
 };
 ```
 
-require 用来加载 exports 的属性、函数和对象。require 的参数为模块标示，返回被请求模块的属性、函数和对象。
+exports 样例代码给我们展示了如何定义一个能够被外部调用到的对象，但是如何在外部文件中调用到这个对象，这个时候就必须用到 require 了。
 
-样例代码：
->		var {createModuleRouter} = require('coala/router');
+require 用来请求声明为 exports 的对象，require 的参数为模块标示，返回被请求模块的属性、函数和对象。
 
-如果需要详细了解exports和require的详细用法请参考[CommonJS] [10]
+require 样例代码：
+```javascript
+var app = require('apps');
+```
+
+require 样例代码给我们展示了如何 require 一个对象。你应该已经注意到了，require 请求的东西首先要被 exports 。
+
+exports 和 require 对于本框架来说非常重要，因为这是基础操作，必须明白切掌握它们的用法才能开始下面的内容。
 
 
-**Introduction**
+框架详细介绍
 ------------
-###**最小项目**
+###最小项目
 为了方便项目的开发，我们提供了作为所有应用 zyeeda-framework-2.0 构建项目的最小项目--   zyeeda-drivebox-2.0 ，所有的项目都将基于此项目扩展而来。 zyeeda-drivebox-2.0 位于14上HG版本管理服务器上，版本库地址为 http://192.168.1.14/hg/zyeeda-drivebox-2.0 ，请自行clone该项目。
 
-#####**项目目录结构**
+#####项目目录结构
 本文档将参照 zyeeda-drivebox-2.0 对项目目录结构做大概的介绍，为下面展开讲解项目的架构及应用做铺垫。
 
 zyeeda-drivebox-2.0的目录结构入下图：
@@ -89,127 +113,134 @@ zyeeda-drivebox-2.0 为 maven 项目，文件主目录为 `src/main` ，主目�
 
 首先将介绍如何定义业务类实体：
 
-###**实体设计**
+###实体设计
 本框架提供了三个基础实体类，分别为 DomainEntity ，SimpleDomainEntity ，     RevisionDomainEntity 。这三个类都实现了 Serializable 接口，并且定义了一些常用属性，自定义业务实体类可以通过继承以上三个基础类来得到一些常用属性和实现可序列化的目的。我们建议所有的自定义业务实体类都通过继承以上的基础类了实现可序列化，不继承任何基础类也是允许的，但是必须实现 Serializable 接口。
 
 我们将在下面的内容中介绍三个基础类，以及如何定义业务实体类。
 
 
-#####***DomainEntity***
+#####DomainEntity
 DomainEntity为所有Entity的基类，它实现了Serializable接口，并且拥有id属性，所有自定义实体类必须继承DomainEntity，无需再定义id属性。<br/>
 代码如下：
->		@javax.persistence.MappedSuperclass
->		public class DomainEntity implements Serializable {
->
->	    private static final long serialVersionUID = 6570499338336870036L;
->
->	    private String id;
->	    @javax.persistence.Id
->	    @javax.persistence.Column(name = "F_ID")
->	    @javax.persistence.GeneratedValue(generator="system-uuid")
->	    @org.hibernate.annotations.GenericGenerator(name="system-uuid", strategy = "uuid")
->		public String getId() {
->			return id;
->		}
->	    public void setId(String id) {
->			this.id = id;
->		}
->		}
+```javascript
+		@javax.persistence.MappedSuperclass
+		public class DomainEntity implements Serializable {
 
+	    private static final long serialVersionUID = 6570499338336870036L;
 
-#####***SimpleDomainEntity***
+	    private String id;
+	    @javax.persistence.Id
+	    @javax.persistence.Column(name = "F_ID")
+	    @javax.persistence.GeneratedValue(generator="system-uuid")
+	    @org.hibernate.annotations.GenericGenerator(name="system-uuid", strategy = "uuid")
+		public String getId() {
+			return id;
+		}
+	    public void setId(String id) {
+			this.id = id;
+		}
+		}
+```
+
+#####SimpleDomainEntity
 
 SimpleDomainEntity 继承自 DomainEntity,并且扩展了另外两个属性-- name 和 description
 
 代码如下:
->		@javax.persistence.MappedSuperclass
->		public class SimpleDomainEntity extends DomainEntity {
->
->		    private static final long serialVersionUID = -2200108673372668900L;
->			
->		    private String name;
->		    private String description;
->		    
->		    @javax.persistence.Basic
->		    @javax.persistence.Column(name = "F_NAME")
->		    public String getName() {
->				return this.name;
->		    }
+```javascript
+		@javax.persistence.MappedSuperclass
+		public class SimpleDomainEntity extends DomainEntity {
 
->		    @javax.persistence.Basic
->		    @javax.persistence.Column(name = "F_DESC", length = 2000)
->		    public String getDescription() {
->				return this.description;
->		    }
->			..............
->		}
+		    private static final long serialVersionUID = -2200108673372668900L;
+			
+		    private String name;
+		    private String description;
+		    
+		    @javax.persistence.Basic
+		    @javax.persistence.Column(name = "F_NAME")
+		    public String getName() {
+				return this.name;
+		    }
 
-#####***RevisionDomainEntity***
+		    @javax.persistence.Basic
+		    @javax.persistence.Column(name = "F_DESC", length = 2000)
+		    public String getDescription() {
+				return this.description;
+		    }
+			..............
+		}
+```
+
+#####RevisionDomainEntity
 
 RevisionDomainEntity 继承自 SimpleDomainEntity ,并且扩展了四个属性-- creator ，createdTime ，lastModifier 和 lastModifiedTime
 
 代码如下:
->		@javax.persistence.MappedSuperclass
->		public class RevisionDomainEntity extends SimpleDomainEntity {
->
->		    private static final long serialVersionUID = 2055338408696881639L;
->			
->		    private String creator;
->		    private Date createdTime;
->		    private String lastModifier;
->		    private Date lastModifiedTime;
->		    
->		    @javax.persistence.Basic
->		    @javax.persistence.Column(name = "F_CREATOR", length = 50)
->		    public String getCreator() {
->				return this.creator;
->		    }	    
->		    @javax.persistence.Temporal(TemporalType.TIMESTAMP)
->		    @javax.persistence.Column(name = "F_CREATED_TIME")
->		    public Date getCreatedTime() {
->				return this.createdTime;
->		    }
->		    @javax.persistence.Basic
->		    @javax.persistence.Column(name = "F_LAST_MODIFIER", length = 50)
->		    public String getLastModifier() {
->				return this.lastModifier;
->		    }
->		    @javax.persistence.Temporal(TemporalType.TIMESTAMP)
->		    @javax.persistence.Column(name = "F_LAST_MODIFIED_TIME")
->		    public Date getLastModifiedTime() {
->				return this.lastModifiedTime;
->		    }
->			..............
->		}
+```javascript
+		@javax.persistence.MappedSuperclass
+		public class RevisionDomainEntity extends SimpleDomainEntity {
 
-#####***如何自定义业务实体类***
+		    private static final long serialVersionUID = 2055338408696881639L;
+			
+		    private String creator;
+		    private Date createdTime;
+		    private String lastModifier;
+		    private Date lastModifiedTime;
+		    
+		    @javax.persistence.Basic
+		    @javax.persistence.Column(name = "F_CREATOR", length = 50)
+		    public String getCreator() {
+				return this.creator;
+		    }	    
+		    @javax.persistence.Temporal(TemporalType.TIMESTAMP)
+		    @javax.persistence.Column(name = "F_CREATED_TIME")
+		    public Date getCreatedTime() {
+				return this.createdTime;
+		    }
+		    @javax.persistence.Basic
+		    @javax.persistence.Column(name = "F_LAST_MODIFIER", length = 50)
+		    public String getLastModifier() {
+				return this.lastModifier;
+		    }
+		    @javax.persistence.Temporal(TemporalType.TIMESTAMP)
+		    @javax.persistence.Column(name = "F_LAST_MODIFIED_TIME")
+		    public Date getLastModifiedTime() {
+				return this.lastModifiedTime;
+		    }
+			..............
+		}
+```
+
+#####如何自定义业务实体类
 
 假设我们有名为 people 的实体类，这个实体类有 id ，name ，sex ，age 这些属性，那么，我们的实体类代码将如下：
->		@Entity
->		@Table(name="ZDA_People")
->		public class People extends DomainEntity {
+```java
+		@Entity
+		@Table(name="ZDA_People")
+		public class People extends DomainEntity {
 
->	    	private static final long serialVersionUID = 2338396716859666598L;
->	    
->	    	@Basic
->	    	@Column(name = "name", length = 32, nullable = false)
->	    	private String name;
->	    
->	    	@Basic
->	    	@Column(name = "age", nullable = false)
->	    	private int age;
->	    
->	    	@Basic
->	    	@Column(name = "sex", length = 32, nullable = false)
->	    	private String sex;
->			...........
->		}
+	    	private static final long serialVersionUID = 2338396716859666598L;
+	    
+	    	@Basic
+	    	@Column(name = "name", length = 32, nullable = false)
+	    	private String name;
+	    
+	    	@Basic
+	    	@Column(name = "age", nullable = false)
+	    	private int age;
+	    
+	    	@Basic
+	    	@Column(name = "sex", length = 32, nullable = false)
+	    	private String sex;
+			...........
+		}
+```
 
 通过继承 DomainEntity，我们无需再重复定义 id 属性。
 
 备注：上例中以 `@` 开头的注解,例如 `@Entity` 、 `@Table` 、 `@Column` 等都来源于     [Hibernate Annotations] [4] ，如果需要了解或者学习也可参考 [hibernate-jpa-annotations] [5] 。
 
-###<b>框架组成结构</b>###
+###框架组成结构###
 本框架后台分三层结构，分别为 router，service 和 manager
 
 - router 用来定义请求规则和处理请求，作为所有请求的入口。router 将调用 service 来处理业务。
@@ -218,7 +249,7 @@ RevisionDomainEntity 继承自 SimpleDomainEntity ,并且扩展了四个属性--
 
 - manager 为数据持久层，用来完成数据库交互工作。
 
-####**main.js**####
+####main.js####
 zyeeda-drivebox-2.0 项目的 src/main/javascript 目录结构如下
 
 ![](assets/images/user-guide/main.png)
@@ -228,32 +259,38 @@ zyeeda-drivebox-2.0 项目的 src/main/javascript 目录结构如下
 在下面介绍 router 的时候，会介绍 router 的用法，以及如何在 main.js 中调用 router。
 接下来，开始介绍 router：
 
-#### **router** ####
+#### router ####
 
 router 主要用来定义请求规则和处理请求。顾名思义，它本身并不处理任何业务，但是根据 router 中定义的请求规则，你可以调用 service 来处理你的业务。
 
 router 的创建方式有两种 `createModuleRouter` 和 `createRouter` ,这两个方法都是由框架封装的 router 类中 exports 出来可被调用的方法。以下将提供两段样例代码来说明这两个方法的用法以区别。
 
 样例1 -- createModuleRouter
->		var {createModuleRouter} = require('coala/router');
->		var router = exports.router = createModuleRouter();
->		router.autoMount(this);
+```javascript
+		var {createModuleRouter} = require('coala/router');
+		var router = exports.router = createModuleRouter();
+		router.autoMount(this);
+```
 
 样例2 -- createRouter
->		var {createRouter} = require('coala/router');
->		var {html} = require('coala/response');
->		var router = exports.router = createRouter();
->		router.get('/', function(request){
->		    return html('sub first');
->		});
+```javascript
+		var {createRouter} = require('coala/router');
+		var {html} = require('coala/response');
+		var router = exports.router = createRouter();
+		router.get('/', function(request){
+		    return html('sub first');
+		});
+```
 
 在讲解`样例1`和`样例2`之前，我们先回顾一下 `require` 的用法：
-
-> 	var {createModuleRouter} = require('coala/router');
-
+```javascript
+ 	var {createModuleRouter} = require('coala/router');
+```
 这句话的意思是请求 `coala` 目录下 `router` 文件中的 `createModuleRouter` 方法，所以这样我们就很容易明白 require 的用法， `require` 的参数是一个文件路径。但是我们要确保我们请求的对象是已经 exports 过的。
 
-> var router = exports.router = createModuleRouter();
+```javascript
+ var router = exports.router = createModuleRouter();
+```
 
 这句代码的意思是，我们定义的 `router` 对象将被 exports 出去，其他对象可以通过 require 方法来请求到这个对象。
 
@@ -261,7 +298,9 @@ router 的创建方式有两种 `createModuleRouter` 和 `createRouter` ,这两�
 
 请注意样例1中的这两行代码
 
-> 		router.autoMount(this);
+```javascript
+ 		router.autoMount(this);
+```
 
 `autoMount()` 是 router expters 的方法，用来自动挂载子模块的 router ,但是只能挂载跟定义`router.autoMount(this)` 这个文件在同一个文件夹下的子文件夹的下一级的名为 `router.js` 文件中定义的对象。
 
@@ -305,65 +344,85 @@ router提供了 “get” ， “post” ，“put” 和 “del” 四种请求
 （备注：path 为当前请求的 root 路径；domain\_id 为数据id；by 为查询条件关键字；field-desc 为按某个字段排序，field 为字段名称，desc 为降序关键字；page 为分页关键字，其后要查询的页数；当前实际URL为 http://localhost：8080/drivebox/demo）
 
 请求处理1
->		//处理 新增 操作
->		//请求路径为 ： path
->		//URL : `http://localhost：8080/drivebox/demo/`
->		//执行操作 ： 新增Form中demo对象
-> 		router.post('/',function(){
-> 			//要执行的操作
-> 		});
+
+```javascript
+		//处理 新增 操作
+		//请求路径为 ： path
+		//URL : `http://localhost：8080/drivebox/demo/`
+		//执行操作 ： 新增Form中demo对象
+ 		router.post('/',function(){
+ 			//要执行的操作
+ 		});
+```
 
 请求处理2
->		//处理 根据id删除 操作
->		//请求路径为 ： path/domain_id
->		//URL : `http://localhost：8080/drivebox/demo/123`
->		//执行操作 ： 删除id为123的demo数据
-> 		router.del('/：id',function(request，id){
-> 			//回调函数中的id将接收URL中的id参数，此例为123
-> 			//要执行的操作
-> 		});
+
+```javascript
+		//处理 根据id删除 操作
+		//请求路径为 ： path/domain_id
+		//URL : `http://localhost：8080/drivebox/demo/123`
+		//执行操作 ： 删除id为123的demo数据
+ 		router.del('/：id',function(request，id){
+ 			//回调函数中的id将接收URL中的id参数，此例为123
+ 			//要执行的操作
+ 		});
+```
 
 请求处理3
->		//处理 批量删除 操作
->		//请求路径为 ： path/delete
->		//URL : `http://localhost：8080/drivebox/demo/delete`
->		//执行操作 ： 删除demo数据
-> 		router.post('/delete',function(request){
-> 			//要执行的操作
-> 		});
+
+```javascript
+		//处理 批量删除 操作
+		//请求路径为 ： path/delete
+		//URL : `http://localhost：8080/drivebox/demo/delete`
+		//执行操作 ： 删除demo数据
+ 		router.post('/delete',function(request){
+ 			//要执行的操作
+ 		});
+```
 
 请求处理4
->		//处理 修改 操作
->		//请求路径为 ： path/domain_id
->		//URL : `http://localhost：8080/drivebox/demo/123`
->		//执行操作 ： 修改id为123的demo数据
-> 		router.put('/',function(request，id){
-> 			//回调函数中的id将接收URL中的id参数，此例为123
-> 			//要执行的操作
-> 		});
+
+```javascript
+		//处理 修改 操作
+		//请求路径为 ： path/domain_id
+		//URL : `http://localhost：8080/drivebox/demo/123`
+		//执行操作 ： 修改id为123的demo数据
+ 		router.put('/',function(request，id){
+ 			//回调函数中的id将接收URL中的id参数，此例为123
+ 			//要执行的操作
+ 		});
+```
 
 请求处理5
->		//处理 根据id查询 操作
->		//请求路径为 ： path/domain_id
->		//URL : `http://localhost：8080/drivebox/demo/123`
->		//执行操作 ： 检索id为123的demo数据
-> 		router.get('/：id',function(request，id){
->			//回调函数中的id将接收URL中的id参数，此例为123
-> 			//要执行的操作
-> 		});
+
+```javascript
+		//处理 根据id查询 操作
+		//请求路径为 ： path/domain_id
+		//URL : `http://localhost：8080/drivebox/demo/123`
+		//执行操作 ： 检索id为123的demo数据
+ 		router.get('/：id',function(request，id){
+			//回调函数中的id将接收URL中的id参数，此例为123
+ 			//要执行的操作
+ 		});
+```
 
 请求处理6
->		//处理 查询列表 操作
->		//请求路径为 ： path
->		//URL : `http://localhost：8080/drivebox/demo/`
->		//执行操作 ： 查询所有demo数据
-> 		router.get('/',function(request){
-> 			//要执行的操作
-> 		});
+
+```javascript
+		//处理 查询列表 操作
+		//请求路径为 ： path
+		//URL : `http://localhost：8080/drivebox/demo/`
+		//执行操作 ： 查询所有demo数据
+ 		router.get('/',function(request){
+ 			//要执行的操作
+ 		});
+```
 
 通过以上请求处理代码片段，我们可以看出，操作和请求处理方法是一一对应的，这是一种严格的约束。即使相同的请求路径，调用不同的处理方法也会成为不同的操作。而且请求对参数有严格的要求，如果定义的请求处理路径中带参数，那么相应的请求也不许带参数，否则无法匹配到这个请求定义。例如我们定义如下router：
 
-> 		router.get('/:id',function(){});
+```javascript
+ 		router.get('/:id',function(){});
+```
 
 通过`http://path/123`可以请求到上面定义的请求处理，而且`http://path/`则无法请求到。并且调用请求的时候需要显示的告诉浏览器，你将采取何种请求方式： `get` 、 `put` 、`post` 、 `del` 。
 
@@ -385,7 +444,7 @@ demo/123`，调用get请求的时候为检索id为123的demo数据。
 
 #####参数传递#####
 
-###<b>service</b>###
+###service###
 service层主要用来处理业务，并调用manager层完成数据操作。通常，我们的业务代码都写在这一层，并且事物处理也必须在这一层完成。接下来，我们将介绍service的用法，以及service相关的方法。
 
 #####创建service
@@ -393,12 +452,14 @@ service层主要用来处理业务，并调用manager层完成数据操作。通
 
 框架的service封装类提供了一个名为`createService`的方法，将为会返回一个service对象。
 
-> 		var {createService} = require('coala/service');
-> 		var service = exports.service = createService();
+```javascript
+ 		var {createService} = require('coala/service');
+ 		var service = exports.service = createService();
+```
 
 service中定义了两个方法：
 
-**-getEntityManager**
+-getEntityManager
 
 语法： getEntityManager( EntityManagerFactory ) 
 
@@ -406,9 +467,11 @@ service中定义了两个方法：
 
 说明： 方法的返回值为 EntityManager 对象
 
-> 		var entityManager = service.getEntityManager('entityManagerFactory');
+```javascript
+ 		var entityManager = service.getEntityManager('entityManagerFactory');
+```
 
-**-createManager**
+-createManager
 
 语法： createManager( entityClass , entityManagerFactoryName )
 
@@ -416,14 +479,16 @@ service中定义了两个方法：
 
 说明： 方法的返回值为 Manager 对象
 
-> 		var entityManager = service.getEntityManager('com.zyeeda.drivebox.entity.User','entityManagerFactory');
+```javascript
+ 		var entityManager = service.getEntityManager('com.zyeeda.drivebox.entity.User','entityManagerFactory');
+```
 
-###<b>manager</b>###
+###manager###
 manager负责跟数据库进行交互。
 
 manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作方法。
 
-**-find**
+-find
 
 语法 : find(\[ids\])
 
@@ -431,7 +496,7 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 说明 : 根据id查找并返回与Mnanager绑定的Entity对应的结果集
 
-**-getReference**
+-getReference
 
 语法 : getReference( \[ids\] )
 
@@ -439,7 +504,7 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 说明 : 根据id查找并返回与Mnanager绑定的Entity对应的结果集
 
-**-merge**
+-merge
 
 语法 : merge( \[entities\] )
 
@@ -447,7 +512,7 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 说明 : 将 Entity 更新到数据库，并返回更新成功的记录
 
-**-save**
+-save
 
 语法 : save( \[entities\] )
 
@@ -455,7 +520,7 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 说明 : 将 Entity 保存到数据库，并返回成功保存的记录
 
-**-remove**
+-remove
 
 语法 : remove( \[entities\] )
 
@@ -463,15 +528,15 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 说明 : 从数据库中删除 Entity 对应的数据，并返回成功删除的记录
 
-**-removeById**
+-removeById
 
-语法 : removeById( [ids] )
+语法 : removeById( \[ids\] )
 
 参数 : ids -id数组
 
 说明 : 根据id删除数据库中对应的记录，并返回成功被删除的记录集合 
 
-**-contains**
+-contains
 
 语法 : contains( entity )
 
@@ -479,7 +544,7 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 说明 : 判断数据库中是否已经存在此 Entity 所对应的记录，如果存在则返回 true ，否则返回 false
 
-**-flush**
+-flush
 
 语法 : flush()
 
@@ -487,15 +552,15 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 说明 : 将处于游离状态的对象持久化到数据库中
 
-**-refresh**
+-refresh
 
-语法 : refresh( [entites] )
+语法 : refresh( \[entites\] )
 
 参数 : entites -Entity 数组
 
 说明 : 从数据库刷新实例的状态，如果有则覆盖实体的变化
 
-**-getAll**
+-getAll
 
 语法 : getAll( option )
 
@@ -503,7 +568,7 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 说明 : 查询并返回所有结果集
 
-**-findByExample**
+-findByExample
 
 语法 : findByExample( example , option )
 
@@ -511,7 +576,7 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 说明 : 通过Manager所绑定的Entity的来构造一个查询条件，并返回满足查询条件的结构集，详细请参考[Criteria ](http://docs.jboss.org/hibernate/orm/4.1/devguide/en-US/html/ch12.html  "Criteria")
 
-**自定义查询方法**
+自定义查询方法
 
 除了以上方法之外，我们还可以通过 JPA 的 orm.xml 配置文件来提供自定义的数据库操作方法。
 
@@ -523,25 +588,29 @@ manager基于 Hibernate JPA 2.0实现，提供了一系列对数据库的操作�
 
 2.在自定义 orm 配置文件中添加自己的查询方法，例如在 test-orm.xml 中添加
 
-> 		<named-query name="queryByName">
->         	<query>
->                	from Demo where name = :name
->         	</query>
->    	</named-query>
+```javascript
+		<named-query name="queryByName">
+	         	<query>
+	                	from Demo where name = :name
+	         	</query>
+    		</named-query>
+```
 
 3.在 resources/META-INF 目录下 persistence.xml 文件中注册自定 orm 配置文件，例如添加如代码
 
->  		<mapping-file>/META-INF/orms/test-orm.xml</mapping-file>
+```javascript
+ 		<mapping-file>/META-INF/orms/test-orm.xml</mapping-file>
+```
 
 4.调用方式跟 manager 自定义的方法一样 ，例如调用 manageer.queryByName( name ) 就会自动定位到上述自定义的 queryByName 方法
 
 如果需要了解 orm.xml 和 persistence.xml 文件的详细配置方法以及用途，请访问[http://](http:// "1111")
-###**marker**###
+###marker###
 本框架引入了marker来解决注入的问题，目前提供四种类型注入 inject ，managers ， services 和 tx 。在 router 中注入 service 或者在 service 中注入 manager 都是通过 marker 来完成的，类似于 spring 的 annotation 。
 
 marker 类提供了两个方法：
 
-**-mark**
+-mark
 
 语法 ： mark( name , attributes )
 
@@ -557,7 +626,7 @@ marker 类提供了两个方法：
 
 说明 ： 用来实现注入功能
 
-**-on**
+-on
 
 语法 ： on( fn, me )
 
@@ -574,33 +643,39 @@ mark 和 on 是成对出现的，通过 mark 方法注入的对象必须通过 o
 
 例如：
 
-**mark实例1**： 在 router 中注入 service 
+mark实例1： 在 router 中注入 service 
 
-> 		router.get('/', mark('services',service).on(function(service,request){
-> 			//调用 service 处理业务
-> 		}));
+```javascript
+ 		router.get('/', mark('services',service).on(function(service,request){
+ 			//调用 service 处理业务
+ 		}));
+```
 
-	router 中还有另外一种调用 service 的方法：
+router 中还有另外一种调用 service 的方法：
 
-> 		var {createService} = require('demo/service/service');
-> 		var service = exports.service = createService();
-> 		router.get('/', function(request){
-> 			//调用 service 处理业务
-> 		});
+```javascript
+ 		var {createService} = require('demo/service/service');
+ 		var service = exports.service = createService();
+ 		router.get('/', function(request){
+ 			//调用 service 处理业务
+ 		});
+```
 
+mark实例2 ： 在 service 中注入 mananger
 
-**mark实例2** ： 在 service 中注入 mananger
-> 		var {DemoEntity} = com.zyeeda.drivebox.entity;
-> 		var {mark} = require('coala/mark');
-> 
->	 	exports.createService = function() {
-> 			return {
-> 				create: mark('managers',DemoEntity).mark('tx').on(function(manager,entity){
-> 					return manager.save(entity);
-> 				})
-> 			};
-> 
-> 		};
+```javascript
+ 		var {DemoEntity} = com.zyeeda.drivebox.entity;
+ 		var {mark} = require('coala/mark');
+ 
+	 	exports.createService = function() {
+ 			return {
+ 				create: mark('managers',DemoEntity).mark('tx').on(function(manager,entity){
+ 					return manager.save(entity);
+ 				})
+ 			};
+ 
+ 		};
+```
 
 mark实例1提供了两种在 router 中调用 service 的方法 ，第一种是通过调用 mark 方法注入，第二种是通过 require 调用 service 的 createService 方法。虽然两种方式达到的效果一样，但是我们建议使用 mark 的方式注入，因为这样更方便，也更灵活。
 
@@ -612,89 +687,94 @@ tx 为Spring的事物管理器，无需参数，只要对方法 mark('tx') , 该
 
 mark实例2 create 中 on 方法的第二个参数 entity 是调用 create 方法需要传递的参数。
 
-**mark 注入的约束**
+mark 注入的约束
 
 - router 层不能注入 managers 和 tx
 
 - service 层可以注入 service ，manager ， tx 和 inject 
 
 
-####**Scaffold**###
+####Scaffold###
 通过在实体中配置 @scaffold 注解的方式，可以实现实体类的 CRUD 操作，并且不需要写任何后台代码。同时可以通过 Scaffold 的配置文件实现扩展功能，例如对自动生成的 CRUD 方法的重写和过滤，对查询结果的过滤和类型转换等功能。通过对 Scaffold 的应用，可以大量减少后台的代码，进一步提升开发效率。
 
-**配置Scaffold**
+配置Scaffold
 
 假设存在一个数据字典类 DriveType ，下面以实现此数据字典类的 CRUD 功能为例介绍 Scaffold 的实现步骤。
 
 第一步 ： 创建实体类并在实体上添加 @Scaffold 注解
 
-![](D:\zyeeda-framework\driveTypeEntity.png)
+![](assets/images/user-guide/drive-type-entity.png)
 
 如图，在 entity 目录中建立如图所示的 DriveType.java 文件 ，DriveType 类的头部添加如下注解
 
->		@Entity(name = "DriveType")
-> 		@Table(name = "ZDA_DRIVE_TYPE")
-> 		@Scaffold(path = "/system/driveType")
-> 		public class DriveType extends SimpleDomainEntity {
+```java
+		@Entity(name = "DriveType")
+ 		@Table(name = "ZDA_DRIVE_TYPE")
+ 		@Scaffold(path = "/system/driveType")
+ 		public class DriveType extends SimpleDomainEntity {
+```
 
 注解 @Scaffold 提供了一个参数 path 属性， 该属性的值既是 CRUD 操作对应的 URL ，又是 Scaffold 配置文件的路径。
 
 第二步 ： 在 config.js 中配置实体包路径
 
-![](D:\zyeeda-framework\driveConfig.png)
+![](assets/images/user-guide/drive-config.png)
  
 在 config.js 中添加如下代码：
 
-> 		exports.env = {
->     		entityPackages : [ 'com.zyeeda.drivebox.entity' ]
-> 		};
+```javascript
+ 		exports.env = {
+     		entityPackages : [ 'com.zyeeda.drivebox.entity' ]
+ 		};
+```
 
 config.js 为固定名称和位置的配置文件， entityPackages 指定的是实体类的包路径。
 
 第三步 ： 在 scaffold 目录中建立配置文件
 
-![](D:\zyeeda-framework\ScaffoldPath.png)
+![](assets/images/user-guide/scaffold-path.png)
 
 如图在 src/main/javascript/scaffold/system 下创建 driveType.js 文件，此文件的路径和 `@Scaffold(path = "/system/driveType")` 一致。加载 Scaffold 注解的时候会根据 path 属性的的值去加载 src/main/javascript/scaffold 目录下对应的文件。
 
 driveType.js 文件中代码如下：
 
-
-> 		// 用来重写默认的请求处理方法
-> 		exports.handlers = {
-> 			create：function(){
-> 				//重写create
-> 			}
-> 		};
-> 
-> 		// 去除不需要的请求处理方法
-> 		//过滤掉 list 方法和 get 方法
-> 		exports.exclude = ['list', 'get'];
-> 
-> 		// 过滤后台传递给前台的 json 数据
-> 		exports.filters = {
->		};
-> 
-> 		// 处理额外的 URL
-> 		exports.doWithRouter = function(router) {
-> 			router.get('/json',function(){
-> 				//定义默认处理方法以外的处理方法
-> 			});
-> 		};
-> 
-> 		// 数据类型转换器
-> 		exports.converters = {
-> 			//createTime 为 DriveType 类的一个字段
-> 			createTime ： function(){
-> 				//类型转换方法
-> 			}
-> 		};
+```javascript
+ 		// 用来重写默认的请求处理方法
+ 		exports.handlers = {
+ 			create：function(){
+ 				//重写create
+ 			}
+ 		};
+ 
+ 		// 去除不需要的请求处理方法
+ 		//过滤掉 list 方法和 get 方法
+ 		exports.exclude = ['list', 'get'];
+ 
+ 		// 过滤后台传递给前台的 json 数据
+ 		exports.filters = {
+		};
+ 
+ 		// 处理额外的 URL
+ 		exports.doWithRouter = function(router) {
+ 			router.get('/json',function(){
+ 				//定义默认处理方法以外的处理方法
+ 			});
+ 		};
+ 
+ 		// 数据类型转换器
+ 		exports.converters = {
+ 			//createTime 为 DriveType 类的一个字段
+ 			createTime ： function(){
+ 				//类型转换方法
+ 			}
+ 		};
+```
 
 driveType.js 用来实现以下功能：
 
 - handlers ：用来重写 Scaffold 默认的请求处理方法。下图为 Scaffold 提供的默认请求方式
 
-	![](D:\zyeeda-framework\autoMehtod.png)
+	![](assets/images/user-guide/auto-mehtod.png)
 
 - exclude : 过滤掉不需要的请求处理方法。只能过滤掉默认方法 list ， get ， create ， updte ， remove 中的一个或者多个。
 
@@ -704,13 +784,16 @@ driveType.js 用来实现以下功能：
 
 - doWithRouter ： 处理额外的 URL。用于给 router 定义除默认方法外额外的处理方法。例如：
 
-> 		exports.doWithRouter = function(router) {
-> 			router.get('/json',function(){
-> 				//定义默认处理方法以外的处理方法
-> 			});
-> 		};
+```javascript
+ 		exports.doWithRouter = function(router) {
+ 			router.get('/json',function(){
+ 				//定义默认处理方法以外的处理方法
+ 			});
+ 		};
+```
 
-	通过上例的配置，DriveType 类就拥有了一个名为 `/json` 的方法。
+
+通过上例的配置，DriveType 类就拥有了一个名为 `/json` 的方法。
 
 - converters ：数据类型转换器。声明实体类的一个字段，然后给字段制定一个数据转换器。
 
