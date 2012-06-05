@@ -261,7 +261,7 @@ RevisionDomainEntity 继承自 SimpleDomainEntity ,并且扩展了 creator ，cr
 
 ###框架组成结构###
 
-本框架后台分三层结构，分别是 router，service 和 manager 。每一层的职责都不同，并且是依次调用的关系,即 router 调用 servicecc 调用 manager。
+本框架后台分三层结构，分别是 router，service 和 manager 。每一层的职责都不同，并且是依次调用的关系,即 router 调用 service , service 调用 manager。
 
 - router ： 定义请求规则和处理请求，作为所有请求的入口。router 调用 service 来处理业务。
 
@@ -279,90 +279,66 @@ RevisionDomainEntity 继承自 SimpleDomainEntity ,并且扩展了 creator ，cr
 
 router 的挂载没有层级限制，而且 router 的挂载路径也正是请求的访问路径。
 
-关于如何创建 、挂载 、请求 router 的问题将方法下面 router 的章节去讲。但是在介绍 router 之前，先要介绍一下 main.js 。因为从项目结构上来说，main.js 是整个后台代码的入口。
+关于如何创建 、挂载 、请求 router 的问题将方法下面 router 的章节去讲。
 
-####main.js####
+在介绍 router 之前，先要介绍一下 main.js 。因为从项目结构上来说，main.js 是整个后台代码的入口。
 
-zyeeda-drivebox-2.0 项目的 `src/main/javascript` 目录结构如下
+### main.js####
+
+`src/main/javascript` 文件夹下有一个固定文件 main.js ，它是整个后台程序的入口文件。
+
+整个项目的 `根router` 会被定义在 main.js 文件中 ，然后再通过 `根router` 来挂载子模块的router。
+
+以 zyeeda-drivebox-2.0 为例，项目目录结构图如下：
 
 ![](assets/images/user-guide/main.png)
 
- `main.js` 为后台代码的入口，后台代码的调用关系为 main.js --> router --> service --> manager。可以认为 main.js 是一个固定名称和位置的文件，程序会自动调用 main.js 来完成后台的加载和调用。
+ `src/main/javascript` 下定义了两个模块 ，分别为 demo 和 sample 。mian.js 作为后台入口定义了 `根router ` ，然后分别挂载了 demo 和 sample 文件夹下的 router.js .
+ 
+### router ####
 
-在下面介绍 router 的时候，会介绍 router 的用法，以及如何在 main.js 中调用 router。
-接下来，开始介绍 router：
+router 是框架的请求处理层，也是整个后端架构的最上层，它主要负责处理和响应前端发送过来的请求 。除此之外它还有一个很重要的作用，挂载子模块的 router 。
 
-#### router ####
+通过挂载子 router ，可以将整个项目的资源串成一个树状结构，并且将 `根router` 作为统一的入口；通过定义请求规则和响应请求，可以约定所有资源的访问规则,并且处理这些请求。
 
-router 主要用来定义请求规则和处理请求。顾名思义，它本身并不处理任何业务，但是根据 router 中定义的请求规则，你可以调用 service 来处理你的业务。
+框架的封装类 router 提供了两个创建 router 的方法 `createModuleRouter` 和 `createRouter` ，这里两个方法都可以创建 router 对象 ，但是创建的 router 对象的用途不同。`createModuleRouter` 方法创建的 router 对象用来自动挂载子模块的 router 或者挂载指定的 router；`createRouter` 方法创建的 router 对象用来定义具体的请求规则和处理请求 。
 
-router 的创建方式有两种 `createModuleRouter` 和 `createRouter` ,这两个方法都是由框架封装的 router 类中 exports 出来可被调用的方法。以下将提供两段样例代码来说明这两个方法的用法以区别。
+####createModuleRouter
 
-样例1 -- createModuleRouter
-```javascript
-		var {createModuleRouter} = require('coala/router');
-		var router = exports.router = createModuleRouter();
-		router.autoMount(this);
-```
+`createModuleRouter` 方法创建的 router 有持有两个方法，分别为  autoMount 和 mount 。
 
-样例2 -- createRouter
-```javascript
-		var {createRouter} = require('coala/router');
-		var {html} = require('coala/response');
-		var router = exports.router = createRouter();
-		router.get('/', function(request){
-		    return html('sub first');
-		});
-```
+-autoMount
 
-在讲解`样例1`和`样例2`之前，我们先回顾一下 `require` 的用法：
-```javascript
- 	var {createModuleRouter} = require('coala/router');
-```
-这句话的意思是请求 `coala` 目录下 `router` 文件中的 `createModuleRouter` 方法，所以这样我们就很容易明白 require 的用法， `require` 的参数是一个文件路径。但是我们要确保我们请求的对象是已经 exports 过的。
+语法： autoMount( router )
 
-```javascript
- var router = exports.router = createModuleRouter();
-```
+参数： router 对象
 
-这句代码的意思是，我们定义的 `router` 对象将被 exports 出去，其他对象可以通过 require 方法来请求到这个对象。
+说明： 自动挂载有两个原则：1.只能挂载名为 router.js 的文件；2.自动挂载的范围是与调用 autoMount 方法的文件所处同级文件夹的子文件夹下的文件，并且只挂载一级，如果子文件夹下还有子文件夹则不会被挂载。只有同时满足以上两个条件的文件，才会被自动挂载。自动挂载后文件的请求路径是 ： `调用autoMount方法的文件的请求路径` / `被挂载文件的相对路径`。
 
-好了，言归正传，我们来看下`样例1`和`样例2`的区别。
 
-请注意样例1中的这两行代码
+-mount
 
-```javascript
- 		router.autoMount(this);
-```
+语法： mount( requestPath , routerPath )
 
-`autoMount()` 是 router expters 的方法，用来自动挂载子模块的 router ,但是只能挂载跟定义`router.autoMount(this)` 这个文件在同一个文件夹下的子文件夹的下一级的名为 `router.js` 文件中定义的对象。
+参数： requestPath 是 router 访问路径；routerPath 是 router 文件的路径。
 
-autoMount 的语法 `aotuMount( router )`
+说明： 挂载指定路径的 router 文件，并且绑定访问路径。
 
-这里要强调一下`同一个文件夹下的子文件夹的下一级`，因为这个是 `autoMount` 的挂载限制。
+示例如图：
 
-假如有如下的目录结构，javascript 文件夹中有 scaffold 文件夹和 main.js 文件，scaffold 文件夹下又有router.js和downScaffold子文件夹，downScaffold文件夹中还有一个router.js。那么如果我们在main.js中调用`router.autoMount()`,那么scaffold文件夹下的router.js中定义的router对象将被挂载，而downScaffold文件夹下的router.js中定义的router对象将不会被挂载。
+![](assets/images/user-guide/autoMount-mount.png)
 
-样例1中`router.mount('/scaffold', 'coala/scaffold/router')`为被挂载的router的项目相对访问路径，第二个参数为该访问路径对应的被挂载的router文件路径。
+上图左侧为项目 src/main/javascript 文件夹下目录结构，右侧为 main.js 中代码。由于代码是 main.js 文件中的，所以当前文件就是 main.js ，假设 main.js 请求访问路径是 rootPath 。
 
-那么综合样例1的代码，我们首先创建了一个router，并且自动挂载当前文件下子文件夹中的router.js,并且指定`coala/scaffold/router`这个router.js中定义的router的访问路径是`/scaffold`。
+如图上图所示,右侧目录结构中用红色方框标示的文件是代码 `router.autoMount(this);` 自动挂载的文件。 `model1/business1/router.js` 未被自动挂载是因为超过了自动挂载的层级限制，`common` 文件夹下文件未被自动挂载是因为没有名为 `router.js` 的文件。自动挂载的文件 `src/main/javascript/model1/router.js` 的访问路径为 rootPath/model1,`src/main/javascript/model2/router.js` 的访问路径为 rootPath/model2 。
 
-接下来，我们来分析样例2的代码。
+右侧用蓝色标示的标示的文件是代码 `router.mount('/common', 'common/common-router');` 制定挂载的文件。 mount 方法的第一个参数 `/common` 是请求 common-router.js 的路径，第二个参数 `common/common-router` 是  common-router.js 的相对路径。指定挂载的 `src/main/javascript/common/common-router.js` 的访问路径为 rootPath/common 。
 
-样例2的代码创建router后直接调用`router.get()`，get方法的第一个参数指定的是访问路径，第二个参数为处理函数。
+####createRouter
 
-所以综样例1和样例2的代码，可以看出`createModuleRouter`和`createRouter`的区别：前者用来创建router，挂载子模块的router对象，并给被挂载的router对象制定访问路径；后者用来创建router，并给router的请求定义访问路径和处理方式。
+createRouter 创建的 router 对象用来定义和处理某个资源的操作请求。例如`用户信息`是一个具体资源 ，createRouter 创建的 router 对象就用来定义诸如 创建 、删除 、修改、查询 等针对用户信息的操作请求以及处理方式。
 
-根据上一节对main.js的描述，关于main.js中应该如何调用router其实已经很清晰了。样例1的代码正是main.js中的代码片段，通过`autoMount`，可以在main.js中自动挂载子模块的router对象，并实现后台请求的唯一入口。
-
-需要注意的是，假设样例2中代码为样例1中被挂载的router中的代码，那么样例2中get方法的请求路径为
-`项目根路径/scaffold/`。实际上项目中的router为层层挂载的，访问子模块中router定义的请求的时候，应该加上上一层router指定给下层router的路径。
-
-接下来将延续样例2的代码，介绍如何定义具体的请求。
-
-#####router的请求方式
-
-router提供了 “get” ， “post” ，“put” 和 “del” 四种请求处理方法，分别对应不同类型的数据操作。
+createRouter 创建的 router 对象提供了 “get” ， “post” ，“put” 和 “del” 四种请求处理方法，分别对应不同类型的数据操作。
 
 - get ：检索数据时请求，单条数据或多条数据检索的时候请求
 
@@ -373,8 +349,6 @@ router提供了 “get” ， “post” ，“put” 和 “del” 四种请求
 - del ：删除单个数据时请求
 
 通常，检索、更新和删除单条数据时需要通过URL来传递参数。假设有如下代码：
-
-（备注：path 为当前请求的 root 路径；domain\_id 为数据id；by 为查询条件关键字；field-desc 为按某个字段排序，field 为字段名称，desc 为降序关键字；page 为分页关键字，其后要查询的页数；当前实际URL为 http://localhost：8080/drivebox/demo）
 
 请求处理1
 
@@ -457,7 +431,7 @@ router提供了 “get” ， “post” ，“put” 和 “del” 四种请求
  		router.get('/:id',function(){});
 ```
 
-通过`http://path/123`可以请求到上面定义的请求处理，而且`http://path/`则无法请求到。并且调用请求的时候需要显示的告诉浏览器，你将采取何种请求方式： `get` 、 `put` 、`post` 、 `del` 。
+通过 `http://path/123` 可以请求到上面定义的请求处理，而且`http://path/` 则无法请求到。并且调用请求的时候需要显示的告诉浏览器，你将采取何种请求方式： `get` 、 `put` 、`post` 、 `del` 。
 
 关于如何显示的告诉浏览器采取何种调用方式，我们将会在前端文档中提及，在此就不做赘述了。
  
@@ -467,20 +441,18 @@ router提供了 “get” ， “post” ，“put” 和 “del” 四种请求
 - 检索单条数据的时候URL为：path/domain\_id，例如：`http://localhost：8080/drivebox/
 demo/123`，调用get请求的时候为检索id为123的demo数据。
 
-- 检索多条数据的时候URL为：path/by/field-desc/page/1，例如：`http://localhost：8080/drivebox/demo/by/name-desc/page/2`，调用get请求的时候为按照 name 降序查找第2页的数据，默认分页条数为10。
+- 检索多条数据的时候URL为：path/by/field-desc/page/1，例如：`http://localhost：8080/drivebox/demo/by/name-desc/page/2` ， 调用get请求的时候为按照 name 降序查找第2页的数据，默认分页条数为10。
 
-- 删除单条数据的时候URL为：path/domain\_id，例如：`http://localhost：8080/drivebox/demo/123`，调用del请求的时候为删除id为123的demo数据。
+- 删除单条数据的时候URL为：path/domain\_id，例如：`http://localhost：8080/drivebox/demo/123` ， 调用del请求的时候为删除id为123的demo数据。
 
-- 更新数据的时候URL为：path/domain\_id，例如：`http://localhost：8080/drivebox/demo/123`，调用put求情的时候为更新id为123的demo数据。
+- 更新数据的时候URL为：path/domain\_id，例如：`http://localhost：8080/drivebox/demo/123` ， 调用put求情的时候为更新id为123的demo数据。
 
 在此章，并没有关于如何在router中调用service介绍。因为这种调用时用注入的方式实现的，而注入会涉及到`marker`的用法。我们将在下面的章节单独介绍如何使用mark来完成servce，mananger等的注入，所以在此就不做阐述。
-
-#####参数传递#####
 
 ###service###
 service层主要用来处理业务，并调用manager层完成数据操作。通常，我们的业务代码都写在这一层，并且事物处理也必须在这一层完成。接下来，我们将介绍service的用法，以及service相关的方法。
 
-#####创建service
+####创建service
 首先，我们来看下如何创建一个service对象。
 
 框架的service封装类提供了一个名为`createService`的方法，将为会返回一个service对象。
