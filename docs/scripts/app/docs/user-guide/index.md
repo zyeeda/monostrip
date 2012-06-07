@@ -4,262 +4,294 @@
 Zyeeda Framework 2.0 用户手册
 =================================
 
+Zyeeda Framework 2.0 是公司全新研发的技术平台与开发框架。在设计与研发过程中，始终秉承如下一些理念：
 
-##简介
+- *Don't make me think.* 这是本框架的核心开发理念，在任何情况下使用该框架，都不希望框架本身为开发人员带来过多思考过程。
+- *One way to do it.* 在本框架的约束下，实现任何功能，都有且只有唯一的一种方式和途径。
+- *Minimize your work.* 框架的封装尽量使得开发人员使用最少的代码编写最多的功能。
 
-Zyeeda Framework 2.0 是公司的最新框架，通过良好的封装和约束，开发人员可以轻松的完成功能开发，从而使开发人员脱离技术约束，专注于业务功能开发。
+和 1.x 版本相比，新框架进行了重大的革新与调整，主要体现在如下几个方面：
 
+- 集成框架抛弃 T5 IoC，而使用最新版本的 Spring Framework
+- 引入服务器端 JavaScript（Server-Side JavaScript, SSJS）脚本编程环境，大部分代码修改后无需编译和重启。
+- 服务器端 JavaScript 使得前后端开发语言得到统一。同一种编程思想，同一套组件类库，一次学习可以前后端通用。
+- 微内核框架。除了必要核心代码使用 Java 编写以外，整个框架都是基于 JavaScript 开发而成。
+- 突出面向实体编程的思想，开发人员定义实体和 ORM 映射关系，并始终围绕实体数据进行编程与开发。
+- 支持动态脚手架功能，根据实体、流程配置动态生成持久化、控制与展现逻辑。
+- 引入约定优于配置的思想，提供了默认的代码布局风格，按照此风格摆放的代码可以自动装载。
 
+服务器端 JavaScript 是本系统的最大特色之一，也是颠覆传统 Spring Struts 和 Hibernate（SSH）开发模式的主要所在，能够更多的了解与 SSJS 有关的内容，就能够更全面的理解本框架的设计思路。这里主要引入了三个服务器端 JavaScript 框架和组件：
 
-##先决条件#
-
-
-###Maven
-
-[Apache Maven](http://maven.apache.org/ "Maven")是一款基于项目对象模型（POM）的项目管理工具，本框架的编译需要依赖Apache Maven。
-
-请下载并配置 Maven ，并确保配置正确，Maven 详细的用法及命令请参考官方文档。
-
-
-
-###Mercurial
-
-[Mercurial](http://mercurial.selenic.com/ "Mercurial") 是一款分布式版本管理软件,通过简单快捷的命令就可以完成所有版本管理的功能。
-
-目前公司多数的项目都是采用此版本管理工具，所以此工具也是必备和必会的。
+- [Rhino](http://www.mozilla.org/rhino/ "Rhino") 是一个完全由 Java 语言写成的符合 ECMAScirpt 和 JavaScript 规范的 JavaScript 解析引擎，能够与 Java 程序无缝集成。
+- [Ringo](http://ringojs.org/ "Ringo") 是一个基于 Rhino 封装的符合 [CommonJS](http://commonjs.org "CommonJS") 规范的 JavaScript 引擎。
+- [Stick](https://github.com/hns/stick "Stick") 是一个基于 Ringo 的模块化 [JSGI](http://wiki.commonjs.org/wiki/JSGI/Level0/A/Draft2 "JavaScript Gate Interface") 中间件组装层和应用程序框架。
 
 
+1. 准备环境
+-----------
+
+### JDK
+
+本框架需要使用 JDK 1.6 版本进行编译，请确认系统中正确配置了 Java 开发和运行环境。
 
 
-##源码下载
+### Maven
 
-本框架版本服务器为 Mercurial ，下载地址为  http://192.168.1.14/hg/zyeeda-framework-2.0 ，请先将框架源码 clone 到本地。
+[Apache Maven](http://maven.apache.org/ "Maven") 是一款基于项目对象模型（Project Object Model, POM）的项目管理工具，本框架的编译需要使用 Maven。
+
+有关 Maven 的配置与运行，请参考[官方文档](http://maven.apache.org/download.html "Download and Install Maven")。
 
 
-##概述
+### Mercurial
+
+[Mercurial](http://mercurial.selenic.com/ "Mercurial") 是一款分布式版本管理软件。如果需要获取和查看本项目的源代码，就需要了解 Mercurial 的基本使用方法。想了解有关内容请参考官方[用户手册](http://mercurial.selenic.com/guide/ "Learning Mercurial in Workflows")。
 
 
-在开始详细介绍框架前，我们需要对框架的部分架构和技术要素做一下简单的说明。因为 zyeeda-framework-2.0 的封装大量使用了 JavaScript 技术，并且基于此框架构建的项目需要编写大量的 JavaScript 代码来替代传统的 Java 代码，也就是说后台的逻辑代码大部分也将由 JavaScript 来完成。这种开发模式对于习惯了传统 Java 项目开发的技术人员来说可能会产生一定的困惑，但这应该不会成为一种阻碍,因为我们要学习的并不是一种新的技术。
+### 获取源代码
 
-####Stick 、 Ringo 和  Rhino
+框架源代码托管于 [Bitbucket](https://bitbucket.org "Atlassian Bitbucket") 服务器，使用如下命令获取源代码（需要向管理员所要访问权限）：
 
-这三种技术都可以看做是本框架的基础技术，但是是否熟悉和理解这三项并不会影响到框架的使用。之所以提供这样的简介，只是为了给开发人员提供了解和学习新技术的一个窗口。
+```
+hg clone https://bitbucket.org/zyeeda/zyeeda-framework-2.0
+```
 
-[Stick](https://github.com/hns/stick "Stick") 是一种后端JS，是基于 RingJS 封装的一个模块化的 JSGI 中间件。而本框架则是基于 Stick 封装而来，提供了整套的调用逻辑。
 
-[Ringo](http://ringojs.org/ "Ringo") 是一个符合 CommonJS 标准的运行时，并且这个运行时是完全由 Java 实现的。同时，这个运行时是构建在  Mozalla Rhino 这个 JavaScript 引擎之上的。
+2. 预备知识
+-----------
 
-[Rhino](http://www.mozilla.org/rhino/ "Rhino") 是一个后端 JavaScript 执行引擎。框架封装的代码就是通过它来解析，并且和 Java 代码进行交互的。
+在开始详细介绍框架功能之前，首先需要了解一下框架引入的新技术和新概念。如果对这些内容已经掌握，可以跳过本章节。
 
-####exports 和 require
+### JavaScript
 
-exports 和 require 来源于 CommonJS ，分别为提供调用和请求调用。
+本框架和基于本框架开发的系统会大量使用 JavaScript 语言，如果不熟悉该语言，请参考如下一些学习资源：
 
-exports 的官方解释是允许标明的脚本向其它标明或未标明的脚本提供属性、函数和对象。通俗的讲，就是如果你定义了需要被外部调用的对象、属性或者方法，那么必须调用 exports 来声明这个方法，这样它才能被外部对象调用到。
+- [JavaScript Tutorial from w3schools.com](http://www.w3schools.com/js/default.asp)
+- [Learn JavaScript from Mozilla Developer Network](https://developer.mozilla.org/en-US/learn/javascript)
 
-exports 样例代码：
+
+### exports 和 require
+
+exports 和 require 来源于 CommonJS 规范，为 JavaScript 提供了模块化思想。服务器端 JavaScript 不同于客户端 JavaScript 的一大区别在于其每一个单独的 JavaScript 文件会形成一个模块（module），在不做任何额外操作的情况下，各模块之间是无法相互贯通的。也就是说模块定义了一个程序边界，变量与方法只能在模块内部相互访问，想要在模块之间实现引用，就必须进行所谓的“导出”与“导入”操作，在 CommonJS 中的术语称为 exports 和 require。
+
+**exports** 顾名思义就是将需要模块外可访问的内容进行“导出"声明，以标识其被模块公开，可以跨越模块边界被其他模块访问。
+
 ```javascript
-//文件名称为 apps.js
-exports.app = function(req) {
+// path/to/demo.js
+exports.app = function (req) {
     return {
         status: 200,
-        headers: {"Content-Type": "text/plain"},
-        body: ["Hello World!"]
+        headers: {'Content-Type': 'text/plain'},
+        body: ['Hello World!']
     };
 };
 ```
 
-exports 样例代码给我们展示了如何定义一个能够被外部调用到的对象，但是如何在外部文件中调用到这个对象，这个时候就必须用到 require 了。
+可以看出 exports 类似于一个 JavaScript 对象，所有该对象的属性都会被公开出来。因此在一个 JavaScript 文件内（或者说模块内），可以多次使用 exports 而声明导出若干属性和方法。
 
-require 用来请求声明为 exports 的对象，require 的参数为模块标示，返回被请求模块的属性、函数和对象。
+**require** 用来请求被模块 exports 出来的内容。require 是一个方法，接收要请求的模块路径作为参数。不同于 Java 的类加载机制，由于 JavaScript 是解析执行的，直到文件被首次 require 的时候，引擎才会解析其内容。解析后的结果会被缓存起来，当文件发生变化的时候，require 会重新解析该文件并缓存，以达到动态语言的目的。
 
-require 样例代码：
 ```javascript
-var app = require('apps');
+var app = require('path/to/demo'); // 模块路径可以省略 .js 扩展名
 ```
 
-require 样例代码给我们展示了如何 require 一个对象。你应该已经注意到了，require 请求的东西首先要被 exports 。
 
-exports 和 require 对于本框架来说非常重要，必须明白且掌握它们的用法才能开始下面的内容。
+### 解构赋值
+
+```javascript
+var user = {
+    firstName: 'Tom',
+    lastName: 'Smith'
+};
+var firstName = user.firstName;
+var lastName = user.lastName;
+```
+
+上面的代码的功能是将 user 对象的两个属性 firstName 和 lastName 分别赋值给两个同名的变量。设想一种情况，假如 user 具有非常多的属性，想要进行类似的赋值，就必须写很多行赋值语句，而且每一行都要包含相同的 user 引用。针对这种情况，JavaScript 1.7 版本以后，开始引入一种新的概念，称为“解构赋值”。
+
+```javascript
+var {firstName, lastName} = user;
+```
+
+这种写法等同于：
+
+```javascript
+var firstName = user.firstName;
+var lastName = user.lastName;
+```
+
+关于解构赋值的更多信息，请参考[这里](https://developer.mozilla.org/en/New_in_JavaScript_1.7, "New in JavaScript 1.7")。
 
 
-框架详细介绍
-------------
+3. 框架详细介绍
+---------------
+
+为了更好的理解和使用本框架，与框架代码一起发布的还有一个 Drivebox 试驾系统。该系统是一个可以独立运行的 Web 应用程序，构建于本框架的基础架构之上。一方面可以用来演示框架在实际生产中是如何被使用的，另外一方面该系统整合了常用的业务功能（例如账户管理、组织结构管理、认证管理和授权管理等），以避免项目过程中的重复劳动。可以使用如下方法获取试驾系统的源代码（需要向管理员所要访问权限）：
 
 
-###zyeeda-drivebox-2.0 最小系统
+```
+hg clone https://bitbucket.org/zyeeda/zyeeda-drivebox-2.0
+```
 
-zyeeda-drivebox-2.0 最小系统是公司在 zyeeda-framework-2.0 和其他开源框架基础上整合的不包括业务代码的可发布的基础平台类项目。
+如何部署和运行该系统，请参考试驾系统用户手册。
 
-它本身也是一个项目，并且提供完善的框架整合，提供常用的工具类，但是不包括特定的业务代码。基于公司的框架开发的项目都将以 zyeeda-drivebox-2.0 最小系统为基础，在此系统上添加各自项目的业务代码。所以 zyeeda-drivebox-2.0 最小系统是一个基础的技术平台，通过这个平台可以扩展各种各样的项目。
+### 目录结构
 
-在开始详细介绍 zyeeda-drivebox-2.0 最小系统以前，请和公司的配置管理员联系，从版本库中将源码 Clone 到本地。
-
-###项目目录结构
-
-本文档参照 zyeeda-drivebox-2.0 对项目目录结构做大概的介绍，为下面展开讲解项目的架构及应用做铺垫。
-
-zyeeda-drivebox-2.0的目录结构如下图：
+基于本框架构建的项目，目录结构要遵守一定的规范。以试驾系统为例：
 
    ![](assets/images/user-guide/project.png)
 
-zyeeda-drivebox-2.0 为 maven 项目，文件主目录为 `src/main` ，主目录下面有五个目录，分别为 java  ， resources ， rules ，javascript 和 webapp 。
+这是一个典型的 Maven 项目，在 src/main 目录下有五个子目录，各自用途如下：
 
-各目录用途如下：
+- java \- Java 文件目录。所有由 Java 语言写成的程序要放到此目录中，比如领域实体等。
+- javascript \- JavaScript 文件目录。服务器端 JavaScript 程序要放到此目录中，基于本框架开发的大部分代码应该集中在此。
+- resources \- 配置文件目录。Spring、JPA 等配置文件都存放在此目录下。
+- rules \- 工作流及规则文件目录。
+- webapp \- Web 应用程序目录。
 
-- java ： java 文件目录，在项目中主要用来存放 Entity 对象文件。
 
-- javascript ： javascript 文件目录，除了 Entity 文件，基本上其他后台文件都下这个目录下。
+### 实体设计
 
-- resources ： 配置文件目录，spring 、JPA 等配置文件都在此目录下。
-
-- rules ：工作流规则文件目录，主要用来存放 bpmn 配置文件
-
-- webapp ： 前端文件目录。
-
-接下来，我们将以 zyeeda-drivebox-2.0 为例，介绍基于 zyeeda-framework-2.0 开发的项目的典型架构。
-
-首先将介绍如何定义业务类实体。
-
-###实体设计
-
-框架提供了三个基础的实体类 ，如下表：
+框架提供了三个基础的实体类，如下表：
 
  ![](assets/images/user-guide/entity.png)
 
+作为基类 DomainEntity 实现了 Serializable 接口，这样所有继承自 DomainEntity 的实体类就都支持序列化了。每个基础实体类都拥有一些属性，上表中列出出了每个属性所对应的数据库字段的名称。通过继承，自定义的业务实体可以不用自己实现 Serializable 接口，并且会从父类继承一些常用属性。
 
-DomainEntity 、SimpleDomainEntity 、 RevisionDomainEntity 分别定义了一些常用属性，并且这三个基类之间是依次继承的关系。
+建议通过继承基础实体类的方式来达到业务实体可序列化的目的，而且通过继承也免去了开发人员反复定义一些常用属性的麻烦。但是要注意一点，如果自定义业务实体类继承了基础实体类，那么就不要再给业务实体类定义和基础实体类中名称一样的属性了，也就是说不要覆盖基类中定义过的属性。
 
-作为基类 DomainEntity 实现了 Serializable 接口，这样所有继承了 DomainEntity 的实体类就都可序列化了。每个基础实体类实体都拥有一些属性，上表中标示出了每个属性所对应的数据库字段的名称。通过继承，自定义的业务实体可以不用自己实现 Serializable 接口，并且会从父类继承一些常用属性。
+##### DomainEntity
 
-我们建议通过继承基础实体类来达到业务实体可序列话的目的，而且通过继承也免去了开发人员反复定义一些常用属性。但是要注意一点，如果自定义业务实体类继承了基础实体类，那么就不要再给业务实体类定义和基础实体类中名称一样的属性了。下面会给出三个实体的代码片段，以便更好的了解这三个基础实体类。
+DomainEntity 实现了 Serializable 接口，并定义了一个 id 属性（默认采用 UUID 的生成策略）。所有自定义业务实体类都应该继承 DomainEntity。
 
-#####DomainEntity
-
-DomainEntity为所有Entity的基类，它实现了Serializable接口，并且拥有id属性，建议所有自定义业务实体类必须继承 DomainEntity 。
-代码如下：
 ```java
-	@javax.persistence.MappedSuperclass
-	public class DomainEntity implements Serializable {
+@MappedSuperclass
+public class DomainEntity implements Serializable {
+    ...
 
-		private static final long serialVersionUID = 6570499338336870036L;
+    @Id
+    @Column(name = "F_ID")
+    @GeneratedValue(generator="system-uuid")
+    @org.hibernate.annotations.GenericGenerator(name="system-uuid", strategy = "uuid")
+    public String getId() {
+        return id;
+    }
 
-		private String id;
-		@javax.persistence.Id
-		@javax.persistence.Column(name = "F_ID")
-		@javax.persistence.GeneratedValue(generator="system-uuid")
-		@org.hibernate.annotations.GenericGenerator(name="system-uuid", strategy = "uuid")
-		public String getId() {
-			return id;
-		}
-		public void setId(String id) {
-			this.id = id;
-		}
-	}
-```
-
-#####SimpleDomainEntity
-
-SimpleDomainEntity 继承自 DomainEntity,并且扩展了 name 和 description 属性。
-
-代码如下:
-```java
-		@javax.persistence.MappedSuperclass
-		public class SimpleDomainEntity extends DomainEntity {
-
-		    private static final long serialVersionUID = -2200108673372668900L;
-			
-		    private String name;
-		    private String description;
-		    
-		    @javax.persistence.Basic
-		    @javax.persistence.Column(name = "F_NAME")
-		    public String getName() {
-				return this.name;
-		    }
-
-		    @javax.persistence.Basic
-		    @javax.persistence.Column(name = "F_DESC", length = 2000)
-		    public String getDescription() {
-				return this.description;
-		    }
-			..............
-		}
-```
-
-#####RevisionDomainEntity
-
-RevisionDomainEntity 继承自 SimpleDomainEntity ,并且扩展了 creator ，createdTime ，lastModifier 和 lastModifiedTime 四个属性。
-
-代码如下:
-```java
-		@javax.persistence.MappedSuperclass
-		public class RevisionDomainEntity extends SimpleDomainEntity {
-
-		    private static final long serialVersionUID = 2055338408696881639L;
-			
-		    private String creator;
-		    private Date createdTime;
-		    private String lastModifier;
-		    private Date lastModifiedTime;
-		    
-		    @javax.persistence.Basic
-		    @javax.persistence.Column(name = "F_CREATOR", length = 50)
-		    public String getCreator() {
-				return this.creator;
-		    }	    
-		    @javax.persistence.Temporal(TemporalType.TIMESTAMP)
-		    @javax.persistence.Column(name = "F_CREATED_TIME")
-		    public Date getCreatedTime() {
-				return this.createdTime;
-		    }
-		    @javax.persistence.Basic
-		    @javax.persistence.Column(name = "F_LAST_MODIFIER", length = 50)
-		    public String getLastModifier() {
-				return this.lastModifier;
-		    }
-		    @javax.persistence.Temporal(TemporalType.TIMESTAMP)
-		    @javax.persistence.Column(name = "F_LAST_MODIFIED_TIME")
-		    public Date getLastModifiedTime() {
-				return this.lastModifiedTime;
-		    }
-			..............
-		}
+    ...
+}
 ```
 
 
-#####如何自定义业务实体类
+##### SimpleDomainEntity
 
+SimpleDomainEntity 继承自 DomainEntity，并且扩展了 name 和 description 属性。有这两个字段要求的实体类型应该继承此类。
 
-
-假设我们有名为 people 的实体类，这个实体类有 id ，name ，sex ，age 这些属性，那么，我们的实体类代码将如下：
 ```java
-		@Entity
-		@Table(name="ZDA_People")
-		public class People extends DomainEntity {
+@MappedSuperclass
+public class SimpleDomainEntity extends DomainEntity {
+    ...
 
-			private static final long serialVersionUID = 2338396716859666598L;
-		    
-			@Basic
-			@Column(name = "name", length = 32, nullable = false)
-			private String name;
-		    
-			@Basic
-			@Column(name = "age", nullable = false)
-			private int age;
-		    
-			@Basic
-			@Column(name = "sex", length = 32, nullable = false)
-			private String sex;
-			...........
-		}
+    @Basic
+    @Column(name = "F_NAME")
+    public String getName() {
+        return this.name;
+    }
+
+    @Basic
+    @Column(name = "F_DESC", length = 2000)
+    public String getDescription() {
+        return this.description;
+    }
+
+    ...
+}
 ```
 
-通过继承 DomainEntity，无需再重复定义 id 属性，并且已经实现了 Serializable 接口。
 
-框架中业务实体类的配置和映射都是通过 Annotation 的方式实现的，所以需要开发人员对 Hinbernate JPA 的注解有所了解。例如上例中以 `@` 开头的注解,例如 `@Entity` 、 `@Table` 、 `@Column` 等都来源于 [Hibernate Annotations](http://www.techferry.com/articles/hibernate-jpa-annotations.html "Hibernate Annotations") ，如果需要了解或者学习也可参考 [hibernate-jpa-annotations](http://docs.jboss.org/hibernate/annotations/3.5/reference/en/html_single/#entity-mapping "hibernate-jpa-annotations") 。
+##### RevisionDomainEntity
 
-###框架组成结构###
+RevisionDomainEntity 继承自 SimpleDomainEntity，并且扩展了 creator，createdTime，lastModifier 和 lastModifiedTime 四个属性。与前面两者的不同之处在于，该类型不仅仅扩展了四个与修订信息有关的字段，而是在系统运行时，这四个字段的值会根据用户登录的上下文自动填充。因此有需要记录修订信息的业务实体，应该继承此类型。
+
+```java
+@MappedSuperclass
+public class RevisionDomainEntity extends SimpleDomainEntity {
+    ...
+
+    @Basic
+    @Column(name = "F_CREATOR", length = 50)
+    public String getCreator() {
+        return this.creator;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "F_CREATED_TIME")
+    public Date getCreatedTime() {
+        return this.createdTime;
+    }
+
+    @Basic
+    @Column(name = "F_LAST_MODIFIER", length = 50)
+    public String getLastModifier() {
+        return this.lastModifier;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "F_LAST_MODIFIED_TIME")
+    public Date getLastModifiedTime() {
+        return this.lastModifiedTime;
+    }
+
+    ...
+}
+```
+
+
+##### 如何自定义业务实体类
+
+例如我们要定义一个 People 实体类，这个实体类具有 id，name，sex 和 age 属性，实体类代码如下：
+
+```java
+@Entity
+@Table(name="ZDA_PEOPLE")
+public class People extends DomainEntity {
+
+    private static final long serialVersionUID = 2338396716859666598L;
+
+    private String name;
+    private String sex;
+    private int age;
+
+    @Basic
+    @Column(name = "F_NAME", length = 32, nullable = false)
+    public String getName() {
+        return name;
+    }
+
+    @Basic
+    @Column(name = "F_SEX", length = 32, nullable = false)
+    public String getSex() {
+        return sex;
+    }
+
+    @Basic
+    @Column(name = "F_AGE", nullable = false)
+    public int getAge() {
+        return age;
+    }
+
+}
+```
+
+**注：表名和字段名具有一定的命名规范。标识符全部采用大写字母，表名前增加 ZDA\_ 前缀（或其他项目相关前缀），字段名前增加 F\_ 前缀。并且所有标记要打在 getter 方法上，而不是属性字段上。**
+
+通过继承 DomainEntity，People 类型无需再定义 id 属性，并且已经实现了 Serializable 接口。
+
+以上代码中的所有实体关系映射（Object Relationship Mapping, ORM）都是通过 Java Annotation 注解实现的，开发人员需要对 Hibernate Annotations 和 Hibernate JPA Annotations 有一定的了解。请参考以下网站获取更多信息。
+
+- [Hibernate Annotations](http://www.techferry.com/articles/hibernate-jpa-annotations.html "Hibernate Annotations")
+- [Hibernate JPA Annotations](http://docs.jboss.org/hibernate/annotations/3.5/reference/en/html_single/#entity-mapping "Hibernate JPA Annotations")
+
+
+### 框架组成结构
 
 本框架后台分三层结构，分别是 router，service 和 manager 。每一层的职责都不同，并且是依次调用的关系,即 router 调用 service , service 调用 manager。
 
