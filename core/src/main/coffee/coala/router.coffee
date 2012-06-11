@@ -9,7 +9,7 @@
 log = require('ringo/logging').getLogger module.id
 entityMetaResovler = Context.getInstance().getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
-exports.createModuleRouter = ->
+exports.createMountPoint = ->
     router = new Application()
     router.configure 'mount'
     router.autoMount = (ctx) ->
@@ -25,7 +25,7 @@ exports.createRouter = ->
 autoMount = (router)->
     repos = @getRepository('./').getRepositories()
     for repo in repos
-        resource = repo.getResource 'router.js'
+        resource = repo.getResource 'module.js'
         try
             router.mount "/#{repo.getName()}", resource.getModuleName() if resource.exists()
         catch e
@@ -160,7 +160,9 @@ defaultHandlers =
         json service.remove(id), getJsonFilter(options, 'remove')
 
     batchRemove: (options, service, entityMeta, request) ->
-        result = service.remove.apply service, request.params.ids
+        ids = request.params.ids
+        ids = if type(ids) is 'string' then [ids] else ids
+        result = service.remove.apply service, ids
         json result, getJsonFilter(options, 'batchRemove')
 
 

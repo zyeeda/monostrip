@@ -13,9 +13,9 @@ parseDate = (pattern, desiredType, stringDate) ->
 
 innerConverters =
     'java.util.Date': (value, fieldMeta) ->
-        parseData.apply null, [env.dateFormat, Date, value]
+        parseDate.apply null, [env.dateFormat, Date, value]
     'java.util.Calendar': (value, fieldMeta) ->
-        parseData.apply null, [env.dateFormat, Calendar, value]
+        parseDate.apply null, [env.dateFormat, Calendar, value]
 
 defaultConverter = (value, fieldMeta) ->
     service = createService()
