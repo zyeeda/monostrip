@@ -27,5 +27,6 @@ exports.createService = mark('services', 'coala/service').on (baseService, entit
         remove: mark('tx').on (id...) ->
             manager = baseService.createManager service.entityClass
             manager.removeById.apply manager, id
+            if id.length is 1 then id[0] else id
 
     service
