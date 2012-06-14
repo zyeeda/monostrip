@@ -70,15 +70,17 @@ exports.createManager = (em, entityClass) ->
         query = builder.createQuery @_entityClass
         root = query.from @_entityClass;
 
-        pageInfo = getPageInfo option
-        fillPageInfo query, pageInfo
-
         if option.orderBy
             orders = for order in option.orderBy
                 builder[value] root.get property for property, value of order
             query.orderBy orders
 
-        @_em.createQuery(query).getResultList()
+        q = @_em.createQuery(query)
+
+        pageInfo = getPageInfo option
+        fillPageInfo q, pageInfo
+
+        q.getResultList()
 
     # this implementation use native hibernate session
     findByExample: (example, option = {}) ->
@@ -108,7 +110,8 @@ exports.createManager = (em, entityClass) ->
         singleResult = 'singleResult' in option and option.singleResult
         delete option['singleResult'] if singleResult
 
-        query.setParameter paramName, value for paramName, value of option
+        for paramName, value of option
+            query.setParameter paramName, value if paramName isnt 'firstResult' and paramName isnt 'maxResults'
         if singleResult then query.getSingleResult() else query.getResultList()
 
 
