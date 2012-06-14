@@ -107,7 +107,7 @@ exports.createManager = (em, entityClass) ->
         query = createQuery @_em, name, option
         fillPageInfo query,pageInfo
 
-        singleResult = 'singleResult' in option and option.singleResult
+        singleResult = 'singleResult' of option and option.singleResult
         delete option['singleResult'] if singleResult
 
         for paramName, value of option
