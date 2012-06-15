@@ -37,7 +37,7 @@ extendRouter = (router) ->
     return
 
 resolveEntity = (entityClass, params, converters) ->
-    entityMeta = entityMetaResovler.resolveEntity clazz
+    entityMeta = entityMetaResovler.resolveEntity entityClass
     entity = createEntity entityMeta.entityClass
 
     mergeEntityAndParameter converters: converters, params, entityMeta, 'resolve', entity
