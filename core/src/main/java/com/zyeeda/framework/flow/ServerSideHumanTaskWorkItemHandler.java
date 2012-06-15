@@ -22,7 +22,6 @@ import org.jbpm.task.TaskData;
 import org.jbpm.task.User;
 import org.jbpm.task.service.ContentData;
 import org.jbpm.task.service.TaskService;
-import org.jbpm.task.service.TaskServiceSession;
 import org.jbpm.task.service.local.LocalTaskService;
 
 /**
@@ -55,15 +54,15 @@ public class ServerSideHumanTaskWorkItemHandler implements WorkItemHandler {
         Task task = createTask(workItem);
         ContentData content = createContentData(workItem);
         
-        TaskServiceSession tss = taskService.createSession();
-        org.jbpm.task.TaskService service = new LocalTaskService(tss);
+        // TaskServiceSession tss = taskService.createSession();
+        org.jbpm.task.TaskService service = new LocalTaskService(taskService);
         service.addTask(task, content);
     }
 
     @Override
     public void abortWorkItem(WorkItem workItem, WorkItemManager manager) {
-        TaskServiceSession tss = taskService.createSession();
-        org.jbpm.task.TaskService service = new LocalTaskService(tss);
+        // TaskServiceSession tss = taskService.createSession();
+        org.jbpm.task.TaskService service = new LocalTaskService(taskService);
         
         Task task = service.getTaskByWorkItemId(workItem.getId());
         service.skip(task.getId(), ADMINISTRATOR_ID);

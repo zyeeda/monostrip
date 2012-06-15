@@ -5,7 +5,7 @@ task 'build', 'compile all server side coffees to js files', ->
         console.log stdout + stderr
 
 task 'build-to-drivebox', 'compile all server side coffees to js files', ->
-    exec 'coffee -o ../zyeeda-drivebox/src/main/javascript/ -c core/src/main/coffee/', (err, stdout, stderr) ->
+    exec 'coffee -o ../zyeeda-drivebox/src/main/webapp/WEB-INF/app/ -c core/src/main/coffee/', (err, stdout, stderr) ->
         console.log stdout + stderr
 
 task 'watch', 'watch for server side coffee file changes', ->
