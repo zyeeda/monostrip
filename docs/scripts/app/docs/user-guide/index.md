@@ -1,6 +1,5 @@
 ![中昱达](assets/images/logo.png "中昱达")
 
-
 Zyeeda Framework 2.0 用户手册
 =================================
 
@@ -34,18 +33,15 @@ Zyeeda Framework 2.0 是公司全新研发的技术平台与开发框架。在�
 
 本框架需要使用 JDK 1.6 版本进行编译，请确认系统中正确配置了 Java 开发和运行环境。
 
-
 ### Maven
 
 [Apache Maven](http://maven.apache.org/ "Maven") 是一款基于项目对象模型（Project Object Model, POM）的项目管理工具，本框架的编译需要使用 Maven。
 
 有关 Maven 的配置与运行，请参考[官方文档](http://maven.apache.org/download.html "Download and Install Maven")。
 
-
 ### Mercurial
 
 [Mercurial](http://mercurial.selenic.com/ "Mercurial") 是一款分布式版本管理软件。如果需要获取和查看本项目的源代码，就需要了解 Mercurial 的基本使用方法。想了解有关内容请参考官方[用户手册](http://mercurial.selenic.com/guide/ "Learning Mercurial in Workflows")。
-
 
 ### 获取源代码
 
@@ -67,7 +63,6 @@ hg clone https://bitbucket.org/zyeeda/zyeeda-framework-2.0
 
 - [JavaScript Tutorial from w3schools.com](http://www.w3schools.com/js/default.asp)
 - [Learn JavaScript from Mozilla Developer Network](https://developer.mozilla.org/en-US/learn/javascript)
-
 
 ### exports 和 require
 
@@ -93,7 +88,6 @@ exports.app = function (req) {
 ```javascript
 var app = require('path/to/demo'); // 模块路径可以省略 .js 扩展名
 ```
-
 
 ### 解构赋值
 
@@ -127,14 +121,13 @@ var lastName = user.lastName;
 
 为了更好的理解和使用本框架，与框架代码一起发布的还有一个 Drivebox 试驾系统。该系统是一个可以独立运行的 Web 应用程序，构建于本框架的基础架构之上。一方面可以用来演示框架在实际生产中是如何被使用的，另外一方面该系统整合了常用的业务功能（例如账户管理、组织结构管理、认证管理和授权管理等），以避免项目过程中的重复劳动。可以使用如下方法获取试驾系统的源代码（需要向管理员所要访问权限）：
 
-
 ```
 hg clone https://bitbucket.org/zyeeda/zyeeda-drivebox-2.0
 ```
 
 如何部署和运行该系统，请参考试驾系统用户手册。
 
-### 目录结构
+### 工作区目录结构
 
 基于本框架构建的项目，目录结构要遵守一定的规范。以试驾系统为例：
 
@@ -148,12 +141,11 @@ hg clone https://bitbucket.org/zyeeda/zyeeda-drivebox-2.0
 - rules \- 工作流及规则文件目录。
 - webapp \- Web 应用程序目录。
 
-
 ### 实体设计
 
 框架提供了三个基础的实体类，如下表：
 
- ![](assets/images/user-guide/entity.png)
+![](assets/images/user-guide/entity.png)
 
 作为基类 DomainEntity 实现了 Serializable 接口，这样所有继承自 DomainEntity 的实体类就都支持序列化了。每个基础实体类都拥有一些属性，上表中列出出了每个属性所对应的数据库字段的名称。通过继承，自定义的业务实体可以不用自己实现 Serializable 接口，并且会从父类继承一些常用属性。
 
@@ -180,7 +172,6 @@ public class DomainEntity implements Serializable {
 }
 ```
 
-
 ##### SimpleDomainEntity
 
 SimpleDomainEntity 继承自 DomainEntity，并且扩展了 name 和 description 属性。有这两个字段要求的实体类型应该继承此类。
@@ -205,7 +196,6 @@ public class SimpleDomainEntity extends DomainEntity {
     ...
 }
 ```
-
 
 ##### RevisionDomainEntity
 
@@ -243,7 +233,6 @@ public class RevisionDomainEntity extends SimpleDomainEntity {
     ...
 }
 ```
-
 
 ##### 如何自定义业务实体类
 
@@ -287,53 +276,57 @@ public class People extends DomainEntity {
 
 以上代码中的所有实体关系映射（Object Relationship Mapping, ORM）都是通过 Java Annotation 注解实现的，开发人员需要对 Hibernate Annotations 和 Hibernate JPA Annotations 有一定的了解。请参考以下网站获取更多信息。
 
-- [Hibernate Annotations](http://www.techferry.com/articles/hibernate-jpa-annotations.html "Hibernate Annotations")
+- []ibernate Annotations](http://www.techferry.com/articles/hibernate-jpa-annotations.html "Hibernate Annotations")
 - [Hibernate JPA Annotations](http://docs.jboss.org/hibernate/annotations/3.5/reference/en/html_single/#entity-mapping "Hibernate JPA Annotations")
-
 
 ### 框架组成结构
 
-本框架后台分三层结构，分别是 router，service 和 manager 。每一层的职责都不同，并且是依次调用的关系,即 router 调用 service , service 调用 manager。
-
-- router ： 定义请求规则和处理请求，作为所有请求的入口。router 调用 service 来处理业务。
-
-- service ： 作为业务处理类，所有的业务处理将在 service 层完成，包括事务处理。service 处理完业务后调用 manager 层来做数据持久化操作。
-
-- manager ： 数据持久层，用来完成数据库交互工作。
-
-每一个业务模块都应该由这样的三层结构组成，并且不同的业务实体类需要定义不同的 router 、 service 和 manager 。如下图，表示的是项目的层级挂载和调用关系。
-
-![](assets/images/user-guide/call-order.png)
-
-上图中` { ` 表示挂载 ， ` -> ` 表示调用。
-
-由上图可以看出`根 router ` 可以挂载子模块的 ` router ` , 子模块又可以挂载子模块的业务类或者下级子模块的 ` router ` 。 通过这种层层挂载的方式，router 可以形成一个树状结构。经由根 router 可以通过树状结构的路径调用到被请求的叶子 router ，然后叶子 router 再调用 service 来处理业务 ，service 调用 manager 处理数据库请求。
-
-router 的挂载没有层级限制，而且 router 的挂载路径也正是请求的访问路径。
-
-关于如何创建 、挂载 、请求 router 的问题将方法下面 router 的章节去讲。
-
-在介绍 router 之前，先要介绍一下 main.js 。因为从项目结构上来说，main.js 是整个后台代码的入口。
-
-### main.js####
-
-`src/main/javascript` 文件夹下有一个固定文件 main.js ，它是整个后台程序的入口文件。
-
-整个项目的 `根router` 会被定义在 main.js 文件中 ，然后再通过 `根router` 来挂载子模块的router。
-
-以 zyeeda-drivebox-2.0 为例，项目目录结构图如下：
+基于本框架构建的项目称为应用程序（application）。应用程序下面包含若干模块（module），而模块下面还可以有子模块，由此形成一棵以应用程序为根的模块树。每个模块都是由 router，service 和 manager 三层结构组成的。
 
 ![](assets/images/user-guide/main.png)
 
- `src/main/javascript` 下定义了两个模块 ，分别为 demo 和 sample 。mian.js 作为后台入口定义了 `根router ` ，然后分别挂载了 demo 和 sample 文件夹下的 router.js .
- 
-### router ####
+- router \- 请求路由层。定义请求的分发与处理规则，是每个请求的入口点。在 router 层中应该处理与请求或响应本身有关的逻辑，比如信息验证和/或数据格式转换等，而不应该处理任何与业务逻辑有关的内容，这样的代码应该写在 service 层中。
+- service \- 业务逻辑处理层。所有与业务逻辑相关的代码应该写在 service 层中，但是不包含访问底层持久化等组件的功能，这些是 manager 层需要处理的事情。最重要的，任何有关**事务**的处理都应该在 service 层中完成。
+- manager \- 数据持久化层，或底层应用层。任何需要访问底层存储介质，或需要跟更底层的组件发生交互而完成的任务应该在 manager 层中实现。
 
-router 是框架的请求处理层，也是整个后端架构的最上层，它主要负责处理和响应前端发送过来的请求 。除此之外它还有一个很重要的作用，挂载子模块的 router 。
+这三层结构是有明确边界的，之间应该是顺序调用的，而且分工明细，不应彼此渗透。良好的架构模式有助于代码的复用，和良好的可扩展性与可维护性。
 
-通过挂载子 router ，可以将整个项目的资源串成一个树状结构，并且将 `根router` 作为统一的入口；通过定义请求规则和响应请求，可以约定所有资源的访问规则,并且处理这些请求。
+#### 应用程序入口点
 
-框架的封装类 router 提供了两个创建 router 的方法 `createModuleRouter` 和 `createRouter` ，这里两个方法都可以创建 router 对象 ，但是创建的 router 对象的用途不同。`createModuleRouter` 方法创建的 router 对象用来自动挂载子模块的 router 或者挂载指定的 router；`createRouter` 方法创建的 router 对象用来定义具体的请求规则和处理请求 。
+有过 Spring 开发经验的用户应该都了解 ApplicationContext 的意义，在 Spring 框架中 ApplicationContext 就相当于一个入口点。基于本框架开发的应用程序同样有一个入口点，不同于 Spring 之处在于，由于本系统大量使用了 JavaScript 语言，因此入口点也自然是由 JavaScript 程序定义的。
+
+在 src/main/javascript 目录中存在一个 main.js 文件，它就是整个服务器端 JavaScript 的入口点文件。main.js 的内容看上去大体是这个样子（后面会详细介绍）：
+
+```javascript
+// src/main/javascript/main.js
+var {createModuleRouter} = require('coala/router');
+var router = exports.router = createModuleRouter();
+router.autoMount(this);
+router.mount('/scaffold', 'coala/scaffold/router');
+```
+
+#### router
+
+router 是用来分发和处理请求的，有些类似于 Spring 中的 DispatcherServlet。下面的代码实现了 Hello World 的功能：
+
+```javascript
+var {createRouter} = require('coala/router');
+var response = require('coala/response');
+var router = createRouter();
+
+router.get('/greeting', function () {
+    return response.html('<h1>Hello World!</h1>');
+});
+```
+
+首先从 coala/router 模块中取出 createRouter 方法，这是创建 router 对象的入口方法；然后获取 coala/response 模块，用来为请求提供响应。调用 createRouter 方法创建一个 router（疑问：createRouter 方法是否可以调用多次？），并调用 get 方法为所有访问到 /greeting 地址的请求输出一个 HTML 响应（不完全正确，见下文解释）。该程序运行效果如图所示：
+
+（暂无图片）
+
+需要注意的是 router 的 get 方法，这个方法的名称很容易让人产生误解，以为是从 router 中获取某些东西，其实不然。这里的 get 方法对应于 HTTP 协议中的 GET 请求，因此所有（且只有）通过 GET 方法访问 /greeting 地址的请求，才会被后面的回调方法处理，从而返回期待的 Hello World 页面。除此之外，在调用 get 方法的时候其实并不会立即触发任何请求和响应，而仅仅是在 router 的内部结构中定义了一个映射关系：当有 GET 请求到 /greeting 地址的时候，就执行相应的回调方法，生成响应。因此回调方法真正被调用的时候，是在请求真正发生的时候。这个时间点通常会晚于 get 方法调用的时间点。
+
+既然 router 中定义了 get 方法来完成 HTTP 协议中对应的 GET 请求，那么不难想象，应该还存在另外三个方法，对应剩下的 POST，PUT 和 DELETE 方法。它们相应的在 router 中的方法名称为 post，put 和 **del**（因为 delete 是 JavaScript 中的关键字）。
+
 
 ####createModuleRouter
 
