@@ -10,6 +10,6 @@ exports.handler = (context, attributes, fn, args) ->
    if attributes
        attr = if type(attributes) == 'array' then attributes else [attributes]
        beans = []
-       beans.push((if type(name) == 'string' then context.getBean else context.getBeanByClass)(name)) for name in attr
+       beans.push((if type(name) == 'string' then context.getBean else context.getBeanByClass).call(context, name)) for name in attr
        args = beans.concat args
    fn.apply null, args
