@@ -358,13 +358,230 @@ router.get('/greeting', function () {
 - GET \- 使用 GET 方法请求一个地址，正如其字面所言，应该是获取存在于该地址的某些资源或数据，可以通过 ? 在请求的 URL 后面添加参数，以访问不同的资源或返回不同的数据。除此之外，更深层次的含义，每次 GET 请求都不应该对服务器的状态产生任何影响，也就是说对某个资源进行 0 次 GET 请求、1 次 GET 请求或若干次 GET 请求得到的结果都应该是一样的，否则就不应该使用 GET 请求。因此我们称 GET 请求具有安全和幂等的特性。
 - POST \- 使用 POST 方法请求一个地址，通常是要向该地址发送数据，并且这些数据要能够对服务端的数据产生影响，通常是用来新增一些数据，或者完成其他三种方法无法完成的任务，比如批量操作等。因此对一个地址执行 0 次、1 次或若干次 POST 请求，其结果都可能会不一样。因此 POST 请求既不是安全的也不是幂等的。
 - PUT \- 使用 PUT 方法请求一个地址，也会通过请求体（request body）向服务端发送数据，与 POST 方法不同的是，通常 PUT 用来处理一些诸如更新和修改的操作。可以想像对某一个地址执行 0 次和执行 1 次 PUT 请求，其结果是不同的，因此 PUT 请求不是安全的；但是执行 1 次和执行若干次 PUT 请求产生的结果却是相同的，因此 PUT 请求是幂等。
-- DELETE \- 顾名思义，使用 DELETE 方法请求一个地址，就是要删除该地址对应的资源或数据。同 PUT 请求类似，DELETE 请求也是不安去但幂等的（请读者自行分析）。
+- DELETE \- 顾名思义，使用 DELETE 方法请求一个地址，就是要删除该地址对应的资源或数据。同 PUT 请求类似，DELETE 请求也是不安全但幂等的（请读者自行分析）。
 
-在设计 router 的时候要正确使用这些方法，以便完整表达请求的语义特性。
+router 中定义的 get、post、put 和 del 方法，具有相同的方法签名，以 put 为例：
 
-#### URL
+```javascript
+router.put(path, function () {
+    // 处理到 path 路径的 put 请求
+});
+```
 
-#### 响应
+第一个参数 path 可以是一个正则表达式对象，或者是一个字符串。如果是正则表达式对象，则可以通过正则表达式自身的抽取功能，从访问的路径中提取所需要的参数。如果是字符串对象，path 参数可以包含静态的地址片段和路径占位符。路径占位符分为命名占位符和非命名占位符。命名占位符使用一个冒号（:）加变量标识符的方法来表示，这种占位符会匹配除了斜杠（/）和点号（.）之外的所有字符，命名占位符可在后面跟上一个问号（?）以表示该占位符是可选的；非命名占位符使用星号（\*）来表示，它可以匹配包含斜杠（/）和点号（.）在内的全部字符。
+
+```
+/users/:userId
+userId 是命名占位符，可以匹配如下路径：
+/users/tom      // userId = tom
+/users/mary     // userId = mary
+
+/users/:userId?
+userId 是可选的命名占位符，可以匹配如下路径：
+/users/jerry    // userId = jerry
+/users          // userId = null
+
+/users/:userId.:format?
+userId 是命名占位符，format 是可选的命名占位符，可以匹配如下路径：
+/users/12       // userId = 12, format = null
+/users/12.html  // userId = 12, format = html
+
+/books/*
+非命名占位符，可以匹配如下路径：
+/books/development/java/thingking-in-java.pdf   // book = development/java/thinking-in-java.pdf
+/books/biography/us/steve-jobs.pdf              // book = biography/us/steve-jobs.pdf
+
+/files/*.*
+两个非命名占位符，可以匹配如下路径：
+/files/jquery.js
+/files/javascripts/jquery.js
+```
+
+第二个参数是请求处理方法，用来编写请求处理逻辑。此方法的第一个参数永远接收 request 对象，其余的参数按顺序是各占位符的匹配值。例如：
+
+```javascript
+router.get('/', function () { ... }); // 如果不需要 request 参数，可以不用声明
+router.get('/', function (req) { ... });
+router.get('/users/:userId', function (req, userId) { ... }); // 声明 request 和 userId 参数
+router.get('/users/:userId.:format?', function (req, userId, format) { ... }); // 声明 request, userId 和 format 参数，其中 format 参数是可选的
+router.put('users/:userId', function (req, userId) { ... }); // 处理 put 请求
+router.del('users/:userId', function (req, userId) { ... }); // 处理 del 请求
+```
+
+**注：占位符的匹配值是按照占位符出现的顺序依次在请求处理方法的签名中出现的，与占位符名称和参数名称是否相同无关。**
+
+这里出现的 request 对象是 [JSGI](http://wiki.commonjs.org/wiki/JSGI) 规范中定义的，主要有如下一些属性：
+
+- **.params** \- 以键值对方式存储的所有查询字符串中的参数以及 POST 请求中的参数
+- **.env.servletRequest** \- 当需要使用底层 Servlet API 的时候，获取 ServletRequest 类型的请求对象
+- **.env.servletResponse** \- 当需要使用底层 Servlet API 的时候，获取 ServletResponse 类型的响应对象
+
+请求处理方法返回一个对象作为响应，该对象需要包含三个必有属性：
+
+- **status** \- HTTP Status Code，用来表示响应的状态。例如：200 代表成功，404 代表请求的资源未找到等
+- **headers** \- HTTP Response Header，响应的头信息
+- **body** \- HTTP Response Body，响应的主体内容
+
+```javascript
+router.get('/users/:userId', function (req, userId) {
+    return {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: '{userId: "tom", name: "Tom Smith", age: 28, gender: "male"}'
+    }
+});
+```
+
+使用这种方式返回响应，需要对 HTTP 协议有深入的了解，尤其需要了解各请求和响应的头信息的含义。而且此处 body 字段的内容必须是静态的数据，如果需要返回流式数据的话，仅仅使用 body 就无能为力了。因此框架引入了更方便的方式对请求进行响应。
+
+```javascript
+var response = require('coala/response');
+```
+
+使用如上的方法获取 response 工具对象，该对象包含如下一些属性和方法：
+
+##### charset()
+
+如果调用此方法时不传入参数，则返回当前正在使用的字符编码（默认为 UTF-8）；如果传入参数，则将该参数设置为当前字符编码。字符编码会跟随在响应头信息的 Content-Type 字段处。
+
+```javascript
+var currentChartset = response.charset(); // 返回当前使用的字符编码，默认为 UTF-8
+
+response.charset('GB2312'); // 设置当前使用的字符编码为 GB2312
+var currentCharset = response.charset() // 返回 GB2312
+```
+
+##### html()
+
+返回 HTML 格式的响应。当仅有一个传入参数，且该参数是一个对象的时候，方法使用此对象作为请求响应。与规范中定义的不同之处在于，除了 body 字段之外，status 和 headers 字段都是可选的。如果 status 字段省略则默认为 200，如果 headers 字段省略则默认为 Content-Type: text/html。当传入参数只有一个，但不是对象的时候，或者有多个传入参数，则方法将这些参数对应的字符串组合输出为 body 的内容，status 取默认的 200，headers 取默认的 Content-Type: text/html。
+
+```javascript
+response.html('<h1>Hello World</h1>');
+
+// 等同于
+response.html({
+    body: '<h1>Hello World</h1>'
+});
+
+// 等同于
+response.html({
+    status: 200,
+    headers: {
+        'Content-Type': 'text/html'
+    },
+    body: '<h1>Hello World</h1>'
+});
+
+response.html({
+    status: 201,
+    body: '<h1>201 Created</h1>'
+});
+
+response.html(
+    '<table><tr>',
+    '<td>姓名</td>',
+    '<td>年龄</td>',
+    '</tr></table>'
+);
+```
+
+##### xml()
+
+返回 XML 格式的响应。同 html() 方法雷同，只是 headers 默认取值为 Content-Type: application/xml。
+
+##### redirect()
+
+返回 303 重定向响应，将页面重定向到指定路径。该方法需要一个重定向的目标地址作为参数。
+
+```javascript
+response.redirect('/sso/acounts/openid/signin');
+```
+
+##### notFound()
+
+返回 404 请求路径未找到响应，该方法需要一个未找到的路径地址作为参数。
+
+```javascript
+response.notFound('/users/steve-jobs');
+```
+
+##### error()
+
+返回 500 服务器错误响应，该方法需要一个错误消息作为参数。
+
+```javascript
+response.error('系统发生致命错误，请联系管理员！');
+```
+
+##### json()
+
+在介绍此方法之前，需要先对本框架使用的 JSON 序列化组件有一个简单的认识。本框架的 JSON 序列化采用了 [Jackson](http://jackson.codehaus.org/) 库的 [filter](http://wiki.fasterxml.com/JacksonFeatureJsonFilter) 功能，就是可以根据指定的 filter 名称和包含的以及排除的字段来自动生成 JSON 结果。其中的 filter 可以想像为一组属性的集合，通常定义在实体类上，例如：
+
+```java
+@JsonFilter("user")
+public class User extends DomainEntity {
+    private String userName;
+    private String password;
+    private int age;
+    private List<Group> groups;
+}
+
+@JsonFilter("group")
+public class Group extends DomainEntity {
+    private String groupName;
+    private List<User> users;
+}
+```
+
+以上代码定义了两个 filter，分别命名为 user 和 group，那么名为 user 的 filter 就包含四个属性，分别是 userName, password, age 和 groups；名为 group 的 filter 包含两个属性，分别是 groupName 和 users。
+
+了解了 filter 的含义，再来看此方法的定义，此方法需要传入两个参数：
+
+- **object** \- 待序列化的实体对象，可以是 JavaScript 对象也可以是 Java 实体对象
+- **config** \- 序列化过程的配置信息
+    - **include** \- 需要包含在序列化结果中的字段列表
+    - **exclude** \- 不需要包含在序列化结果中的字段列表
+    - **status** \- HTTP Status Code，可选，默认为 200
+    - **headers** \- 响应头信息，可选，默认为 Content-Type: application/json
+
+include 和 exclude 的类型都是对象，对象的键是 filter 的名称，值为属性列表。需要注意的是，同一个名称的 filter 不能同时出现在 include 和 exclude 中。承接上例：
+
+```javascript
+response.json(user, {
+    include: {
+        group: ['id', 'groupName'] // 这个 id 属性是从 DomainEntity 继承过来的
+    },
+    exclude: {
+        user: ['password']
+    }
+});
+```
+
+这段代码的含义就是生成的 JSON 结果要包含 Group 对象里面的 groupName 和 users 属性，而去掉 User 对象里面的 password 属性。
+
+##### stream()
+
+以流的形式返回响应。该方法的第一个参数是 JSGI request 对象，第二个参数可以是一个对象或者一个方法。如果是一个对象，则包含如下字段：
+
+- **status** \- HTTP Status Code，可选，默认为 200
+- **headers** \- 响应头信息，可选，默认为 Content-Type: binary/octet-stream
+- **callback** \- 数据流处理方法，该方法会被传入 request.env.servletResponse.getOutputStream() 对象，用来向响应中以流的方式输出数据
+
+如果第二个参数是一个方法，其含义就相当于上文中的 callback。
+
+```javascript
+response.stream({
+    status: 200,
+    headers: {
+        'Content-Type': 'application/ms-word'
+    },
+    callback: function (outputStream) { // outputStream = request.env.servletResponse.getOutputStream()
+        // 向 outputStream 中写入数据流
+    }
+});
+```
 
 #### 挂载
 
