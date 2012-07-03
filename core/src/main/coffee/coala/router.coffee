@@ -1,13 +1,13 @@
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 {Application} = require 'stick'
-{objects, type} = require 'coala/util'
-{env} = require 'coala/config'
+{objects, type, paths} = require 'coala/util'
+{coala} = require 'coala/config'
 {json,html} = require 'coala/response'
 {createService} = require 'coala/scaffold/service'
 {createConverter} = require 'coala/scaffold/converter'
 
 log = require('ringo/logging').getLogger module.id
-entityMetaResovler = Context.getInstance().getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
+entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
 exports.createMountPoint = ->
     router = new Application()
@@ -102,9 +102,30 @@ attachDomain = (router, path, clazz, options = {}) ->
     router.del removeUrl, handlers.remove.bind handlers, options, service, entityMeta unless excludes.remove
     router.post batchRemoveUrl, handlers.batchRemove.bind handlers, options, service, entityMeta unless excludes.batchRemove
 
-    options.doWithRouter router if type(options.doWithRouter) is 'function'
+    if type(options.doWithRouter) is 'function'
+        r = createMockRouter()
+        options.doWithRouter r
+        mountMockRouter router, path, r
 
     router
+
+createMockRouter = ->
+    router =
+        gets: {}
+        posts: {}
+        puts: {}
+        dels: {}
+
+    for name in ['get', 'post', 'put', 'del']
+        do (name) ->
+            router[name] = (url, fn) ->
+                router[name+'s'][url] = fn
+    router
+
+mountMockRouter = (target, path, router) ->
+    for name in ['get', 'post', 'put', 'del']
+        do (name) ->
+            target[name].call target, paths.join(path, url), fn for url,fn of router[name + 's']
 
 createEntity = (clazz) ->
     c = clazz.getConstructor()
@@ -181,15 +202,15 @@ getOrderBy = (orders) ->
     result = []
     while (m = ORDER_BY_REGEXP.exec orders ) isnt null
         order = {}
-        order[m[1]] = m[2] or env.defaultOrder
+        order[m[1]] = m[2] or coala.defaultOrder
         result.push order
     result
 
 
 getPageInfo = (request, page) ->
     return null unless page?
-    key = env.pageSizeKey
-    pageSize = request.params[key] or env.defaultPageSize
+    key = coala.pageSizeKey
+    pageSize = request.params[key] or coala.defaultPageSize
     delete request.params[key]
 
     firstResult: (page - 1) * pageSize

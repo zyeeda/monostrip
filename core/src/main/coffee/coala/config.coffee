@@ -15,6 +15,6 @@ defaultConfigure =
     pageSizeKey: 'pageSize',
     dateFormat: 'yyyy-MM-dd'
 
-exports.env = objects.extend defaultConfigure, projectLevelConfigure.env
+exports.coala = objects.extend defaultConfigure, projectLevelConfigure.coala
 
-log.debug "environment variable #{name}:#{value}" for name, value of exports.env
+log.debug "environment variable #{name}:#{value}" for name, value of exports.coala

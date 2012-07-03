@@ -2,7 +2,7 @@
 {Calendar, Date, ArrayList, HashSet} = java.util
 {ClassUtils} = org.springframework.util
 
-{env} = require 'coala/config'
+{coala} = require 'coala/config'
 {objects, type} = require 'coala/util'
 {createService} = require 'coala/service'
 
@@ -13,9 +13,9 @@ parseDate = (pattern, desiredType, stringDate) ->
 
 innerConverters =
     'java.util.Date': (value, fieldMeta) ->
-        parseDate.apply null, [env.dateFormat, Date, value]
+        parseDate.apply null, [coala.dateFormat, Date, value]
     'java.util.Calendar': (value, fieldMeta) ->
-        parseDate.apply null, [env.dateFormat, Calendar, value]
+        parseDate.apply null, [coala.dateFormat, Calendar, value]
 
 defaultConverter = (value, fieldMeta) ->
     service = createService()
