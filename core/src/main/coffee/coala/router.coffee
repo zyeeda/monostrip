@@ -75,8 +75,6 @@ resolveEntity = (entityClass, params, converters) ->
 # there also is a way to specifiy some converters to convert request parameters to domain fields
 # converters: { 'field name or class name': (value, fieldMeta) -> }
 
-ORDER_BY_AND_PAGE_PARAMS_REGEXP_SUFFIX = '(?:\/by((?:\/(?!page)\\w+(?:\-desc|\-asc)?)*))?(?:\/page\/(\\d+))?'
-ORDER_BY_REGEXP = /\/(\w+)(?:\-(desc|asc))?/g
 ID_SUFFIX = '/:id'
 
 attachDomain = (router, path, clazz, options = {}) ->
@@ -84,7 +82,7 @@ attachDomain = (router, path, clazz, options = {}) ->
     entityMeta.path = path if entityMeta.path is null
     path = entityMeta.path
 
-    listUrl = new RegExp("#{path.replace '/', '\\/'}#{ORDER_BY_AND_PAGE_PARAMS_REGEXP_SUFFIX}")
+    listUrl = path
     removeUrl = updateUrl = getUrl = path + ID_SUFFIX
     createUrl = path
     batchRemoveUrl = path + '/delete'
@@ -141,13 +139,14 @@ getJsonFilter = (options, type) ->
 
 
 defaultHandlers =
-    list: (options, service, entityMeta, request, orders, page) ->
+    list: (options, service, entityMeta, request) ->
         result = {}
 
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
 
-        configs = getPageInfo request, page
+        configs = coala.extractPaginationInfo request.params
+        orders = coala.extractOrderInfo request.params
         if configs?
             configs.fetchCount = true
             pageSize = configs.maxResults
@@ -156,14 +155,14 @@ defaultHandlers =
             result.pageCount = Math.ceil count/pageSize
             delete configs.fetchCount
 
-        orderBy = getOrderBy orders
-        if orderBy?.length isnt 0
+        if orders?.length isnt 0
             configs = configs or {}
-            configs.orderBy = orderBy
+            configs.orderBy = orders
 
         result.results = service.list entity, configs
 
-        json result, getJsonFilter(options, 'list')
+        o = coala.generateListResult result.results, configs.currentPage, configs.maxResults, result.recordCount, result.pageCount
+        json o, getJsonFilter(options, 'list')
 
     get: (options, service, entityMeta, request, id) ->
         json service.get(id), getJsonFilter(options, 'get')
@@ -196,22 +195,3 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
         entity[key] = converter.convert value,entityMeta.getField(key)
     options.afterMerge? entity, type
     entity
-
-
-getOrderBy = (orders) ->
-    result = []
-    while (m = ORDER_BY_REGEXP.exec orders ) isnt null
-        order = {}
-        order[m[1]] = m[2] or coala.defaultOrder
-        result.push order
-    result
-
-
-getPageInfo = (request, page) ->
-    return null unless page?
-    key = coala.pageSizeKey
-    pageSize = request.params[key] or coala.defaultPageSize
-    delete request.params[key]
-
-    firstResult: (page - 1) * pageSize
-    maxResults: pageSize
