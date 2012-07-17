@@ -54,7 +54,7 @@ obj =
         obj.annos = []
         obj.keys = []
 
-        context = Context.getInstance()
+        context = Context.getInstance(module)
         result.reduce ((memo, anno) ->
             handler = handlers[anno.name] or loadExtraHandler anno.name
             attributes = anno.attributes

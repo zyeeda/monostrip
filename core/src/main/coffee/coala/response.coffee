@@ -6,22 +6,55 @@ log = require('ringo/logging').getLogger module.id
 {ObjectMapper} = org.codehaus.jackson.map
 {SimpleFilterProvider, SimpleBeanPropertyFilter} = org.codehaus.jackson.map.ser.impl
 
-exports.charset = res.charset
+charset = 'utf-8'
 
-for name in ['html', 'xml', 'static', 'redirect', 'notFound', 'error']
-    do (name) ->
-        exports[name] = (args...) ->
-            if args.length is 1 and type(args[0]) is 'object'
-                config = args[0]
-                body = if Array.isArray config.body then config.body else [config.body]
-                throw new Error('illegal body property.') unless Array.isArray body
+getContentType = (type) ->
+    'Content-Type': if charset then "#{type}; charset=#{charset}" else type
 
-                result = res[name].apply res, body
-                result.status = config.status or result.status
-                result.headers = objects.extend result.headers, config.headers or {}
-                result
-            else
-                res[name].apply res, args
+exports.charset = (c) ->
+    charset = c
+
+exports.redirect = res.redirect
+
+exports.html = (args...) ->
+    result =
+        status: 200
+        headers: getContentType 'text/html'
+        body: args
+
+    if args.length is 1 and type(args[0]) is 'object'
+        config = args[0]
+        (result[name] = config[name] if config[name]) for name of result
+
+    result.body = [result.body] if type(result.body) isnt 'array'
+
+    result
+
+exports.xml = (args...) ->
+    result =
+        status: 200
+        headers: getContentType 'application/xml'
+        body: args
+
+    if args.length is 1
+        if typeof args[0] is 'xml'
+            result.body = args[0].toXmlString()
+        else if type(args[0]) is 'object'
+            (result[name] = args[0][name] if args[0][name]) for name of result
+
+    result.body = [result.body] if type(result.body) isnt 'array'
+
+    result
+
+exports.notFound = (args...) ->
+    status: 404
+    headers: getContentType 'text/html'
+    body: args
+
+exports.error = (args...) ->
+    status: 500
+    headers: getContentType 'text/html'
+    body: args
 
 ###
 generate json response, support three ways:

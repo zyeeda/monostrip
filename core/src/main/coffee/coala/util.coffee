@@ -42,3 +42,15 @@ exports.objects =
         for mixin in mixins
             target[key] = value for key, value of mixin
         target
+
+exports.paths =
+    join: (paths..., cleanStartAndEndSlash) ->
+        if exports.type(cleanStartAndEndSlash) is 'string'
+            paths.push cleanStartAndEndSlash
+            cleanStartAndEndSlash = false
+
+        result = ''
+        result += '/' + p for p in paths
+        result = result.replace /(\/){2,3}/g, '/'
+        result = result.replace /(^\/)|(\/$)/g, '' if cleanStartAndEndSlash
+        result

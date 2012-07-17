@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import org.ringojs.engine.ModuleObject;
 import org.ringojs.jsgi.JsgiServlet;
 
 public class SpringAwareJsgiServlet extends JsgiServlet {
@@ -22,7 +23,7 @@ public class SpringAwareJsgiServlet extends JsgiServlet {
         this.servletCtx = config.getServletContext();
         this.springCtx = WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletCtx);
         
-        Context.getInstance().setContext(springCtx);
+        Context.instance.setContext(springCtx);
     }
 
     public ApplicationContext getSpringContext() {
@@ -35,7 +36,7 @@ public class SpringAwareJsgiServlet extends JsgiServlet {
 
     public static class Context {
         
-        private static Context instance = null;
+        private static Context instance = new Context();
         private ApplicationContext context = null;
         
         void setContext(ApplicationContext context) {
@@ -58,10 +59,17 @@ public class SpringAwareJsgiServlet extends JsgiServlet {
         
         }
 
-        public static Context getInstance() {
-            if( instance == null ) {
-                instance = new Context();
+        public static Context getInstance(ModuleObject module) {
+            
+            if (module == null) {
+                return null;
             }
+            
+            String id = module.getId().toString();
+            if (id == null || !id.startsWith("coala")) {
+                return null;
+            }
+            
             return instance;
         }
     }

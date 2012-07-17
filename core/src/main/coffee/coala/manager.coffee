@@ -1,41 +1,58 @@
-
+{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet;
+{EntityManager, EntityManagerFactory} = javax.persistence;
+{EntityManagerFactoryUtils} = org.springframework.orm.jpa;
 {Example, Order, Projections} = org.hibernate.criterion
 {Configuration} = org.hibernate.cfg
-{env} = require 'coala/config'
+{coala} = require 'coala/config'
+{type} = require 'coala/util'
 
-exports.createManager = (em, entityClass) ->
-    _em: em,
-    _entityClass: entityClass,
+context = Context.getInstance(module)
+# parameter name is the name of EntityManagerFactory which is configed in spring context
+getEntityManager = (name = false) ->
+    emf = if name then context.getBean name else context.getBeanByClass EntityManagerFactory
+    em = EntityManagerFactoryUtils.doGetTransactionalEntityManager emf, null
+    throw new Error('can not find an EntityManager in current thread') unless em?
+    em
+
+
+exports.createManager = (entityClass, name) ->
+    em = getEntityManager name
+
+    mixin: (mixins) ->
+        for name, value of mixins
+            if type(value) is 'function'
+                @[name] = value.bind @, em
+        @
 
     find: (ids...) ->
         result = for id in ids
             throw new Error('id can not be null') unless id?
-            @_em.find @_entityClass, id
+            em.find entityClass, id
         firstIfOnlyOne result
 
     getReference: (ids...) ->
         result = for id in ids
             throw new Error('id can not be null') unless id?
-            @_em.getReference @_entityClass, id
+            em.getReference entityClass, id
         firstIfOnlyOne result
 
     merge: (entities...) ->
         result = for entity in entities
             throw new Error('entity can not be null') unless entity?
-            @_em.merge entity
+            em.merge entity
         firstIfOnlyOne result
 
     save: (entities...) ->
         result = for entity in entities
             throw new Error('entity can not be null') unless entity?
-            @_em.persist entity
+            em.persist entity
             entity
         firstIfOnlyOne result
 
     remove: (entities...) ->
         result = for entity in entities
             throw new Error('entity can not be null') unless entity?
-            @_em.remove entity
+            em.remove entity
             entity
         firstIfOnlyOne result
 
@@ -45,15 +62,15 @@ exports.createManager = (em, entityClass) ->
         @remove.apply @, entities
 
     contains: (entity) ->
-        @_em.contains entity
+        em.contains entity
 
     flush: ->
-        @_em.flush()
+        em.flush()
 
     refresh: (entities...) ->
         result = for entity in entities
             throw new Error('entity can not be null') unless entity?
-            @_em.refresh entity
+            em.refresh entity
         firstIfOnlyOne result
 
     # option can be like this:
@@ -66,16 +83,16 @@ exports.createManager = (em, entityClass) ->
     #     ]
     # }
     getAll: (option = {}) ->
-        builder = @_em.getCriteriaBuilder()
-        query = builder.createQuery @_entityClass
-        root = query.from @_entityClass;
+        builder = em.getCriteriaBuilder()
+        query = builder.createQuery entityClass
+        root = query.from entityClass;
 
         if option.orderBy
             orders = for order in option.orderBy
                 builder[value] root.get property for property, value of order
             query.orderBy orders
 
-        q = @_em.createQuery(query)
+        q = em.createQuery(query)
 
         pageInfo = getPageInfo option
         fillPageInfo q, pageInfo
@@ -85,7 +102,7 @@ exports.createManager = (em, entityClass) ->
     # this implementation use native hibernate session
     findByExample: (example, option = {}) ->
         ex = Example.create(example).excludeZeroes()
-        criteria = @_em.getDelegate().createCriteria(@_entityClass).add ex
+        criteria = em.getDelegate().createCriteria(entityClass).add ex
         if option.fetchCount is true
             criteria.setProjection Projections.rowCount()
             criteria.list().get(0)
@@ -104,7 +121,7 @@ exports.createManager = (em, entityClass) ->
 
         pageInfo = getPageInfo option
 
-        query = createQuery @_em, name, option
+        query = createQuery em, name, option
         fillPageInfo query,pageInfo
 
         singleResult = 'singleResult' of option and option.singleResult
@@ -136,14 +153,14 @@ fillPageInfo = (query,pageInfo) ->
     false
 
 
-if env.development is true
+if coala.development is true
     fs = require 'fs'
     {Configuration} = org.hibernate.cfg
     namedQueries = {}
     modifyRecord = []
 
     modified = ->
-        times = (fs.lastModified name for name in env.orms).map (date) -> date.getTime()
+        times = (fs.lastModified name for name in coala.orms).map (date) -> date.getTime()
         if times.length != modifyRecord.length
             modifiyRecord = times
             true
@@ -154,7 +171,7 @@ if env.development is true
 
     loadOrms = ->
         config = new Configuration()
-        config.addFile file for file in env.orms
+        config.addFile file for file in coala.orms
         config.buildMappings()
 
         queries = config.getNamedQueries()
