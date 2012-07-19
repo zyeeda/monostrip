@@ -11,10 +11,41 @@ defaultConfigure =
     orms: ['src/main/resources/META-INF/orms/orm.xml'],
     scaffoldRoot: 'scaffold',
     defaultPageSize: 10,
-    defaultOrder: 'asc',
-    pageSizeKey: 'pageSize',
     dateFormat: 'yyyy-MM-dd'
+    extractPaginationInfo: (params) ->
+        pageSize = params['_pageSize']
+        currentPage = params['_page']
+        return null if not currentPage
+        delete params['_pageSize']
+        delete params['_page']
 
-exports.env = objects.extend defaultConfigure, projectLevelConfigure.env
+        firstResult: (currentPage - 1) * pageSize
+        maxResults: pageSize
+        currentPage: currentPage
 
-log.debug "environment variable #{name}:#{value}" for name, value of exports.env
+    generateListResult: (results, currentPage, pageSize, recordCount, pageCount) ->
+        results: results
+        page: currentPage
+        recordCount: recordCount
+        pageCount: pageCount
+
+    extractOrderInfo: (params) ->
+        orders = params['_order']
+        return null if not orders
+        delete params['_order']
+        orders = orders.split ','
+
+        result = []
+        for order in orders
+            continue if order.length is 0
+            ts = order.split '-'
+            s = if ts.length is 1 then 'asc' else ts[1]
+            o = {}
+            o[ts[0]] = s
+            result.push o
+
+        result
+
+exports.coala = objects.extend defaultConfigure, projectLevelConfigure.coala
+
+log.debug "environment variable #{name}:#{value}" for name, value of exports.coala

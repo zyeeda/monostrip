@@ -1,15 +1,15 @@
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 {Application} = require 'stick'
-{objects, type} = require 'coala/util'
-{env} = require 'coala/config'
+{objects, type, paths} = require 'coala/util'
+{coala} = require 'coala/config'
 {json,html} = require 'coala/response'
 {createService} = require 'coala/scaffold/service'
 {createConverter} = require 'coala/scaffold/converter'
 
 log = require('ringo/logging').getLogger module.id
-entityMetaResovler = Context.getInstance().getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
+entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
-exports.createModuleRouter = ->
+exports.createMountPoint = ->
     router = new Application()
     router.configure 'mount'
     router.autoMount = (ctx) ->
@@ -25,7 +25,7 @@ exports.createRouter = ->
 autoMount = (router)->
     repos = @getRepository('./').getRepositories()
     for repo in repos
-        resource = repo.getResource 'router.js'
+        resource = repo.getResource 'module.js'
         try
             router.mount "/#{repo.getName()}", resource.getModuleName() if resource.exists()
         catch e
@@ -37,7 +37,7 @@ extendRouter = (router) ->
     return
 
 resolveEntity = (entityClass, params, converters) ->
-    entityMeta = entityMetaResovler.resolveEntity clazz
+    entityMeta = entityMetaResovler.resolveEntity entityClass
     entity = createEntity entityMeta.entityClass
 
     mergeEntityAndParameter converters: converters, params, entityMeta, 'resolve', entity
@@ -75,8 +75,6 @@ resolveEntity = (entityClass, params, converters) ->
 # there also is a way to specifiy some converters to convert request parameters to domain fields
 # converters: { 'field name or class name': (value, fieldMeta) -> }
 
-ORDER_BY_AND_PAGE_PARAMS_REGEXP_SUFFIX = '(?:\/by((?:\/(?!page)\\w+(?:\-desc|\-asc)?)*))?(?:\/page\/(\\d+))?'
-ORDER_BY_REGEXP = /\/(\w+)(?:\-(desc|asc))?/g
 ID_SUFFIX = '/:id'
 
 attachDomain = (router, path, clazz, options = {}) ->
@@ -84,7 +82,7 @@ attachDomain = (router, path, clazz, options = {}) ->
     entityMeta.path = path if entityMeta.path is null
     path = entityMeta.path
 
-    listUrl = new RegExp("#{path.replace '/', '\\/'}#{ORDER_BY_AND_PAGE_PARAMS_REGEXP_SUFFIX}")
+    listUrl = path
     removeUrl = updateUrl = getUrl = path + ID_SUFFIX
     createUrl = path
     batchRemoveUrl = path + '/delete'
@@ -102,9 +100,30 @@ attachDomain = (router, path, clazz, options = {}) ->
     router.del removeUrl, handlers.remove.bind handlers, options, service, entityMeta unless excludes.remove
     router.post batchRemoveUrl, handlers.batchRemove.bind handlers, options, service, entityMeta unless excludes.batchRemove
 
-    options.doWithRouter router if type(options.doWithRouter) is 'function'
+    if type(options.doWithRouter) is 'function'
+        r = createMockRouter()
+        options.doWithRouter r
+        mountMockRouter router, path, r
 
     router
+
+createMockRouter = ->
+    router =
+        gets: {}
+        posts: {}
+        puts: {}
+        dels: {}
+
+    for name in ['get', 'post', 'put', 'del']
+        do (name) ->
+            router[name] = (url, fn) ->
+                router[name+'s'][url] = fn
+    router
+
+mountMockRouter = (target, path, router) ->
+    for name in ['get', 'post', 'put', 'del']
+        do (name) ->
+            target[name].call target, paths.join(path, url), fn for url,fn of router[name + 's']
 
 createEntity = (clazz) ->
     c = clazz.getConstructor()
@@ -120,13 +139,14 @@ getJsonFilter = (options, type) ->
 
 
 defaultHandlers =
-    list: (options, service, entityMeta, request, orders, page) ->
+    list: (options, service, entityMeta, request) ->
         result = {}
 
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
 
-        configs = getPageInfo request, page
+        configs = coala.extractPaginationInfo request.params
+        orders = coala.extractOrderInfo request.params
         if configs?
             configs.fetchCount = true
             pageSize = configs.maxResults
@@ -135,14 +155,14 @@ defaultHandlers =
             result.pageCount = Math.ceil count/pageSize
             delete configs.fetchCount
 
-        orderBy = getOrderBy orders
-        if orderBy?.length isnt 0
+        if orders?.length isnt 0
             configs = configs or {}
-            configs.orderBy = orderBy
+            configs.orderBy = orders
 
         result.results = service.list entity, configs
 
-        json result, getJsonFilter(options, 'list')
+        o = coala.generateListResult result.results, configs.currentPage, configs.maxResults, result.recordCount, result.pageCount
+        json o, getJsonFilter(options, 'list')
 
     get: (options, service, entityMeta, request, id) ->
         json service.get(id), getJsonFilter(options, 'get')
@@ -160,7 +180,9 @@ defaultHandlers =
         json service.remove(id), getJsonFilter(options, 'remove')
 
     batchRemove: (options, service, entityMeta, request) ->
-        result = service.remove.apply service, request.params.ids
+        ids = request.params.ids
+        ids = if type(ids) is 'string' then [ids] else ids
+        result = service.remove.apply service, ids
         json result, getJsonFilter(options, 'batchRemove')
 
 
@@ -173,22 +195,3 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
         entity[key] = converter.convert value,entityMeta.getField(key)
     options.afterMerge? entity, type
     entity
-
-
-getOrderBy = (orders) ->
-    result = []
-    while (m = ORDER_BY_REGEXP.exec orders ) isnt null
-        order = {}
-        order[m[1]] = m[2] or env.defaultOrder
-        result.push order
-    result
-
-
-getPageInfo = (request, page) ->
-    return null unless page?
-    key = env.pageSizeKey
-    pageSize = request.params[key] or env.defaultPageSize
-    delete request.params[key]
-
-    firstResult: (page - 1) * pageSize
-    maxResults: pageSize

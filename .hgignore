@@ -13,6 +13,8 @@ syntax: glob
 *.tlog
 .DS_Store
 
+.DS_Store
+
 work
 target
 bin

@@ -35,7 +35,7 @@ createTransactionDefinition = (option = {}) ->
     definition
 
 exports.tx = (callback) ->
-    context = Context.getInstance()
+    context = Context.getInstance(module)
     cb = if type(callback) is 'object' then callback else {}
     callback = callback['callback'] if type(callback) is 'object'
     throw new Error('no callback function supplied') unless type(callback) is 'function'
