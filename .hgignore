@@ -11,6 +11,7 @@ syntax: glob
 *.~ml
 *.orig
 *.tlog
+.DS_Store
 
 work
 target

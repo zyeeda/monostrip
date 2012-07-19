@@ -11,13 +11,13 @@ Zyeeda Framework 2.0 是公司全新研发的技术平台与开发框架。在�
 
 和 1.x 版本相比，新框架进行了重大的革新与调整，主要体现在如下几个方面：
 
-- 集成框架抛弃 T5 IoC，而使用最新版本的 Spring Framework。
-- 引入服务器端 JavaScript（Server-Side JavaScript, SSJS）脚本编程环境，大部分代码修改后无需编译和重启。
-- 服务器端 JavaScript 使得前后端开发语言得到统一。同一种编程思想，同一套组件类库，一次学习可以前后端通用。
-- 微内核框架。除了必要核心代码使用 Java 编写以外，整个框架都是基于 JavaScript 开发而成。
-- 突出面向实体编程的思想，开发人员定义实体和 ORM 映射关系，并始终围绕实体数据进行编程与开发。
-- 支持动态脚手架功能，根据实体、流程配置动态生成持久化、控制与展现逻辑。
-- 引入约定优于配置的思想，提供了默认的代码布局风格，按照此风格摆放的代码可以自动装载和运行。
+- 集成框架抛弃 T5 IoC，而使用最新版本的 Spring Framework
+- 引入服务器端 JavaScript（Server-Side JavaScript, SSJS）脚本编程环境，大部分代码修改后无需编译和重启
+- 服务器端 JavaScript 使得前后端开发语言得到统一。同一种编程思想，同一套组件类库，一次学习可以前后端通用
+- 微内核框架。除了必要核心代码使用 Java 编写以外，整个框架都是基于 JavaScript 开发而成
+- 突出面向实体编程的思想，开发人员定义实体和 ORM 映射关系，并始终围绕实体数据进行编程与开发
+- 支持动态脚手架功能，根据实体、流程配置动态生成持久化、控制与展现逻辑
+- 引入约定优于配置的思想，提供了默认的代码布局风格，按照此风格摆放的代码可以自动装载和运行
 
 服务器端 JavaScript 是本系统的最大特色之一，也是颠覆传统 Spring Struts 和 Hibernate（SSH）开发模式的主要所在，能够更多的了解与 SSJS 有关的内容，就能够更全面的理解本框架的设计思想。这里主要引入了三个服务器端 JavaScript 框架和组件：
 
@@ -68,7 +68,7 @@ hg clone https://bitbucket.org/zyeeda/zyeeda-framework-2.0
 
 exports 和 require 来源于 CommonJS 规范，为 JavaScript 提供了模块化思想。服务器端 JavaScript 不同于客户端 JavaScript 的一大区别在于其每一个单独的 JavaScript 文件会形成一个模块（module），在不做任何额外操作的情况下，各模块之间是无法相互贯通的。也就是说模块定义了一个程序边界，变量与方法只能在模块内部相互访问，想要在模块之间实现相互引用，就必须进行所谓的“导出”与“导入”操作，在 CommonJS 中的术语称为 exports 和 require。
 
-**exports** 顾名思义就是将需要模块外可访问的内容进行“导出"声明，以标识其被模块公开，可以跨越模块边界被其他模块访问。
+**exports** 顾名思义就是将模块外可访问的内容进行“导出"声明，以标识其被模块公开，可以跨越模块边界被其他模块访问。
 
 ```javascript
 // path/to/demo.js
@@ -81,9 +81,9 @@ exports.app = function (req) {
 };
 ```
 
-可以看出 exports 类似于一个 JavaScript 对象，所有该对象的属性都会被公开出来。因此在一个 JavaScript 文件内（或者说模块内），可以多次使用 exports 来声明导出若干属性和方法。
+可以看出 exports 类似于一个 JavaScript 对象，所有该对象的属性和方法都会被公开出来。因此在一个 JavaScript 文件内（或者说模块内），可以多次使用 exports 来声明导出若干属性和方法。
 
-**require** 用来请求被其它模块 exports 出来的内容。require 是一个方法，接收要请求的模块路径作为参数。不同于 Java 的类加载机制，由于 JavaScript 是解析执行的，直到文件被首次 require 的时候，引擎才会解析其内容，解析后的结果会被缓存起来，再次访问的时候就不用重新解析。当文件发生变化的时候，require 才会重新解析该文件并缓存，从而到动态语言的效果。
+**require** 用来请求被其它模块 exports 出来的内容。require 是一个方法，接收要请求的模块路径作为参数。不同于 Java 的类加载机制，由于 JavaScript 是解析执行的，直到文件被首次 require 的时候，引擎才会解析其内容，解析后的结果会被缓存起来，再次访问的时候就不用重新解析。当文件发生变化的时候，require 会重新解析该文件并缓存，从而达到动态语言的效果。
 
 ```javascript
 var app = require('path/to/demo'); // 模块路径可以省略 .js 扩展名
@@ -100,7 +100,7 @@ var firstName = user.firstName;
 var lastName = user.lastName;
 ```
 
-上面的代码的功能是将 user 对象的两个属性 firstName 和 lastName 分别赋值给两个同名的变量。设想一种情况，假如 user 具有非常多的属性，想要进行类似的赋值，就必须写很多行赋值语句，而且每一行都要包含相同的 user 引用。针对这种情况，JavaScript 1.7 版本以后，开始引入一种新的概念，称为“解构赋值”。关于解构赋值的更多信息，请参考[这里](https://developer.mozilla.org/en/New_in_JavaScript_1.7, "New in JavaScript 1.7")。
+上面的代码的功能是将 user 对象的两个属性 firstName 和 lastName 分别赋值给两个的变量。设想一种情况，假如 user 具有非常多的属性，想要进行类似的赋值，就必须写很多行赋值语句，而且每一行都要包含相同的 user 引用。针对这种情况，JavaScript 1.7 版本以后，开始引入一种新的概念，称为“解构赋值”。关于解构赋值的更多信息，请参考[这里](https://developer.mozilla.org/en/New_in_JavaScript_1.7, "New in JavaScript 1.7")。
 
 ```javascript
 var {firstName, lastName} = user;
@@ -114,6 +114,8 @@ var lastName = user.lastName;
 ---------------
 
 为了更好的理解和使用本框架，与框架代码一起发布的还有一个 Drivebox 试驾系统。该系统是一个可以独立运行的 Web 应用程序，构建于本框架的基础结构之上。一方面可以用来演示框架在实际生产中是如何被使用的，另外一方面该系统整合了常用的业务功能（例如账户管理、组织机构管理、认证管理和授权管理等），以避免这些功能在项目过程中被重复开发。可以使用如下方法获取试驾系统的源代码（注：需要向管理员所要访问权限）：
+
+**试驾系统的定位有待明确！**
 
 ```
 hg clone https://bitbucket.org/zyeeda/zyeeda-drivebox-2.0
@@ -132,8 +134,8 @@ hg clone https://bitbucket.org/zyeeda/zyeeda-drivebox-2.0
 - java \- Java 文件目录。所有由 Java 语言编写的程序要放到此目录下，比如领域实体等。
 - javascript \- JavaScript 文件目录。服务器端 JavaScript 程序要放到此目录下，基于本框架开发的大部分代码应该集中在此。
 - resources \- 配置文件目录。Spring、JPA 等配置文件都存放在此目录下。
-- rules \- 工作流及规则文件目录。
-- sql \- 系统初始化时使用的 SQL 语句。
+- rules \- 工作流及规则文件目录。（**规则和流程应该分开**）
+- sql \- 系统初始化及升级时使用的 SQL 语句。
 - webapp \- Web 应用程序目录。
 
 ### 实体设计
@@ -179,7 +181,7 @@ hg clone https://bitbucket.org/zyeeda/zyeeda-drivebox-2.0
     </tbody>
 </table>
 
-作为父类 DomainEntity 实现了 Serializable 接口，这样所有继承自 DomainEntity 的实体类就都可以支持序列化了。每个基础实体类都拥有一些预定义属性，可以按需选取继承。上表列出了每个实体类及属性的概要信息。建议通过继承基础实体类的方式来达到业务实体类可序列化的目的，而且通过继承也免去了开发人员重复定义一些常用属性的麻烦。但是要注意一点，如果自定义业务实体类继承了基础实体类，那么就不要再给业务实体类定义和基础实体类中名称一样的属性了，也就是说不要覆盖基类中定义过的属性。
+作为父类，DomainEntity 实现了 Serializable 接口，这样所有继承自 DomainEntity 的实体类就都可以支持序列化了。每个基础实体类都拥有一些预定义属性，可以按需选取继承。上表列出了每个实体类及其属性的概要信息。建议通过继承基础实体类的方式来达到业务实体类可序列化的目的，而且通过继承也免去了开发人员重复定义一些常用属性的麻烦。但是要注意一点，如果自定义业务实体类继承了基础实体类，那么就不要再给业务实体类定义和基础实体类中相同的属性了，也就是说不要覆盖基类中定义过的属性。
 
 ##### DomainEntity
 
@@ -319,7 +321,7 @@ public class People extends DomainEntity {
 - service \- 业务逻辑处理层。所有与业务逻辑相关的代码应该写在 service 层中，但是不包含访问底层持久化等组件的功能，这些是 manager 层需要处理的事情。最重要的，任何有关**事务**的处理都应该在 service 层中完成。
 - manager \- 数据持久化层，或底层调用层。任何需要访问持久化组件，或需要跟其它底层组件发生交互而完成的任务应该在 manager 层中实现。
 
-**注：这三层结构是有明确边界的，之间应该是顺序调用的（router \-&gt; service \-&gt; manager），而且分工明确，不应彼此渗透。良好的架构模式有助于代码的复用，和良好的可扩展性与可维护性。**
+**注：这三层结构是有明确边界的，之间应该是顺序调用的（router \-&gt; service \-&gt; manager），而且分工明确，不应彼此渗透。良好的架构模式有助于代码的可重用性、可扩展性与可维护性。**
 
 #### 应用程序入口点
 
@@ -328,9 +330,12 @@ public class People extends DomainEntity {
 ```javascript
 // src/main/javascript/main.js
 var {createModuleRouter} = require('coala/router');
-var router = exports.router = createModuleRouter();
+
+var router = createModuleRouter();
 router.autoMount(this);
 router.mount('/scaffold', 'coala/scaffold/router');
+
+exports.router = router;
 ```
 
 #### router
@@ -351,13 +356,13 @@ router.get('/greeting', function () {
 
 （暂无图片）
 
-这里需要注意的是 router 的 get 方法，这个方法的名称很容易让人产生误解，以为是从 router 中获取某些东西，其实不然。这里的 get 方法对应于 HTTP 协议中的 GET 请求，因此该方法含义是指：所有（且只有）通过 GET 方法访问 /greeting 地址的请求，才会被后面的回调方法处理，从而返回期待的 Hello World 页面。除此之外，在调用 get 方法的时候其实并不会立即触发任何请求和响应，而仅仅是在 router 的内部结构中定义了一个映射关系：当有 GET 请求到 /greeting 地址的时候，就执行相应的回调方法，生成响应。因此回调方法真正被调用的时候，是在请求真正发生的时候。这个时间点通常会晚于 get 方法调用的时间点。
+这里需要注意的是 router 的 get 方法，这个方法的名称很容易让人产生误解，以为是从 router 中获取某些东西，其实不然。这里的 get 方法对应于 HTTP 协议中的 GET 请求，因此该方法的含义是指：所有（且只有）通过 GET 方法访问 /greeting 地址的请求，才会被后面的回调方法处理，从而返回期待的 Hello World 页面。另外，在调用 get 方法的时候其实并不会立即触发任何请求和响应，而仅仅是在 router 的内部结构中定义了一个映射关系：当有 GET 请求到 /greeting 地址的时候，就执行相应的回调方法，生成响应。因此回调方法真正被调用的时候，是在请求真正发生的时候。这个时间点通常会晚于 get 方法调用的时间点。
 
-[HTTP/1.1](http://www.ietf.org/rfc/rfc2616.txt) 协议中定义了四种常用的请求方式（HTTP Methods）：GET、POST、PUT 和 DELETE，分别对应 router 中的 get、post、put 和 **del** 方法。因为 delete 是 JavaScript 中的关键字，所以没办法使用 delete 全称，只能用缩写 del。前两种方法是我们比较熟悉也是经常使用的，但后两种就相对陌生。即便是我们熟悉的 GET 和 POST 方法也经常有人搞不清楚他们的具体含义和应用场景，因此在这里把这四种 HTTP/1.1 协议中定义的请求方式再详细描述一下：
+[HTTP/1.1](http://www.ietf.org/rfc/rfc2616.txt) 协议中定义了四种常用的请求方式（HTTP Methods）：GET、POST、PUT 和 DELETE，分别对应 router 中的 get、post、put 和 **del** 方法。因为 delete 是 JavaScript 的关键字，所以没办法使用 delete 全称，只能用缩写 del。前两种方法是我们比较熟悉也是经常使用的，但后两种就相对陌生。即便是我们熟悉的 GET 和 POST 方法也经常有人搞不清楚他们的具体含义和应用场景，因此在这里把这四种 HTTP/1.1 协议中定义的请求方式再详细描述一下：
 
-- GET \- 使用 GET 方法请求一个地址，正如其字面所言，应该是获取存在于该地址的某些资源或数据，可以通过 ? 在请求的 URL 后面添加参数，以访问不同的资源或返回不同的数据。除此之外，更深层次的含义，每次 GET 请求都不应该对服务器的状态产生任何影响，也就是说对某个资源进行 0 次 GET 请求、1 次 GET 请求或若干次 GET 请求得到的结果都应该是一样的，否则就不应该使用 GET 请求。因此我们称 GET 请求具有安全和幂等的特性。
+- GET \- 使用 GET 方法请求一个地址，正如其字面所言，应该是获取存在于该地址的某些资源或数据，可以通过 ? 在请求的 URL 后面添加参数，以访问不同的资源或返回不同的数据。除此之外，更深层次的含义，每次 GET 请求都不应该对服务器的状态产生任何影响，也就是说对某个资源进行 0 次 GET 请求、1 次 GET 请求或若干次 GET 请求得到的结果都应该是一样的，否则就不应该使用 GET。因此我们称 GET 请求具有安全和幂等的特性。
 - POST \- 使用 POST 方法请求一个地址，通常是要向该地址发送数据，并且这些数据要能够对服务端的数据产生影响，通常是用来新增一些数据，或者完成其他三种方法无法完成的任务，比如批量操作等。因此对一个地址执行 0 次、1 次或若干次 POST 请求，其结果都可能会不一样。因此 POST 请求既不是安全的也不是幂等的。
-- PUT \- 使用 PUT 方法请求一个地址，也会通过请求体（request body）向服务端发送数据，与 POST 方法不同的是，通常 PUT 用来处理一些诸如更新和修改的操作。可以想像对某一个地址执行 0 次和执行 1 次 PUT 请求，其结果是不同的，因此 PUT 请求不是安全的；但是执行 1 次和执行若干次 PUT 请求产生的结果却是相同的，因此 PUT 请求是幂等。
+- PUT \- 使用 PUT 方法请求一个地址，也会通过请求体（request body）向服务端发送数据，与 POST 方法不同的是，通常 PUT 用来处理一些诸如更新和修改的操作。可以想像对某一个地址执行 0 次和执行 1 次 PUT 请求，其结果是不同的，因此 PUT 请求不是安全的；但是执行 1 次和执行若干次 PUT 请求产生的结果却应该是相同的，因此 PUT 请求是幂等。
 - DELETE \- 顾名思义，使用 DELETE 方法请求一个地址，就是要删除该地址对应的资源或数据。同 PUT 请求类似，DELETE 请求也是不安全但幂等的（请读者自行分析）。
 
 router 中定义的 get、post、put 和 del 方法，具有相同的方法签名，以 put 为例：
@@ -388,8 +393,8 @@ userId 是命名占位符，format 是可选的命名占位符，可以匹配如
 
 /books/*
 非命名占位符，可以匹配如下路径：
-/books/development/java/thingking-in-java.pdf   // book = development/java/thinking-in-java.pdf
-/books/biography/us/steve-jobs.pdf              // book = biography/us/steve-jobs.pdf
+/books/development/java/thingking-in-java.pdf   // * = development/java/thinking-in-java.pdf
+/books/biography/us/steve-jobs.pdf              // * = biography/us/steve-jobs.pdf
 
 /files/*.*
 两个非命名占位符，可以匹配如下路径：
@@ -424,12 +429,13 @@ router.del('users/:userId', function (req, userId) { ... }); // 处理 del 请�
 
 ```javascript
 router.get('/users/:userId', function (req, userId) {
+    var user = findByUserId(userId); // 该方法需自行实现
     return {
         status: 200,
         headers: {
             'Content-Type': 'application/json'
         },
-        body: '{userId: "tom", name: "Tom Smith", age: 28, gender: "male"}'
+        body: '{userId: user.userId, name: user.userName, age: user.age, gender: user.gender}'
     }
 });
 ```
@@ -450,12 +456,12 @@ var response = require('coala/response');
 var currentChartset = response.charset(); // 返回当前使用的字符编码，默认为 UTF-8
 
 response.charset('GB2312'); // 设置当前使用的字符编码为 GB2312
-var currentCharset = response.charset() // 返回 GB2312
+currentCharset = response.charset() // 返回 GB2312
 ```
 
 ##### html()
 
-返回 HTML 格式的响应。当仅有一个传入参数，且该参数是一个对象的时候，方法使用此对象作为请求响应。与规范中定义的不同之处在于，除了 body 字段之外，status 和 headers 字段都是可选的。如果 status 字段省略则默认为 200，如果 headers 字段省略则默认为 Content-Type: text/html。当传入参数只有一个，但不是对象的时候，或者有多个传入参数，则方法将这些参数对应的字符串组合输出为 body 的内容，status 取默认的 200，headers 取默认的 Content-Type: text/html。
+返回 HTML 格式的响应。当仅有一个传入参数，且该参数是一个 JavaScript 对象的时候，方法使用此对象作为请求响应。与规范中定义的不同之处在于，除了 body 字段之外，status 和 headers 字段都是可选的。如果 status 字段省略则默认为 200，如果 headers 字段省略则默认为 Content-Type: text/html。当传入参数只有一个，但不是 JavaScript 对象的时候，或者有多个传入参数，则方法将这些参数对应的字符串组合输出为 body 的内容，status 取默认的 200，headers 取默认的 Content-Type: text/html。
 
 ```javascript
 response.html('<h1>Hello World</h1>');
@@ -535,7 +541,7 @@ public class Group extends DomainEntity {
 }
 ```
 
-以上代码定义了两个 filter，分别命名为 user 和 group，那么名为 user 的 filter 就包含四个属性，分别是 userName, password, age 和 groups；名为 group 的 filter 包含两个属性，分别是 groupName 和 users。
+以上代码定义了两个 filter，分别命名为 user 和 group，名为 user 的 filter 就包含四个属性，分别是 userName, password, age 和 groups；名为 group 的 filter 包含两个属性，分别是 groupName 和 users。
 
 了解了 filter 的含义，再来看此方法的定义，此方法需要传入两个参数：
 
@@ -546,12 +552,12 @@ public class Group extends DomainEntity {
     - **status** \- HTTP Status Code，可选，默认为 200
     - **headers** \- 响应头信息，可选，默认为 Content-Type: application/json
 
-include 和 exclude 的类型都是对象，对象的键是 filter 的名称，值为属性列表。需要注意的是，同一个名称的 filter 不能同时出现在 include 和 exclude 中。承接上例：
+include 和 exclude 的类型都是 JavaScript 对象，对象的键是 filter 的名称，值为属性列表。需要注意的是，同一个名称的 filter 不能同时出现在 include 和 exclude 中。承接上例：
 
 ```javascript
 response.json(user, {
     include: {
-        group: ['id', 'groupName'] // 这个 id 属性是从 DomainEntity 继承过来的
+        group: ['id', 'groupName', 'users'] // 这个 id 属性是从 DomainEntity 继承过来的
     },
     exclude: {
         user: ['password']
@@ -559,7 +565,7 @@ response.json(user, {
 });
 ```
 
-这段代码的含义就是生成的 JSON 结果要包含 Group 对象里面的 groupName 和 users 属性，而去掉 User 对象里面的 password 属性。
+这段代码的含义就是生成的 JSON 结果要包含 Group 对象里面的 id, groupName 和 users 属性，而去掉 User 对象里面的 password 属性。有关 Jackson 及 JsonFilter 的更多用法请参考 Jackon 的官方文档。
 
 ##### stream()
 
@@ -567,7 +573,7 @@ response.json(user, {
 
 - **status** \- HTTP Status Code，可选，默认为 200
 - **headers** \- 响应头信息，可选，默认为 Content-Type: binary/octet-stream
-- **callback** \- 数据流处理方法，该方法会被传入 request.env.servletResponse.getOutputStream() 对象，用来向响应中以流的方式输出数据
+- **callback** \- 数据流处理方法，该方法会被传入 request.env.servletResponse.getOutputStream() 对象，用来向响应中以流的方式写入数据
 
 如果第二个参数是一个方法，其含义就相当于上文中的 callback。
 
