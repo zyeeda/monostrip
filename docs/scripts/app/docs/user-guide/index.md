@@ -110,6 +110,7 @@ var firstName = user.firstName;
 var lastName = user.lastName;
 ```
 
+
 3、框架详细介绍
 ---------------
 
@@ -183,7 +184,7 @@ hg clone https://bitbucket.org/zyeeda/zyeeda-drivebox-2.0
 
 作为父类，DomainEntity 实现了 Serializable 接口，这样所有继承自 DomainEntity 的实体类就都可以支持序列化了。每个基础实体类都拥有一些预定义属性，可以按需选取继承。上表列出了每个实体类及其属性的概要信息。建议通过继承基础实体类的方式来达到业务实体类可序列化的目的，而且通过继承也免去了开发人员重复定义一些常用属性的麻烦。但是要注意一点，如果自定义业务实体类继承了基础实体类，那么就不要再给业务实体类定义和基础实体类中相同的属性了，也就是说不要覆盖基类中定义过的属性。
 
-##### 3.2.1、DomainEntity
+#### 3.2.1、DomainEntity
 
 DomainEntity 实现了 Serializable 接口，并定义了一个 id 属性（默认采用 UUID 的生成策略）。所有自定义业务实体类都应该继承 DomainEntity。
 
@@ -204,7 +205,7 @@ public class DomainEntity implements Serializable {
 }
 ```
 
-##### 3.2.2、SimpleDomainEntity
+#### 3.2.2、SimpleDomainEntity
 
 SimpleDomainEntity 继承自 DomainEntity，并且扩展了 name 和 description 属性。有这两个字段需求的实体类型应该继承此类。
 
@@ -229,7 +230,7 @@ public class SimpleDomainEntity extends DomainEntity {
 }
 ```
 
-##### 3.2.3、RevisionDomainEntity
+#### 3.2.3、RevisionDomainEntity
 
 RevisionDomainEntity 继承自 SimpleDomainEntity，并且扩展了 creator，createdTime，lastModifier 和 lastModifiedTime 四个属性。与前面两者的不同之处在于，该类型不仅仅扩展了四个与修订信息有关的字段，而是在系统运行时，这四个字段的值会根据用户登录的上下文自动填充。因此有需要记录修订信息的业务实体，应该继承此类型。
 
@@ -266,7 +267,7 @@ public class RevisionDomainEntity extends SimpleDomainEntity {
 }
 ```
 
-##### 3.2.4、如何自定义业务实体类
+#### 3.2.4、如何自定义业务实体类
 
 假如我们要定义一个 People 实体类，这个实体类具有 id，name，sex 和 age 属性，具体代码如下：
 
@@ -344,7 +345,7 @@ exports.router = mountPoint;
 
 exports.router 是 main.js 里面必须的，用来告知应用程序请求的入口在哪里。
 
-#### 3.4、路由（Router）
+### 3.4、路由（Router）
 
 与 router 相关的脚本全部存放在每个模块的 routers 目录中，但对每个 router 的文件名没有限制，可以根据具体的功能特征进行选取，也可以根据功能分组，对文件进行组合与拆分，以控制单个脚本文件的体积。每个 router 文件必须导出一个名为 router 的对象（使用 createRouter 方法创建），以便自动自动加载机制可以加载到。
 
@@ -456,7 +457,7 @@ var response = require('coala/response');
 
 使用如上的方法获取 response 工具对象，该对象包含如下一些属性和方法：
 
-##### charset()
+#### charset()
 
 如果调用此方法时不传入参数，则返回当前正在使用的字符编码（默认为 UTF-8）；如果传入参数，则将该参数设置为当前字符编码。字符编码会跟随在响应头信息的 Content-Type 字段处。
 
@@ -467,7 +468,7 @@ response.charset('GB2312'); // 设置当前使用的字符编码为 GB2312
 currentCharset = response.charset() // 返回 GB2312
 ```
 
-##### html()
+#### html()
 
 返回 HTML 格式的响应。当仅有一个传入参数，且该参数是一个 JavaScript 对象的时候，方法使用此对象作为请求响应。与规范中定义的不同之处在于，除了 body 字段之外，status 和 headers 字段都是可选的。如果 status 字段省略则默认为 200，如果 headers 字段省略则默认为 Content-Type: text/html。当传入参数只有一个，但不是 JavaScript 对象的时候，或者有多个传入参数，则方法将这些参数对应的字符串组合输出为 body 的内容，status 取默认的 200，headers 取默认的 Content-Type: text/html。
 
@@ -501,11 +502,11 @@ response.html(
 );
 ```
 
-##### xml()
+#### xml()
 
 返回 XML 格式的响应。同 html() 方法雷同，只是 headers 默认取值为 Content-Type: application/xml。
 
-##### redirect()
+#### redirect()
 
 返回 303 重定向响应，将页面重定向到指定路径。该方法需要一个重定向的目标地址作为参数。
 
@@ -513,7 +514,7 @@ response.html(
 response.redirect('/sso/acounts/openid/signin');
 ```
 
-##### notFound()
+#### notFound()
 
 返回 404 请求路径未找到响应，该方法需要一个未找到的路径地址作为参数。
 
@@ -521,7 +522,7 @@ response.redirect('/sso/acounts/openid/signin');
 response.notFound('/users/steve-jobs');
 ```
 
-##### error()
+#### error()
 
 返回 500 服务器错误响应，该方法需要一个错误消息作为参数。
 
@@ -529,7 +530,7 @@ response.notFound('/users/steve-jobs');
 response.error('系统发生致命错误，请联系管理员！');
 ```
 
-##### json()
+#### json()
 
 在介绍此方法之前，需要先对本框架使用的 JSON 序列化组件有一个简单的认识。本框架的 JSON 序列化采用了 [Jackson](http://jackson.codehaus.org/) 库的 [filter](http://wiki.fasterxml.com/JacksonFeatureJsonFilter) 功能，就是可以根据指定的 filter 名称和包含的以及排除的字段来自动生成 JSON 结果。其中的 filter 可以想像为一组属性的集合，通常定义在实体类上，例如：
 
@@ -575,7 +576,7 @@ response.json(user, {
 
 这段代码的含义就是生成的 JSON 结果要包含 Group 对象里面的 id, groupName 和 users 属性，而去掉 User 对象里面的 password 属性。有关 Jackson 及 JsonFilter 的更多用法请参考 Jackon 的官方文档。
 
-##### stream()
+#### stream()
 
 以流的形式返回响应。该方法的第一个参数是 JSGI request 对象，第二个参数可以是一个对象或者一个方法。如果是一个对象，则包含如下字段：
 
@@ -597,7 +598,7 @@ response.stream({
 });
 ```
 
-#### 3.5、路由、模块和自动挂载
+### 3.5、路由、模块和自动挂载
 
 根据以上的介绍，我们应该了解到，应用程序的入口点是 main.js，应用程序由模块和子模块构成，并形成树状结构，在每个模块下都包含 routers、services 和 managers 等目录，在 routers 目录中定义有所有的路由和请求处理逻辑，但问题是这些路由、模块以及主应用程序是如何衔接在一起并配合工作的？简单回答就是：**全自动**。
 
@@ -619,7 +620,7 @@ response.stream({
 
 需要注意的是，routers、services 和 managers 目录并不是直接摆放在模块目录之下，而是放在一个名为 ROOT 的目录下，该目录是一个特殊的子模块，指代当前模块的根路径。也就是说，例如图中 system 模块下的 ROOT 目录，反映到访问路径上，并不是 /system/ROOT，而只是 /system，ROOT 作为当前模块的根路径被省略掉了，其他模块的同样。而且可以看到 routers、services 和 managers 目录只能出现在 ROOT 目录中。
 
-#### 3.6、标记（Marker）
+### 3.6、标记（Marker）
 
 在开始介绍 service 和 manager 之前，需要先来了解一下 marker 的用法。marker 类似于 Java 中的 annotation，主要用来向方法中注入对象。基本用法类似这样：
 
@@ -643,7 +644,7 @@ mark('first').mark('second').mark('third').on(function () {
 
 目前框架支持四种类型的 marker，分别介绍如下：
 
-##### tx
+#### tx
 
 该 marker 向方法注入事务。经过注入的方法会运行在事务当中。事务的具体注入过程是依赖 Spring 容器的，因此关于事务注入的详细信息，请参考 Spring Transaction 的[官方文档](http://static.springsource.org/spring/docs/3.1.x/spring-framework-reference/htmlsingle/spring-framework-reference.html#transaction)。
 
@@ -680,7 +681,7 @@ mark('tx', {needStatus: true}).on(function (status) {
 
 可以在 on 后面的方法中接收这个 TransactionStatus 参数。
 
-##### beans
+#### beans
 
 该 marker 向方法注入 Spring 容器中声明的 bean 对象。
 
@@ -690,11 +691,11 @@ mark('beans', ['beanId1', 'beanId2', 'beanId3']).on(function (bean1, bean2, bean
 });
 ```
 
-此 marker 的第二个参数是一个数组，包含了需要注入的 bean ID。
+此 marker 的第二个参数是一个数组，包含了所有需要注入的 bean ID。
 
-##### services
+#### services
 
-该 marker 向方法注入 service 对象。
+该 marker 向方法注入 service 对象，关于 service 对象请参考有关章节。
 
 ```javascript
 mark('services', ['/path/to/service1', '/path/to/service2', 'path/to/service3']).on(function (service1, service2, service3) {
@@ -702,11 +703,11 @@ mark('services', ['/path/to/service1', '/path/to/service2', 'path/to/service3'])
 });
 ```
 
-此 marker 的第二个参数是一个数组，包含了需要注入的 service 的绝对路径（绝对路径的根在 main.js 所在的目录）。一般可以使用 module.resolve 方法，来通过相对于当前目录的相对路径来获取绝对路径。此 marker 要求注入的 service 都必须导出一个名为 createService 的方法。
+此 marker 的第二个参数是一个数组，包含了需要注入的 service 的绝对路径（绝对路径的根在 main.js 所在的目录）。一般可以使用 module.resolve 方法，将相对于当前目录的相对路径转换为绝对路径。此 marker 要求注入的 service 都必须导出一个名为 createService 的方法。
 
-##### managers
+#### managers
 
-该 marker 向方法注入 manager 对象。
+该 marker 向方法注入 manager 对象，关于 manager 对象请参考有关章节。
 
 ```javascript
 mark('managers', [User, Group, '/path/to/other-manager']).on(function (userManager, groupManager, otherManager) {
@@ -714,48 +715,89 @@ mark('managers', [User, Group, '/path/to/other-manager']).on(function (userManag
 });
 ```
 
-此 marker 的第二个参数同样是一个数组，但是里面可以包含两种类型的内容。首先可以指定一种实体类型，则框架会自动注入一个通用的 manager 用来访问该实体，另外如果是指定一个到 manager 文件的绝对路径，则框架注入该文件定义的 manager，也就是用户自己扩展的 manager 对象。同注入 service 的 marker 类似，这里也要求自定义的 manager 文件必须导出一个名为 createManager 的方法。
+此 marker 的第二个参数同样是一个数组，但是里面可以包含两种类型的对象。首先可以指定一种实体类型，则框架会自动注入一个通用的 manager 用来访问该实体，另外如果是指定一个到 manager 文件的绝对路径，则框架注入该文件定义的 manager。同注入 service 的 marker 类似，这里也要求自定义的 manager 文件必须导出一个名为 createManager 的方法。
 
-#### 3.3.4、服务（Service）
+### 3.7、服务（Service）
 
-#### 3.3.5、管理器（Manager）
+service 在本框架中充当业务逻辑层的角色，所有与业务有关的代码都应该在这里完成。但是 service 中的代码不应该参与访问底层存储或其它基础组件，这部分工作应该是由 manager 来完成的，service 应该只是调用 manager 里面的方法而已。为了使得 marker 可以自动注入 service，要求每个 service 文件必须导出一个名为 createService 的方法，marker 在每次注入的时候都会调用该方法，生成一个新的 service，因此 service 的注入模式是 protoytype 的，而不是 singleton 的。
 
-#### 挂载点（Mount Point）
-
-前面提到过，应用程序是按照模块的方式来划分的，而模块下面又有子模块，从而形成一棵模块树。模块树的每个节点相对于其子树而言，就是一个挂载点。每个模块及子模块必须被挂载到挂载点上，才可以被请求访问到。前文提到的 main.js 既是应用程序的入口点，又是根挂载点。声明一个挂载点的方式如下：
+所有的 service 都要求存放在模块的 services 目录下，也应该按照功能分类进行合并与拆分，每个 service 文件的命名，框架并没有强制要求。
 
 ```javascript
-var {createMountPoint} = require('coala/router');
-var mountPoint = createMountPoint();
+// system/user/ROOT/services/user-service.js
+
+exports.createService = function () {
+    return {
+        createUser: mark('managers', User).mark('tx').on(function (userManager, user) { ... }),
+        editUser: mark('managers', User).mark('tx').on(function (userManager, id, newUser) { ... }),
+        deleteUser: mark('managers', User).mark('tx').on(function (userManager, id) { ... }),
+
+        showUser: mark('managers', User).on(function (userManager, id) { ... }),
+        listUsers: mark('managers', User).on(function (userManager) { ... })
+    };
+}
 ```
 
-同 createRouter 方法一样，createMountPoint 方法也是从 coala/router 模块中获取的，因此广义上讲挂载点也是一种路由。挂载点对象具有如下一些方法：
+以上代码定义了一个 user service 用来处理 user 实体的基本添、删、改、查等操作。我们来详细分析此段代码的含义。
 
-##### autoMount
+首先，根据 marker 的要求，service 必须导出名为 createService 的方法，用来在注入的时候创建 service 对象。这里的 createService 直接返回了一个普通的 JavaScript 字面对象，该对象包含 5 个方法，用来分别处理创建用户、编辑用户、删除用户、显示用户和用户列表的业务操作。这些都是比较容易理解的，难点在于这些方法与 marker 的配合使用。在 marker 的章节中我们提到过，managers marker 用来向方法中注入 manager 对象，而 tx marker 用来使得方法运行在事务中，而且 marker 可以串联使用。拿 createUser 方法为例，marker 向该方法中注入了通用的 user manager 对象，同时使得该方法被事务控制起来；而后面的 showUser 和 listUsers 两个方法，只注入了 user manager 对象，而没有注入事务，这是因为这两个方法进行的是只读操作，为了提升性能，无需在这里显示声明事务。但问题并没有就此结束，细心的读者一定发现，除了被注入的 userManager 对象之外，很多 on 后面的方法还声明了多余的参数，这些参数的作用何在？而且如何使用？
 
-自动挂载子模块。想搞清楚这个方法的含义，必须先明白模块的层级结构和组织方式，如下图：
-
-（上图）
-
-图中可以看到，模块与子模块的关系就是文件夹与子文件夹的关系。除了根模块，每个子模块都包含一个名为 module.js 的文件，用来声明该模块的挂载信息（根模块的挂载信息文件不叫 module.js，而是叫 main.js，是不是有点恍然大悟的感觉）。module.js 需要 exprots 一个名为 router 的对象（可以是通过 createRouter 方法或 createMountPoint 方法创建的）。使用 autoMount 方法来挂载子模块，只能挂载当前模块下的一级子模块。挂载的具体过程，就是将子模块 module.js 文件 exports 出来的 router 对象，按照目录名挂载到当前模块上，因此只要每个 module.js 都执行了 autoMount 方法去挂载他们自己的子模块，且在 main.js 中也同样操作，就可以将系统中所有的模块都按照层级递归的挂载到根挂载点上。
-
-需要特别注意的是，每个模块下会有一个特殊的名为 ROOT 的子模块，它的含义是将其下 module.js 导出的 router 对象直接挂载到父模块的根路径上。
-
-autoMount 方法必须接收一个 module 对象作为参数：
+回想前面讲解 marker 时的所说的，marker 的返回值是什么。marker 返回一个被装饰过的方法，该方法绑定了那些被注入的参数，而那些未被注入的参数，则留给新方法作为参数使用。还是不太明白，那么我们可以认为当调用 createService 方法之后，返回的 userService 对象具有如下的方法签名：
 
 ```javascript
-var mountPoint = createMountPoint();
-mountPoint.autoMount(module);
+userService = {
+    createUser: function (user) { ... },
+    editUser: function (id, newUser) { ... },
+    deleteUser: function (id) { ... },
+
+    showUser: function (id) { ... },
+    listUsers: function () { ... }
+}
 ```
 
-createMountPoint 方法也可以在调用时传入 module 对象，这样就不用手工调用 autoMount 方法了：
+调用 userService 里面的方法的时候，就只需传入那些没有被注入的参数就可以了。
+
+service 一般是在 router 中进行使用的，配合上面的例子，对应的 user-router.js 应该看起来像这个样子：
 
 ```javascript
-var mountPoint = createMountPoint(module);
+// system/user/ROOT/routers/user-router.js
 
-// 等同于
-var mountPoint = createMountPoint();
-mountPoint.autoMount(module);
+var {createRouter} = require('coala/router');
+var router = createRouter();
+
+router.post('/', mark('services', module.resolve('../services/user-service')).on(function (userService) { ... }));
+router.put('/:userId', mark('services', module.resolve('../services/user-service')).on(function (userService, userId) { ... }));
+router.del('/:userId', mark('services', module.resolve('../services/user-service')).on(function (userService, userId) { ... }));
+
+router.get('/:userId', mark('services', module.resolve('../services/user-service')).on(function (userService, userId) { ... }));
+router.get('/list', mark('services', module.resolve('../services/user-service')).on(function (userService) { ... }));
+
+exports.router = router;
 ```
 
-##### mount
+请读者根据前面的思路，自行分析以上代码的含义。
+
+### 3.8、管理器（Manager）
+
+manager 在本框架中充当数据访问层的角色。大多数情况下，为了完成基本的添、删、改、查等操作，一般无需自定义 manager，直接使用通用的就可以了。
+
+通用 manager 还有一个功能就是可以动态加载并自动调用 orm.xml 文件中定义的 named query。JPA 规范中允许将 named query 以配置文件的形式保存到 orm.xml 文件中，这样做可以带来若干好处：比如可以很方便的集中编辑所有的 HQL/SQL 语句，而且预先定义的 HQL 语句会在系统启动的时候进行预编译，提高运行期的语句解析速度。但是随之产生一个问题，就是该文件改动以后，必须重新启动系统才可以重新加载，这个过程显然有悖于本框架的基本理念。因此框架在实现通用 manager 的时候在这方面进行了加强。只要 orm.xml 文件的内容被修改过，调用 manager 方法的时候就会自动加载这些变更了的文件。这种形式的动态加载自然会对运行效率有一定的影响，因此系统可以通过参数配置运行的模式，只有运行在开发模式下，此项功能才会启用。
+
+通用的 manager 还充分利用了 JavaScript 语言的动态性，声明在 orm.xml 文件中的 named query 的名称，可以直接当作 manager 的方法名来使用。比如在某个 orm.xml 文件中声明了一个名为 findByUserName 的 named query，那么就可以直接在通用的 manager 里面调用以 findByUserName 为名称的方法，而且 query 中定义的命名参数，可以以一个 JavaScript 对象的形式传入。
+
+(demo)
+
+当通用 manager 无法满足要求的时候，框架也提供了扩展机制。想要扩展一个 manager 就需要在模块的 managers 目录下创建一个文件，为了满足 marker 的要求，该文件要导出名为 createManager 的方法。
+
+```javascript
+exports.createManager = mark('managers', User).on(function (userManager) {
+    return userManager.mixin({
+        method1: function (entityManager) { ... },
+        method2: function (entityManager) { ... }
+    });
+});
+```
+
+可以看到这里仍然使用了 managers mark 来注入一个通用的 manager，原因是我们希望扩展的 manager 仍然具有通用的 manager 的所有功能。在这里调用了通用 manager 内置的一个方法 mixin，顾名思义就是将当前对象与参数中的对象的属性和方法进行混合，即返回的结果是一个新的对象，该对象拥有这两个对象的属性和方法的并集。而且 mixin 里面的方法会被注入 EntityManager 以便对底层数据库进行访问。
+
+在 manager 的方法中不要进行任何与事务有关的操作，这些操作应该是在 service 层进行的。
