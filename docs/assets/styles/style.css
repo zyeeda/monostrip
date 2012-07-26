@@ -17,3 +17,8 @@
 .ui-layout-west .sidebar-nav {
     margin-bottom: 0px;
 }
+
+p {
+    margin: 0.5em 0;
+    /*text-indent: 2em;*/
+}

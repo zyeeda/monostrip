@@ -25,6 +25,8 @@ define [
                     closable: false
                     #resizable: false
                     spacing_open: 2
+                west:
+                    size: 280
             }
 
             window.app.vent.trigger 'viewport:show'
