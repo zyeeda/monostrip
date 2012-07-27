@@ -35,19 +35,19 @@ limitations under the License.
     <packaging>jar</packaging>
 
     <properties>
-        <hibernateVersion>4.0.0.Final</hibernateVersion>
+        <hibernate.version>4.0.0.Final</hibernate.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>${hibernateVersion}</version>
+            <version>${hibernate.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>${hibernateVersion}</version>
+            <version>${hibernate.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>xml-apis</artifactId>
@@ -79,7 +79,7 @@ limitations under the License.
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-ehcache</artifactId>
-            <version>${hibernateVersion}</version>
+            <version>${hibernate.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>
