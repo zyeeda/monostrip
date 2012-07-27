@@ -1,6 +1,6 @@
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet;
-{EntityManager, EntityManagerFactory} = javax.persistence;
-{EntityManagerFactoryUtils} = org.springframework.orm.jpa;
+{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{EntityManager, EntityManagerFactory} = javax.persistence
+{EntityManagerFactoryUtils} = org.springframework.orm.jpa
 {Example, Order, Projections} = org.hibernate.criterion
 {Configuration} = org.hibernate.cfg
 {coala} = require 'coala/config'
@@ -73,6 +73,9 @@ exports.createManager = (entityClass, name) ->
             em.refresh entity
         firstIfOnlyOne result
 
+    createNamedQuery: (name) ->
+        createQuery em, name
+
     # option can be like this:
     # {
     #     firstResult: 0,
@@ -92,7 +95,7 @@ exports.createManager = (entityClass, name) ->
                 builder[value] root.get property for property, value of order
             query.orderBy orders
 
-        q = em.createQuery(query)
+        q = em.createQuery query
 
         pageInfo = getPageInfo option
         fillPageInfo q, pageInfo
@@ -129,8 +132,11 @@ exports.createManager = (entityClass, name) ->
 
         for paramName, value of option
             query.setParameter paramName, value if paramName isnt 'firstResult' and paramName isnt 'maxResults'
-        if singleResult then query.getSingleResult() else query.getResultList()
 
+        if name.substring(0, 4) is 'find'
+            if singleResult then query.getSingleResult() else query.getResultList()
+        else
+            query.executeUpdate()
 
 getPageInfo = (object) ->
     result =

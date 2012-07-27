@@ -494,4 +494,18 @@
             <version>2.2.5-2</version>
         </dependency>
     </dependencies>
+    
+    <build>
+        <finalName>zyeeda-framework-2.0</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/packages</directory>
+                <targetPath>${project.build.outputDirectory}/packages</targetPath>
+            </resource>
+        </resources>
+    </build>
 </project>
