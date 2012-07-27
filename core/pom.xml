@@ -494,4 +494,12 @@ limitations under the License.
         </dependency>
     </dependencies>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/packages</directory>
+                <targetPath>${project.build.outputDirectory}/packages</targetPath>
+            </resource>
+        </resources>
+    </build>
 </project>
