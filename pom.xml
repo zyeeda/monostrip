@@ -52,7 +52,7 @@ limitations under the License.
     </dependencies>
 
     <scm>
-        <connection>http://bitbucket.org/zyeeda/zyeeda-framework-2.0</connection>
+        <connection>scm:hg:http://bitbucket.org/zyeeda/zyeeda-framework-2.0</connection>
         <developerConnection>scm:hg:${basedir}/../${project.artifactId}</developerConnection>
         <url>http://bitbucket.org/zyeeda/zyeeda-framework-2.0</url>
     </scm>
