@@ -14,7 +14,7 @@ for meta in metas
     path = meta.path
     path = path.replace /(^\/)|(\/$)/g, ''
     [paths..., name] = path.split '/'
-    paths.push coala.scaffoldRoot
+    paths.push coala.scaffoldFolderName
     paths.push name
     path = paths.join '/'
 

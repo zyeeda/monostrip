@@ -1,7 +1,9 @@
 
 {mark} = require 'coala/mark'
+{createService} = require 'coala/service'
 
-exports.createService = mark('services', 'coala/service').on (baseService, entityClass) ->
+exports.createService = (entityClass) ->
+    baseService = createService()
 
     service =
         entityClass: entityClass

@@ -9,11 +9,33 @@
 log = require('ringo/logging').getLogger module.id
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
-exports.createMountPoint = ->
+processRoot = (router, repo, prefix) ->
+    routersRepo = repo.getChildRepository coala.routerFoldername
+    print router, routersRepo, routersRepo.exists(), 'routers'
+    return if not routersRepo.exists()
+    routers = routersRepo.getResources false
+    for r in routers
+        try
+            module = r.getModuleName()
+            url = prefix + r.getBaseName()
+            log.debug "mount #{module} to #{url}"
+            router.mount url, module
+        catch e
+            log.warn "can't mount #{r.getModuleName()}, it is not export and router"
+    true
+
+processRepository = (router, repo, prefix) ->
+    processRoot router, repo, prefix
+    for r in repo.getRepositories()
+        processRepository router, r, prefix + r.getName() + '/'
+    true
+
+exports.createMountPoint = (module)->
     router = new Application()
     router.configure 'mount'
-    router.autoMount = (ctx) ->
-        autoMount.call ctx, router
+    if module
+        root = module.getRepository('./')
+        processRepository router, root, '/'
     router
 
 exports.createRouter = ->
@@ -29,17 +51,15 @@ autoMount = (router)->
         try
             router.mount "/#{repo.getName()}", resource.getModuleName() if resource.exists()
         catch e
-            log.warn "can't mount #{resource.getModuleName()}, it had not export an router"
+            log.warn "can't mount #{resource.getModuleName()}, it is not export an router"
 
 extendRouter = (router) ->
     router.attachDomain = attachDomain.bind router, router
     router.resolveEntity = resolveEntity.bind router
     return
 
-resolveEntity = (entityClass, params, converters) ->
-    entityMeta = entityMetaResovler.resolveEntity entityClass
-    entity = createEntity entityMeta.entityClass
-
+resolveEntity = (entity, params, converters) ->
+    entityMeta = entityMetaResovler.resolveEntity entity.getClass()
     mergeEntityAndParameter converters: converters, params, entityMeta, 'resolve', entity
 
 # By default, the relationship of action, domain operate and url map is:
