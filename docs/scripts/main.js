@@ -28,7 +28,7 @@ define([
     marked.setOptions({
         gfm: true,
         pedantic: false,
-        sanitize: true,
+        sanitize: false,
         highlight: function(code, lang) {
             if (_.has(hljs.LANGUAGES, lang)) {
                 return hljs.highlight(lang, code).value;

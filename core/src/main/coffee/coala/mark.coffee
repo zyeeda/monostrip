@@ -13,10 +13,11 @@
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
 {objects,type} = require 'coala/util'
+_ = require 'underscore'
 
 handlers =
     tx: require('coala/marker/tx').handler
-    inject: require('coala/marker/inject').handler
+    beans: require('coala/marker/beans').handler
     services: require('coala/marker/services').handler
     managers: require('coala/marker/managers').handler
     process: require('coala/marker/process').handler
@@ -40,10 +41,11 @@ obj =
     # parameter name is the annotation's name, it is used to find the annotation handler
     # parameter attributes will pass into the handler which is found by name
     ###
-    mark: (name, attributes) ->
+    mark: (name, attributes...) ->
         throw new Error('one annotation once') if obj.keys.indexOf(name) isnt -1
         throw new Error("annotation #{name} is not supported") unless name of handlers
-        obj.annos.push {attributes: attributes, name: name}
+        attr = _.flatten attributes
+        obj.annos.push {attributes: attr, name: name}
         obj.keys.push name
         obj
 
