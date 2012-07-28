@@ -19,6 +19,7 @@ handlers =
     inject: require('coala/marker/inject').handler
     services: require('coala/marker/services').handler
     managers: require('coala/marker/managers').handler
+    process: require('coala/marker/process').handler
 
 loadExtraHandler = (moduleId) ->
     try
