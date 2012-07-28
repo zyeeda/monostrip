@@ -22,5 +22,6 @@ exports.createService = ->
         ksession = if id then getKnowledgeService().getProcessSession id else getKnowledgeService().getProcessSession()
 
         __noSuchMethod__: (name, args) ->
+            throw new Error("no such method: #{name}") if not ksession[name]
             ksession[name].apply ksession, args
 
