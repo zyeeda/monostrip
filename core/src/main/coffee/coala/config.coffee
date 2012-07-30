@@ -7,10 +7,14 @@ catch e
     {}
 
 defaultConfigure =
-    development: true,
-    orms: ['src/main/resources/META-INF/orms/orm.xml'],
-    scaffoldRoot: 'scaffold',
-    defaultPageSize: 10,
+    development: true
+    orms: ['src/main/resources/META-INF/orms/orm.xml']
+    scaffoldFolderName: '__scaffold__'
+    serviceFolderName: '__services__'
+    managerFolderName: '__managers__'
+    routerFoldername: '__routers__'
+    servicePathSeperator: ':'
+    defaultPageSize: 10
     dateFormat: 'yyyy-MM-dd'
     extractPaginationInfo: (params) ->
         pageSize = params['_pageSize']
