@@ -20,6 +20,7 @@ handlers =
     beans: require('coala/marker/beans').handler
     services: require('coala/marker/services').handler
     managers: require('coala/marker/managers').handler
+    process: require('coala/marker/process').handler
 
 loadExtraHandler = (moduleId) ->
     try
