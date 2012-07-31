@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.zyeeda.framework.bpm.ExtensionTaskHandler;
 import com.zyeeda.framework.bpm.TaskService;
 
-public class DefaultTaskServiceSupport implements TaskService{
+public class DefaultTaskService implements TaskService{
 
 	private final String SIGNAL_SUBFIX = "-Signal";
 	private org.jbpm.task.service.TaskService humanTaskService = null;
