@@ -92,15 +92,9 @@ public class DefaultTaskServiceSupport implements TaskService{
 	public void complete(Long taskId, String comment, Map<String,Object> results) {
 		TaskServiceSession tss = humanTaskService.createSession();
         Task task = tss.getTask(taskId);
-        complete(task, comment, results);
-	}
-    @Transactional
-	@Override
-	public void complete(Task task, String comment, Map<String,Object> results) {
         long workItemId = task.getTaskData().getWorkItemId();
         String userId = task.getTaskData().getActualOwner().getId();
 
-        TaskServiceSession tss = humanTaskService.createSession();
         //task 在 start后(处于InProgress状态)才能complete
         tss.taskOperation(Operation.Start, task.getId(), userId, null, null, null);
 		ContentData contentData = null;
@@ -144,11 +138,6 @@ public class DefaultTaskServiceSupport implements TaskService{
 	public void reject(Long taskId) {
 		TaskServiceSession tss = humanTaskService.createSession();
         Task task = tss.getTask(taskId);
-        reject(task);
-	}
-    @Transactional
-	@Override
-	public void reject(Task task) {
 		long workItemId = task.getTaskData().getWorkItemId();
 //		task.getTaskData().getWorkItemId()
         //faultName 用于存放task节点的名字
@@ -165,23 +154,16 @@ public class DefaultTaskServiceSupport implements TaskService{
 		PersistenceContext context = ((PersistenceContextManager) env.get( EnvironmentName.PERSISTENCE_CONTEXT_MANAGER )).getCommandScopedPersistenceContext();
 		WorkItemInfo workIntmInfo = context.findWorkItemInfo(workItemId);
 		context.remove(workIntmInfo);
-        TaskServiceSession tss = humanTaskService.createSession();
         tss.setTaskStatus(task.getId(), Status.Exited);
         if(taskHandler!=null){
         	taskHandler.exitTask(task);
         }
 	}
-	@Transactional
+    @Transactional
 	@Override
 	public void recall(Long taskId) {
 		TaskServiceSession tss = humanTaskService.createSession();
         Task task = tss.getTask(taskId);
-        recall(task);
-		
-	}
-    @Transactional
-	@Override
-	public void recall(Task task) {
 		long workItemId = task.getTaskData().getWorkItemId();
 //		task.getTaskData().getWorkItemId()
         //faultName 用于存放task节点的名字
@@ -193,7 +175,6 @@ public class DefaultTaskServiceSupport implements TaskService{
 		//删除workitem、标记task为完成状态，因为signalEvent后workitem和task 依然存在
 		WorkItemInfo workIntmInfo = context.findWorkItemInfo(workItemId);
 		context.remove(workIntmInfo);
-        TaskServiceSession tss = humanTaskService.createSession();
         tss.setTaskStatus(task.getId(), Status.Exited);
         if(taskHandler!=null){
         	taskHandler.deleteTask(task);
