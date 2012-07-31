@@ -1,5 +1,9 @@
 package com.zyeeda.framework.bpm.support;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +21,13 @@ import org.drools.persistence.jpa.JPAKnowledgeService;
 import org.drools.runtime.Environment;
 import org.drools.runtime.EnvironmentName;
 import org.drools.runtime.StatefulKnowledgeSession;
+import org.jbpm.task.AccessType;
+import org.jbpm.task.Comment;
 import org.jbpm.task.Status;
 import org.jbpm.task.Task;
-import org.jbpm.task.query.TaskSummary;
+import org.jbpm.task.User;
+import org.jbpm.task.service.ContentData;
+import org.jbpm.task.service.Operation;
 import org.jbpm.task.service.TaskServiceSession;
 import org.jbpm.task.service.local.LocalTaskService;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +38,10 @@ import com.zyeeda.framework.bpm.TaskService;
 public class DefaultTaskServiceSupport implements TaskService{
 
 	private final String SIGNAL_SUBFIX = "-Signal";
-	private final String LANGUAGE = "en-UK";
 	private org.jbpm.task.service.TaskService humanTaskService = null;
 	private KnowledgeBase kbase = null;
     private ExtensionTaskHandler taskHandler = null;
-    
+//    private StatefulKnowledgeSession ksession = null;
     private EntityManagerFactory entityManagerFactory;
     private EntityManager entityManager;
     private TransactionManager transactionManager;
@@ -42,6 +49,9 @@ public class DefaultTaskServiceSupport implements TaskService{
     public void setEntityManagerFactory(EntityManagerFactory emf) {
 		this.entityManagerFactory = emf;
 	}
+//	public void setKsession(StatefulKnowledgeSession ksession) {
+//		this.ksession = ksession;
+//	}
 	public void setEntityManager(EntityManager em) {
 		this.entityManager = em;
 	}
@@ -61,12 +71,12 @@ public class DefaultTaskServiceSupport implements TaskService{
     	Environment env = KnowledgeBaseFactory.newEnvironment();
     	env.set(EnvironmentName.ENTITY_MANAGER_FACTORY, entityManagerFactory);
 		env.set(EnvironmentName.APP_SCOPED_ENTITY_MANAGER, entityManager);
-		env.set(EnvironmentName.CMD_SCOPED_ENTITY_MANAGER, entityManager);
+//		env.set(EnvironmentName.CMD_SCOPED_ENTITY_MANAGER, entityManager);
 		env.set(EnvironmentName.TRANSACTION_MANAGER, transactionManager);
 //		env.set(EnvironmentName.TRANSACTION, null);
 //		env.set(EnvironmentName.TRANSACTION_SYNCHRONIZATION_REGISTRY, null);
 //		env.set(EnvironmentName.PERSISTENCE_CONTEXT_MANAGER, null);
-		
+//		
 		StatefulKnowledgeSession ksession = JPAKnowledgeService.loadStatefulKnowledgeSession(
 				ksessionId, this.kbase, null, env);
     	return ksession;
@@ -80,22 +90,53 @@ public class DefaultTaskServiceSupport implements TaskService{
 	}
     @Transactional
 	@Override
-	public void complete(Long taskId) {
+	public void complete(Long taskId, String comment, Map<String,Object> results) {
 		TaskServiceSession tss = humanTaskService.createSession();
         Task task = tss.getTask(taskId);
-        complete(task);
+        complete(task, comment, results);
 	}
     @Transactional
 	@Override
-	public void complete(Task task) {
+	public void complete(Task task, String comment, Map<String,Object> results) {
         long workItemId = task.getTaskData().getWorkItemId();
         String userId = task.getTaskData().getActualOwner().getId();
-        Map<String, Object> results = new HashMap<String, Object>();
-        results.put("ActorId", userId);
+
         TaskServiceSession tss = humanTaskService.createSession();
-        tss.setTaskStatus(task.getId(), Status.Completed);
-        StatefulKnowledgeSession ksession = getKsession(task.getTaskData().getProcessSessionId());
+        //task 在 start后(处于InProgress状态)才能complete
+        tss.taskOperation(Operation.Start, task.getId(), userId, null, null, null);
+		ContentData contentData = null;
+		if (results != null) {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream out;
+			try {
+				results.put("ActorId", userId);
+				out = new ObjectOutputStream(bos);
+				out.writeObject(results);
+				out.close();
+				contentData = new ContentData();
+				contentData.setContent(bos.toByteArray());
+				contentData.setAccessType(AccessType.Inline);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else{
+			results = new HashMap<String, Object>();
+			results.put("ActorId", userId);
+		}
+        //complete 任务
+        tss.taskOperation(Operation.Complete, task.getId(), userId, null, contentData, null);
+        Comment cmt = null;
+        if(comment!=null&&"".equals(comment.trim())){
+        	cmt = new Comment();
+        	cmt.setAddedAt(new Date());
+        	cmt.setAddedBy(new User(userId));
+        	cmt.setText(comment);
+        	tss.addComment(task.getId(), cmt);
+        }
+//        tss.setTaskStatus(task.getId(), Status.Completed);
+//        StatefulKnowledgeSession ksession = getKsession(task.getTaskData().getProcessSessionId());
 //        tss.dispose();//不能销毁，否则tss的操作将不会在事务内提交
+        StatefulKnowledgeSession ksession = getKsession(task.getTaskData().getProcessSessionId());
         ksession.getWorkItemManager().completeWorkItem(workItemId, results);
 		
 	}
@@ -179,13 +220,5 @@ public class DefaultTaskServiceSupport implements TaskService{
         if(taskHandler!=null){
         	taskHandler.deleteTask(task);
         }
-	}
-	@Override
-	public List<TaskSummary> getTasks(String userId) {
-		return humanTaskService.createSession().getTasksAssignedAsPotentialOwner(userId, LANGUAGE);
-	}
-	@Override
-	public List<TaskSummary> getTasksOwned(String userId) {
-		return humanTaskService.createSession().getTasksOwned(userId, LANGUAGE);
 	}
 }
