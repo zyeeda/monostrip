@@ -1,13 +1,11 @@
-![中昱达](assets/images/logo.png "中昱达")
-
-用户手册
-=================================
+Zyeeda Framework 2.0 用户手册
+=============================
 
 Zyeeda Framework 2.0 是公司全新研发的技术平台与开发框架。在设计与研发过程中，始终秉承如下一些理念：
 
-- *Don't make me think.* 这是本框架的核心开发理念，在任何情况下使用该框架，都不希望框架本身为开发人员带来过多思考过程。
-- *One way to do it.* 在本框架的约束下，实现任何功能，都有且只有唯一的一种方式和途径。
-- *Minimize your work.* 框架的封装尽量使得开发人员使用最少的代码编写最多的功能。
+- **Don't Make Me Think.** 这是本平台的核心开发理念，在任何情况下使用该平台，都不希望平台本身为开发和使用人员带来过多困扰。无论从用户界面、系统结构以及应用程序接口（API）方面，都力求清晰易懂，不引入或少引入陌生概念，各种术语也力争与外界标准相兼容。
+- **Only One Way to Do it.** 在本平台的约束下，实现任何功能，都有且只有唯一的一种方式和途径。这是对上一条理念的升华，开发人员在日常工作中，都曾碰到过这样的情况：有多余一种途径可以实现某个客户的需求，那么究竟哪一种更好，哪一种稍差？技术水平低一些的人员可能无从分辨，只能盲目选择或者选择自己熟悉的；而技术水平较高的人员会进行一番论证然后选择最优的办法。前者无疑是不可靠的，而后者又浪费了优势资源的时间，因此在设计和实现本平台的过程中，就将最佳实践一起引入，指导开发人员使用唯一途径实现指定需求。
+- **Minimize Your Work.** 平台的封装尽量使得开发人员使用最少的代码编写最多的功能。秉承这个理念，可以大大降低开发人员的工作量，而且能够缩短项目工期，在同样的周期时间内花更少的资源完成更多的项目。
 
 和 1.x 版本相比，新框架进行了大量的革新与调整，主要体现在如下几个方面：
 
@@ -37,39 +35,24 @@ Zyeeda Framework 2.0 是公司全新研发的技术平台与开发框架。在�
 
 [Apache Maven](http://maven.apache.org/ "Maven") 是一款基于项目对象模型（Project Object Model, POM）的项目管理工具，本框架的编译需要使用 Maven。有关 Maven 的配置与运行，请参考[官方文档](http://maven.apache.org/download.html "Download and Install Maven")。
 
-在内网环境下使用时，建议配置 Maven 的镜像服务器到本地私服。打开 Maven 安装目录下的 conf/settings.xml 文件，找到 &lt;mirrors&gt; 节点，增加如下的配置（<span class="label label-info">提示</span> **其中服务器的地址和端口请向管理员索取**）：
+在内网环境下使用时，建议配置 Maven 的镜像服务器到内网私服。打开 Maven 安装目录下的 conf/settings.xml 文件，找到 &lt;mirrors&gt; 节点，增加如下配置：
 
 ```xml
 <mirror>
     <id>zyeeda</id>
-    <url>http://${host}:${port}/nexus/content/groups/public</url>
+    <url>http://10.1.2.11:8081/nexus/content/groups/public</url>
     <mirrorOf>*</mirrorOf>
 </mirror>
 ```
 
-### 1.3、Node 和 Cake
+配置好 Maven 的镜像服务器后，可以在项目的 POM 文件中以如下的方式引用本框架：
 
-本框架的大部分代码是采用 CoffeeScript 写成的，CoffeeScript 是比 JavaScript 更高级的语言，可以通过工具编译为 JavaScript。编译 CoffeeScript，并将生成的结果打包需要 Cake 环境，而 Cake 又是运行在 Node 上面的。Node 是基于 Google V8 引擎构件的另一款服务器端 JavaScript 框架。有关安装和配置 [Node](http://nodejs.org/ "node.js") 以及 [Cake](http://coffeescript.org/#cake "Cake, and Cakefiles") 的方法请参考有关文档。
-
-### 1.4、Mercurial
-
-[Mercurial](http://mercurial.selenic.com/ "Mercurial") 是一款分布式版本管理软件。如果需要获取和查看本项目的源代码，就需要了解 Mercurial 的基本使用方法。想了解有关内容请参考官方[用户手册](http://mercurial.selenic.com/guide/ "Learning Mercurial in Workflows")。
-
-### 1.5、获取源代码
-
-框架源代码托管于 [Bitbucket](https://bitbucket.org "Atlassian Bitbucket") 服务器，使用如下命令获取源代码（<span class="label label-info">提示</span> **需要向管理员所要访问权限**）：
-
-```
-hg clone https://bitbucket.org/zyeeda/zyeeda-framework-2.0
-```
-
-### 1.6、编译
-
-如果正确配置了以上环境，编译本框架就变得非常简单，只需要两个命令：
-
-```
-cake build
-mvn clean install
+```xml
+<dependency>
+    <groupId>com.zyeeda</groupId>
+    <artifactId>zyeeda-framework</artifactId>
+    <version>2.0.0.B1</version>
+</dependency>
 ```
 
 2、预备知识
@@ -134,16 +117,15 @@ var lastName = user.lastName;
 3、框架详细介绍
 ---------------
 
-为了更好的理解和使用本框架，与框架代码一起发布的还有一个 Starter Kit 新手包。该系统是一个可以独立运行的 Web 应用程序，构建于本框架的基础结构之上，主要作用是用来展示框架的组成结构和各种配置文件的使用方法。可以通过如下方法获取该系统的源代码：
+为了更好的理解和使用本框架，与框架代码一起发布的还有一个 Starter Kit 新手包。该系统是一个可以独立运行的 Web 应用程序，构建于本框架的基础结构之上，主要作用是用来展示框架的组成结构和各种配置文件的使用方法。可以通过如下方法获取该项目的源代码：
 
 ```
-hg clone https://bitbucket.org/zyeeda/zyeeda-starter-kit-1.0
+hg clone http://10.1.2.13/hg/zyeeda-starter-kit-1.0
 ```
 
 想要运行该系统也非常容易，只需要在项目根目录下执行命令：
 
 ```
-mvn clean package
 mvn jetty:run
 ```
 
@@ -151,7 +133,7 @@ mvn jetty:run
 
 基于本框架构建的项目，目录结构要遵守一定的规范。以新手包为例：
 
-![](assets/images/user-guide/1-starter-kit.png)
+![新手包](assets/images/user-guide/1-starter-kit.png)
 
 这是一个典型的 Maven 项目，在 src/main 目录下有六个子目录，各自用途如下：
 
@@ -211,84 +193,13 @@ mvn jetty:run
 
 DomainEntity 实现了 Serializable 接口，并定义了一个 id 属性（默认采用 UUID 的生成策略）。所有自定义业务实体类都应该继承 DomainEntity。
 
-```java
-@MappedSuperclass
-public class DomainEntity implements Serializable {
-    ...
-
-    @Id
-    @Column(name = "F_ID")
-    @GeneratedValue(generator="system-uuid")
-    @org.hibernate.annotations.GenericGenerator(name="system-uuid", strategy = "uuid")
-    public String getId() {
-        return id;
-    }
-
-    ...
-}
-```
-
 #### 3.2.2、SimpleDomainEntity
 
 SimpleDomainEntity 继承自 DomainEntity，并且扩展了 name 和 description 属性。有这两个属性需求的实体类型应该继承该类型。
 
-```java
-@MappedSuperclass
-public class SimpleDomainEntity extends DomainEntity {
-    ...
-
-    @Basic
-    @Column(name = "F_NAME")
-    public String getName() {
-        return this.name;
-    }
-
-    @Basic
-    @Column(name = "F_DESC", length = 2000)
-    public String getDescription() {
-        return this.description;
-    }
-
-    ...
-}
-```
-
 #### 3.2.3、RevisionDomainEntity
 
 RevisionDomainEntity 继承自 SimpleDomainEntity，并且扩展了 creator，createdTime，lastModifier 和 lastModifiedTime 四个属性。与前面两者的不同之处在于，该类型不仅仅扩展了四个与修订信息有关的字段，而是在系统运行时，这四个字段的值会根据登录用户的上下文自动填充。因此有需要记录修订信息的业务实体，应该继承此类型。
-
-```java
-@MappedSuperclass
-public class RevisionDomainEntity extends SimpleDomainEntity {
-    ...
-
-    @Basic
-    @Column(name = "F_CREATOR", length = 50)
-    public String getCreator() {
-        return this.creator;
-    }
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "F_CREATED_TIME")
-    public Date getCreatedTime() {
-        return this.createdTime;
-    }
-
-    @Basic
-    @Column(name = "F_LAST_MODIFIER", length = 50)
-    public String getLastModifier() {
-        return this.lastModifier;
-    }
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "F_LAST_MODIFIED_TIME")
-    public Date getLastModifiedTime() {
-        return this.lastModifiedTime;
-    }
-
-    ...
-}
-```
 
 #### 3.2.4、如何自定义业务实体类
 
@@ -335,7 +246,7 @@ public class People extends DomainEntity {
 }
 ```
 
-**注：表名和字段名需要遵守一定的命名规范：标识符全部采用大写字母，表名前增加 ZDA\_ 前缀（或其他项目相关前缀），字段名前增加 F\_ 前缀。并且所有标记要打在 getter 方法上，而不是属性字段上。**
+<span class="label label-important">注意</span> **表名和字段名需要遵守一定的命名规范：标识符全部采用大写字母，表名前增加 ZDA\_ 前缀（或其他项目相关前缀），字段名前增加 F\_ 前缀。并且所有标记要打在 getter 方法上，而不是属性字段上。**
 
 通过继承 DomainEntity，People 类型无需再定义 id 属性，并且已经实现了 Serializable 接口。
 
@@ -348,9 +259,13 @@ public class People extends DomainEntity {
 
 所有服务器端 JavaScript 脚本都需要存放在 src/main/webapp/WEB-INF/app 目录中，此目录是所有脚本文件加载的根目录。后面描述中提到的有关文件的绝对路径，都是以这里作为起始的。
 
-基于本框架开发的项目称为应用程序（application）。应用程序包含若干模块（module）（<span class="label label-important">注意</span> **这里模块的概念要区别于前文提到的 CommnsJS 中的模块，这里的模块是真正的业务上的模块**），而模块下面还可以有子模块，由此形成一棵以应用程序为根的模块树。每个模块都是由 router，service 和 manager 三层结构组成的，它们分别放置于每个模块下的 \_\_routers\_\_，\_\_services\_\_ 和 \_\_managers\_\_ 目录中（<span class="label label-important">注意</span> **为了表明这三个目录是系统预定义的目录，因此需要在目录前后都增加双下划线，以示和自定义模块目录的区别。另外这三个文件夹都是复数形式的。要严格遵守这些规范，否则会导致文件加载不到的问题。**）。
+基于本框架开发的项目称为应用程序（application）。应用程序包含若干模块（module），而模块下面还可以有子模块，由此形成一棵以应用程序为根的模块树。每个模块是由功能项（Feature）组成的，功能项在布局上体现为 \_\_routers\_\_，\_\_services\_\_ 和 \_\_managers\_\_ 目录，分别代表了功能项的三层结构，即：路由（router），服务（service）和管理器（manager）。
 
-![](assets/images/user-guide/2-webapp.png)
+<span class="label label-important">注意</span> **这里模块的概念要区别于前文提到的 CommnsJS 中的模块，这里的模块是真正的业务上的模块。**
+
+![框架组成结构](assets/images/user-guide/2-webapp.png)
+
+<span class="label label-important">注意</span> **为了表明这三个目录是系统预定义的目录，因此在目录前后都增加了双下划线，以示和子模块目录之间的区别。另外这三个文件夹都是复数形式的。要严格遵守这些规范，否则会导致文件加载不到等问题。**
 
 - **router** \- 请求路由层。定义请求的分发与处理规则，是每个请求的入口点。在 router 层中应该处理与请求或响应本身有关的逻辑，比如信息验证和/或数据格式转换等，而不应该处理任何与业务逻辑有关的内容，这样的代码应该写在 service 层中。
 - **service** \- 业务逻辑处理层。所有与业务逻辑相关的代码都应该写在 service 层中，但是不包含访问底层持久化等组件的功能，这些是 manager 层需要处理的事情。最重要的，任何有关事务的处理工作都应该在 service 层中完成。
@@ -358,28 +273,19 @@ public class People extends DomainEntity {
 
 <span class="label label-important">注意</span> **这三层结构是有明确边界的，之间应该是顺序调用的（router \-&gt; service \-&gt; manager），而且分工明确，不应彼此渗透。良好的架构模式有助于代码的可重用性、可扩展性与可维护性。**
 
-根目录中必须能存在一个名为 main.js 的文件，作为应用程序入口点。应用程序入口点可以和 Java 程序中的 main 方法做一个类比：main 方法是用来启动 Java 程序的入口和起点；本框架类似的存在一个 main.js 文件，用来加载和启动所有框架内的模块，以及基于此框架开发的项目中的所有模块，这个文件就是本框架的入口点。有过 Spring 开发经验的用户应该都了解 ApplicationContext 的意义，在 Spring 框架中 ApplicationContext 就相当于一个入口点。
+根目录中必须能存在一个名为 main.js 的文件，作为应用程序入口点。应用程序入口点可以和 Java 程序中的 main 方法做一个类比：main 方法是用来启动 Java 程序的入口和起点；本框架类似的存在一个 main.js 文件，用来加载和启动所有框架内的模块，以及基于此框架开发的项目中的所有模块，这个文件就是本框架的调用起点。有过 Spring 开发经验的用户应该都了解 ApplicationContext 的意义，在 Spring 框架中 ApplicationContext 就相当于一个入口点。
 
-main.js 的内容看上去大致是这个样子的（后面会详细介绍）：
-
-**这段代码要改的**
+main.js 的内容通常来说只有一行，看上去是这个样子的：
 
 ```javascript
-// src/main/javascript/main.js
-var {createMountPoint} = require('coala/router');
-
-var mountPoint = createMountPoint();
-mountPoint.autoMount(module);
-mountPoint.mount('/scaffold', 'coala/scaffold/router');
-
-exports.router = mountPoint;
+exports.router = require('coala/router').createApplication(this);
 ```
 
 exports.router 是 main.js 里面必须的，用来告知应用程序请求的入口在哪里。
 
 ### 3.4、路由（Router）
 
-与 router 相关的脚本全部存放在每个模块的 \_\_routers\_\_ 目录中，但对每个 router 的文件名没有额外限制，可以根据具体的功能特征进行选取，最好根据业务功能划分，对 router 文件进行组合与拆分，以控制单个脚本文件的体积。每个 router 文件必须导出一个名为 router 的对象（使用 createRouter 方法创建，见下文），以便自动自动加载机制可以加载到。
+与 router 有关的脚本全部存放在每个功能项的 \_\_routers\_\_ 目录中，应该根据业务功能特征对 router 进行划分，并选取适当的文件名，这些文件名会作为访问路径的一部分，出现在最终请求的 URL 里面。每个 router 文件都必须导出一个名为 router 的对象（使用 createRouter 方法创建，见下文），以便自动自动加载机制可以加载到。
 
 router 是用来分发和处理请求的，有些类似于 Spring 中的 DispatcherServlet。当有请求来到服务端的时候，router 会拦截所有请求，并根据其中定义的规则，分发请求到一个请求处理方法，该请求处理方法会调用 service（进而是 manager）来实现业务逻辑处理，并最终将响应返回给客户端。下面的代码实现了最简单的 Hello World 功能：
 
@@ -395,9 +301,9 @@ router.get('/greeting', function () {
 exports.router = router;
 ```
 
-首先从 coala/router 模块中取出 createRouter 方法，这是创建 router 对象的入口方法；然后获取 coala/response 模块，用来为请求提供响应。调用 createRouter 方法创建一个 router（疑问：createRouter 方法是否可以调用多次？），并调用 get 方法为所有访问到 /greeting 地址的请求输出一个 HTML 片段响应（不完全正确，见下文解释）。该程序运行效果如图所示：
+首先从 coala/router 模块中取出 createRouter 方法，这是创建 router 对象的入口方法；然后获取 coala/response 模块，用来为请求提供响应。调用 createRouter 方法创建一个 router，并调用 get 方法为所有访问到 /greeting 地址的请求输出一个 HTML 片段响应（不完全正确，见下文解释）。该程序运行效果如图所示：
 
-（暂无图片）
+![运行效果](assets/images/user-guide/3-hello-world.png)
 
 这里需要注意的是 router 的 get 方法，这个方法的名称很容易让人产生误解，以为是从 router 中获取某些数据，其实不然。这里的 get 方法对应于 HTTP 协议中的 GET 请求，因此该方法的含义是指：所有（且只有）通过 GET 方法访问 /greeting 地址的请求，才会被后面的回调方法处理，从而返回期待的 Hello World 页面。另外，在调用 get 方法的时候其实并不会立即触发任何请求和响应，而仅仅是在 router 的内部结构中定义了一个映射关系：当有 GET 请求到达 /greeting 地址的时候，就执行相应的回调方法，生成响应。因此回调方法真正被调用的时候，是在请求真正发生的时候。这个时间点通常会晚于 get 方法调用的时间点。
 
@@ -478,7 +384,7 @@ router.get('/users/:userId', function (req, userId) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: '{userId: user.userId, name: user.userName, age: user.age, gender: user.gender}'
+        body: '{userId: ' + user.userId + ', name: ' + user.userName + ', age: ' + user.age + ', gender: ' + user.gender + '}'
     }
 });
 ```
@@ -569,22 +475,26 @@ response.error('系统发生致命错误，请联系管理员！');
 在介绍此方法之前，需要先对本框架使用的 JSON 序列化组件有一个简单的认识。本框架的 JSON 序列化采用了 Jackson 库的 filter 功能，就是可以根据指定的 filter 名称和包含的以及排除的字段来自动生成 JSON 结果。其中的 filter 可以想像为一组属性的集合，通常定义在实体类上，例如：
 
 ```java
-@JsonFilter("user")
+@JsonFilter("userFilter")
 public class User extends DomainEntity {
     private String userName;
     private String password;
     private int age;
     private List<Group> groups;
+
+    // 省略了相应的 getter 和 setter 方法
 }
 
-@JsonFilter("group")
+@JsonFilter("groupFilter")
 public class Group extends DomainEntity {
     private String groupName;
     private List<User> users;
+
+    // 省略了相应的 getter 和 setter 方法
 }
 ```
 
-以上代码定义了两个 filter，分别命名为 user 和 group，名为 user 的 filter 包含五个属性，分别是 id（继承自 DomainEntity），userName，password，age 和 groups；名为 group 的 filter 包含三个属性，分别是 id（继承自 DomainEntity），groupName 和 users。
+以上代码定义了两个 filter，分别命名为 userFilter 和 groupFiter，名为 userFilter 的 filter 包含五个属性，分别是 id（继承自 DomainEntity），userName，password，age 和 groups；名为 groupFilter 的 filter 包含三个属性，分别是 id（继承自 DomainEntity），groupName 和 users。
 
 了解了 filter 的含义，再来看此方法的定义，此方法需要传入两个参数：
 
@@ -598,17 +508,17 @@ public class Group extends DomainEntity {
 include 和 exclude 的类型都是 JavaScript 对象，对象的键是 filter 的名称，值为属性列表。需要注意的是，同一个名称的 filter 不能同时出现在 include 和 exclude 中。承接上例：
 
 ```javascript
-response.json(user, {
+response.json(user, { // user 是 User 类型的一个实例
     include: {
-        group: ['id', 'groupName', 'users']
+        groupFilter: ['id', 'groupName', 'users']
     },
     exclude: {
-        user: ['password']
+        userFilter: ['password']
     }
 });
 ```
 
-这段代码的含义就是生成的 JSON 结果要包含 Group 对象里面的 id, groupName 和 users 属性，而去掉 User 对象里面的 password 属性。有关 [Jackson](http://jackson.codehaus.org/ "Jackson JSON Processor") 及 [JsonFilter](http://wiki.fasterxml.com/JacksonFeatureJsonFilter "JacksonFeatureJsonFilter") 的更多用法请参考官方文档。
+这段代码的含义就是生成的 JSON 结果要包含 Group 类型对象里面的 id, groupName 和 users 属性，而去掉 User 类型对象里面的 password 属性。有关 [Jackson](http://jackson.codehaus.org/ "Jackson JSON Processor") 及 [JsonFilter](http://wiki.fasterxml.com/JacksonFeatureJsonFilter "JacksonFeatureJsonFilter") 的更多用法请参考官方文档。
 
 #### stream()
 
@@ -621,7 +531,7 @@ response.json(user, {
 如果第二个参数是一个方法，其含义就相当于上文中的 callback。
 
 ```javascript
-response.stream({
+response.stream(request, {
     status: 200,
     headers: {
         'Content-Type': 'application/ms-word'
@@ -636,25 +546,26 @@ response.stream({
 
 ### 3.5、路由、模块和自动挂载
 
-根据以上的介绍，我们应该了解到，应用程序的入口点是 main.js，应用程序由模块和子模块构成，并形成树状结构，在每个模块下都包含 \_\_routers\_\_、\_\_services\_\_ 和 \_\_managers\_\_ 等目录，在 \_\_routers\_\_ 目录中定义有所有的路由和请求处理逻辑，但问题是这些路由、模块以及主应用程序是如何衔接在一起并配合工作的？简单回答就是：**全自动**。
+根据以上的介绍，我们应该了解到，应用程序的入口点是 main.js，应用程序由模块和子模块构成，并形成树状结构，在每个模块下都包含组成功能项的 \_\_routers\_\_、\_\_services\_\_ 和 \_\_managers\_\_ 目录，在 \_\_routers\_\_ 目录中定义有所有的路由和请求处理逻辑，但问题是这些路由、功能项、模块以及主应用程序是如何衔接在一起并配合工作的？简单回答就是：**全自动**。
 
-详细一点来说，框架启动时会加载 main.js 启动主应用程序，主应用程序会根据模块的目录结构加载模块，并自动将该模块的访问路径添加到访问路径中，然后会遍历模块 \_\_routers\_\_ 目录下的所有文件，挂载每个文件导出的 router 对象（这就是为什么前面介绍 router 的时候要求每个 router 文件必须导出这个对象的原因了）。自动挂载的最终结果就是请求的访问路径，看上去和模块的目录结构是相同的。如下所示：
+详细一点来说，框架启动时会加载 main.js 开启主应用程序，主应用程序会根据模块的目录结构加载模块，并自动将该模块的路径添加到访问路径中，然后会遍历模块下功能项里面的 \_\_routers\_\_ 目录，按文件名挂载每个 router 文件导出的 router 对象（这就是为什么前面介绍 router 的时候要求每个 router 文件必须导出这个对象的原因了）。自动挂载的最终结果就是请求的访问路径，看上去和模块的目录结构是相同的。如下所示：
 
-![](assets/images/user-guide/3-router-mount.png)
+![自动挂载](assets/images/user-guide/4-auto-mount.png)
 
-图中所示的应用程序有两个一级模块和若干二级模块，则所有可访问的请求路径如下：
+图中所示的应用程序有两个一级模块 system 和一个二级模块 workspace，则所有可访问的请求路径如下：
 
 ```
-/system
 /system/users
 /system/departments
 /system/groups
-/workspace/home
-/workspace/tasks
-/workspace/calendar
+/system/workspace/home
+/system/workspace/tasks
+/system/workspace/calendar
 ```
 
 ### 3.6、标记（Marker）
+
+(**marker 的注入顺序**)
 
 在开始介绍 service 和 manager 之前，需要先来了解一下 marker 的用法。marker 类似于 Java 中的 annotation，主要用来向方法中注入对象。基本用法类似这样：
 
@@ -679,6 +590,8 @@ mark('first').mark('second').mark('third').on(function () {
 目前框架支持四种类型的 marker，分别介绍如下：
 
 #### tx
+
+(**tx 必须要放到最后**)
 
 该 marker 向方法注入事务。经过注入的方法会运行在事务当中。事务的具体注入过程是依赖 Spring 容器的，因此关于事务注入的详细信息，请参考 Spring Transaction 的[官方文档](http://static.springsource.org/spring/docs/3.1.x/spring-framework-reference/htmlsingle/spring-framework-reference.html#transaction)。
 
@@ -725,6 +638,8 @@ mark('beans', 'bean1', 'bean2', 'bean3').on(function (bean1, bean2, bean3) {
 });
 ```
 
+(**还可以支持 class**)
+
 此 marker 的第一个参数表明了该 marker 的类型，后面是一组变参，将需要注入的 Java Bean 的 ID 罗列在此，后面的方法就可以按次序接收到注入的 Java Bean 对象。
 
 #### services
@@ -742,7 +657,7 @@ mark('services', 'modulePath1:serviceName1', 'modulePath2:serviceName2', 'module
 - 屏蔽了 service 的具体查找路径，也就是免去了在路径中写入 \_\_services\_\_ 这样的目录
 - 强制要求 service 一定放置在 \_\_services\_\_ 目录，突出框架的规范性要求
 
-此 marker 要求注入的 service 都必须导出一个名为 createService 的方法。
+<span class="label label-important">注意</span> **此 marker 要求注入的 service 必须导出一个名为 createService 的方法。**
 
 #### managers
 
@@ -754,7 +669,9 @@ mark('managers', User, Group, 'modulePath:managerName').on(function (userManager
 });
 ```
 
-同上，此 marker 的第一个参数也表明了该 marker 的类型，后面也是一组变参，该参数里面可以包含两种类型的对象。首先可以指定一种实体类型，则框架会自动注入一个通用的 manager 用来访问该实体，另外如果是指定一个到 manager 的坐标（同 service 的坐标概念类似），则框架注入该坐标指向的 manager。同注入 service 的 marker 类似，这里也要求自定义的 manager 文件必须导出一个名为 createManager 的方法。
+同上，此 marker 的第一个参数也表明了该 marker 的类型，后面也是一组变参，该参数里面可以包含两种类型的对象。首先可以指定一种实体类型，则框架会自动注入一个通用的 manager 用来访问该实体，另外如果是指定一个到 manager 的坐标（同 service 的坐标概念类似），则框架注入该坐标指向的 manager。
+
+<span class="label label-important">注意</span> **此 marker 要求注入的 manager 必须导出一个名为 createManager 的方法。**
 
 ### 3.7、服务（Service）
 
