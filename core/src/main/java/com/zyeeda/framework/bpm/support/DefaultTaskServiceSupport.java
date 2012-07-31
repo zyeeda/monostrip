@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -142,16 +141,6 @@ public class DefaultTaskServiceSupport implements TaskService{
 	}
     @Transactional
 	@Override
-	public void complete(Long taskId, List<String> actors, int transitionType) {
-    	throw new java.lang.UnsupportedOperationException();
-	}
-    @Transactional
-	@Override
-	public void complete(Task task, List<String> actors, int transitionType) {
-    	throw new java.lang.UnsupportedOperationException();
-	}
-    @Transactional
-	@Override
 	public void reject(Long taskId) {
 		TaskServiceSession tss = humanTaskService.createSession();
         Task task = tss.getTask(taskId);
@@ -181,17 +170,6 @@ public class DefaultTaskServiceSupport implements TaskService{
         if(taskHandler!=null){
         	taskHandler.exitTask(task);
         }
-	}
-
-	@Override
-	public void reject(Long taskId, String target) {
-		throw new java.lang.UnsupportedOperationException();
-		
-	}
-	@Override
-	public void reject(Task task, String target) {
-		throw new java.lang.UnsupportedOperationException();
-		
 	}
 	@Transactional
 	@Override
