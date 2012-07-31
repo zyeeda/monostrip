@@ -1,8 +1,8 @@
 package com.zyeeda.framework.bpm;
 import java.util.List;
+import java.util.Map;
 
 import org.jbpm.task.Task;
-import org.jbpm.task.query.TaskSummary;
 
 public interface TaskService {
     // 任务流转类型
@@ -24,13 +24,13 @@ public interface TaskService {
      * 
      * @param taskId
      */
-    public void complete(Long taskId);
+    public void complete(Long taskId, String comment, Map<String,Object> results);
     /**
      * 根据任务实例提交任务
      * 
      * @param task
      */
-    public void complete(Task task);
+    public void complete(Task task, String comment, Map<String,Object> results);
 
     /**
      * 根据任务实例id、参与者、动态审批类型提交任务
@@ -90,20 +90,5 @@ public interface TaskService {
      * @param taskId
      */
     public void recall(Task task);
-    /**
-     * @deprecated
-     * 
-     * 根据用户账号，获取未领取的任务
-     * @param userId
-     * @return
-     */
-    public List<TaskSummary> getTasks(String userId);
-    /**
-     * 获取以领取的任务
-     * @deprecated
-     * @param userId
-     * @return
-     */
-    public List<TaskSummary> getTasksOwned(String userId);
 
 }
