@@ -1,5 +1,4 @@
 package com.zyeeda.framework.bpm;
-import java.util.List;
 import java.util.Map;
 
 import org.jbpm.task.Task;
@@ -33,50 +32,17 @@ public interface TaskService {
     public void complete(Task task, String comment, Map<String,Object> results);
 
     /**
-     * 根据任务实例id、参与者、动态审批类型提交任务
-     * 
-     * @param taskId
-     * @param actors
-     * @param transType
-     *            {@link #TRANSITION_TYPE}
-     */
-    public void complete(Long taskId, List<String> actors, int transitionType);
-
-    /**
-     * 根据任务实例、参与者、动态审批类型提交任务
-     * 
-     * @param task
-     * @param actors
-     * @param transType
-     */
-    public void complete(Task task, List<String> actors, int transitionType);
-
-    /**
      * 回退任务
      * 
      * @param taskId
      */
     public void reject(Long taskId);
     /**
-     * 回退任务到指定的节点
-     * @param taskId
-     * @param target
-     */
-    public void reject(Long taskId, String target);
-
-    /**
      * 回退任务
      * 
      * @param taskId
      */
-    public void reject(Task task);
-    /**
-     * 回退任务到指定的节点
-     * @param task
-     * @param target
-     */
-    public void reject(Task task, String target);    
-
+    public void reject(Task task);    
     /**
      * 召回任务
      * 
