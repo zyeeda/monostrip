@@ -1,4 +1,4 @@
-package com.zyeeda.framework.knowledge.internal;
+package com.zyeeda.framework.bpm.support;
 
 import javax.persistence.EntityManagerFactory;
 
@@ -19,15 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 
-import com.zyeeda.framework.knowledge.KnowledgeService;
+import com.zyeeda.framework.bpm.KnowledgeService;
 
 /**
  * Domain object for retrieving pre-configured KnowledgeSessions.
  * Designed for use with Spring.
  * 
  */
-public class DroolsKnowledgeServiceProvider implements KnowledgeService {
-	private static final Logger logger = LoggerFactory.getLogger(DroolsKnowledgeServiceProvider.class);
+public class DefaultKnowledgeService implements KnowledgeService {
+	private static final Logger logger = LoggerFactory.getLogger(DefaultKnowledgeService.class);
 	
 	private Environment env;
 	private KnowledgeBase kbase;

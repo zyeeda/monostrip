@@ -1,4 +1,4 @@
-package com.zyeeda.framework.knowledge;
+package com.zyeeda.framework.bpm;
 
 import org.drools.runtime.StatefulKnowledgeSession;
 
