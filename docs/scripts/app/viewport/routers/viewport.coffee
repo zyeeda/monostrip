@@ -57,6 +57,8 @@ define [
                     ul.append "<li class='nav-header'>#{token.text}</li>"
                 else if token.depth is 2
                     ul.append "<li>#{token.text}</li>"
+                else if token.depth is 3
+                    ul.append "<li style='text-indent:1em;'>#{token.text}</li>"
 
             $('#west').empty().append div
 
