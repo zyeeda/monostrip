@@ -502,7 +502,7 @@ limitations under the License.
             </resource>
             <resource>
                 <directory>src/main/packages</directory>
-                <targetPath>${project.build.outputDirectory}/packages</targetPath>
+                <targetPath>packages</targetPath>
             </resource>
         </resources>
     </build>
