@@ -1,0 +1,24 @@
+.ui-layout-north {
+    padding: 0px;
+}
+
+.ui-layout-pane {
+    border: 0px none;
+}
+
+.ui-layout-north .navbar {
+    margin-bottom: 0px;
+}
+
+.ui-layout-north .navbar-inner {
+    border-radius: 0;
+}
+
+.ui-layout-west .sidebar-nav {
+    margin-bottom: 0px;
+}
+
+p {
+    margin: 0.5em 0;
+    /*text-indent: 2em;*/
+}

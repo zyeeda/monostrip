@@ -1,0 +1,30 @@
+syntax: glob
+
+*.
+*.class
+.classpath
+.project
+.settings
+*.swp
+*.bak
+*~
+*.~ml
+*.orig
+*.tlog
+.DS_Store
+
+.DS_Store
+
+work
+target
+bin
+
+WEB-INF/classes
+WEB-INF/lib
+WEB-INF/app
+WEB-INF/modules/coala
+
+src/main/webapp/scripts/main-dist.js
+
+
+syntax: regexp
