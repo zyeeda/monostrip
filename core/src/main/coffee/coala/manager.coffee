@@ -1,7 +1,7 @@
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 {EntityManager, EntityManagerFactory} = javax.persistence
 {EntityManagerFactoryUtils} = org.springframework.orm.jpa
-{Example, Order, Projections} = org.hibernate.criterion
+{Example, Order, Projections, MatchMode, Restrictions} = org.hibernate.criterion
 {Configuration} = org.hibernate.cfg
 {coala} = require 'coala/config'
 {type} = require 'coala/util'
@@ -104,8 +104,10 @@ exports.createManager = (entityClass, name) ->
 
     # this implementation use native hibernate session
     findByExample: (example, option = {}) ->
-        ex = Example.create(example).excludeZeroes()
+        ex = Example.create(example).excludeZeroes().enableLike(MatchMode.ANYWHERE)
         criteria = em.getDelegate().createCriteria(entityClass).add ex
+        if option.restricts
+            criteria = fillRestrict criteria, option.restricts
         if option.fetchCount is true
             criteria.setProjection Projections.rowCount()
             criteria.list().get(0)
@@ -157,6 +159,30 @@ fillPageInfo = (query,pageInfo) ->
         query.setMaxResults pageInfo.maxResults
         return true
     false
+
+fillRestrict = (criteria, restrictions) ->
+    for restrict in restrictions
+        continue unless restrict.operator
+        if 'or' == restrict.operator
+            junc = Restrictions.disjunction()
+            criteria = criteria.add fillRestrict junc, restrict.value
+        else if 'and' == restrict.operator
+            junc = Restrictions.conjunction()
+            criteria = criteria.add fillRestrict junc, restrict.value
+        else if 'not' == restrict.operator
+            criteria = fillRestrict criteria, restrict.value
+        else
+            if restrict.value and restrict.other
+                if 'like' == restrict.operator or 'ilike' == restrict.operator
+                    otherVal = MatchMode[restrict.other.toLocaleUpperCase()]
+                else
+                    otherVal = restrict.other
+                criteria = criteria.add Restrictions[restrict.operator].call Restrictions, restrict.name, restrict.value, otherVal
+            else if restrict.value
+                criteria = criteria.add Restrictions[restrict.operator].call Restrictions, restrict.name, restrict.value
+            else
+                criteria = criteria.add Restrictions[restrict.operator].call Restrictions, restrict.name
+    criteria
 
 
 if coala.development is true

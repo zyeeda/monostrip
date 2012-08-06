@@ -167,7 +167,11 @@ defaultHandlers =
 
         configs = coala.extractPaginationInfo request.params
         orders = coala.extractOrderInfo request.params
+        restricts = coala.extractRestrictInfo request.params
         if configs?
+            if restricts?
+                configs.restricts = restricts
+
             configs.fetchCount = true
             pageSize = configs.maxResults
             count = service.list entity, configs

@@ -50,6 +50,12 @@ defaultConfigure =
 
         result
 
+    extractRestrictInfo: (params) ->
+        restricts = params['_restricts']
+        return null if not restricts
+        delete params['_restricts']
+        JSON.parse restricts
+
 exports.coala = objects.extend defaultConfigure, projectLevelConfigure.coala
 
 log.debug "environment variable #{name}:#{value}" for name, value of exports.coala
