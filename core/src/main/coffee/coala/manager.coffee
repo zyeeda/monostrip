@@ -3,6 +3,9 @@
 {EntityManagerFactoryUtils} = org.springframework.orm.jpa
 {Example, Order, Projections, MatchMode, Restrictions} = org.hibernate.criterion
 {Configuration} = org.hibernate.cfg
+{Boolean} = java.lang
+{ArrayList} = java.util
+{DatetimeUtils} = com.zyeeda.framework.utils
 {coala} = require 'coala/config'
 {type} = require 'coala/util'
 
@@ -163,25 +166,41 @@ fillPageInfo = (query,pageInfo) ->
 fillRestrict = (criteria, restrictions) ->
     for restrict in restrictions
         continue unless restrict.operator
-        if 'or' == restrict.operator
-            junc = Restrictions.disjunction()
-            criteria = criteria.add fillRestrict junc, restrict.value
-        else if 'and' == restrict.operator
-            junc = Restrictions.conjunction()
-            criteria = criteria.add fillRestrict junc, restrict.value
-        else if 'not' == restrict.operator
-            criteria = fillRestrict criteria, restrict.value
-        else
-            if restrict.value and restrict.other
-                if 'like' == restrict.operator or 'ilike' == restrict.operator
-                    otherVal = MatchMode[restrict.other.toLocaleUpperCase()]
-                else
-                    otherVal = restrict.other
-                criteria = criteria.add Restrictions[restrict.operator].call Restrictions, restrict.name, restrict.value, otherVal
-            else if restrict.value
-                criteria = criteria.add Restrictions[restrict.operator].call Restrictions, restrict.name, restrict.value
+        _operator = restrict.operator
+        if restrict.type
+            _type = restrict.type.toUpperCase() 
+            if 'DATE' == _type
+                _value = DatetimeUtils.parseDate restrict.value if restrict.value
+                _other = DatetimeUtils.parseDate restrict.other if restrict.other
+            else if 'BOOLEAN' == _type
+                _value = new Boolean restrict.value if restrict.value
+                _other = new Boolean restrict.other if restrict.other
             else
-                criteria = criteria.add Restrictions[restrict.operator].call Restrictions, restrict.name
+                _value = restrict.value if restrict.value
+                _other = restrict.other if restrict.other
+        else
+            _value = restrict.value if restrict.value
+            _other = restrict.other if restrict.other
+
+        if 'or' == _operator
+            junc = Restrictions.disjunction()
+            criteria = criteria.add fillRestrict junc, _value
+        else if 'and' == _operator
+            junc = Restrictions.conjunction()
+            criteria = criteria.add fillRestrict junc, _value
+        else if 'not' == _operator
+            criteria = fillRestrict criteria, _value
+        else
+            if _value and _other
+                if 'like' == _operator or 'ilike' == _operator
+                    otherVal = MatchMode[_other.toUpperCase()]
+                else
+                    otherVal = _other
+                criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, otherVal
+            else if restrict.value
+                criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value 
+            else
+                criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name
     criteria
 
 

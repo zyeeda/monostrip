@@ -51,9 +51,9 @@ defaultConfigure =
         result
 
     extractRestrictInfo: (params) ->
-        restricts = params['_restricts']
+        restricts = params['_filters']
         return null if not restricts
-        delete params['_restricts']
+        delete params['_filters']
         JSON.parse restricts
 
 exports.coala = objects.extend defaultConfigure, projectLevelConfigure.coala
