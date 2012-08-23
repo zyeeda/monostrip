@@ -109,16 +109,23 @@ exports.createManager = (entityClass, name) ->
         q.getResultList()
 
     findByExample: (example, option = {}) ->
-        dsPath = '/Volumes/MacRes/develop/framework/framework/zyeeda-drivebox-2.0/src/main/webapp/WEB-INF/app/unit/__scaffold__/'
-        dsFiles = ['emps.ds.hql', 'emps.ds.sql', 'emps.ds.sp', 'emps.ds.js']
+        meta = entityMetaResolver.resolveEntity entityClass
+        path = meta.path
+        path = path.replace /(^\/)|(\/$)/g, ''
+        [paths..., name] = path.split '/'
+        paths.push coala.scaffoldFolderName
+        paths.push name
+        path = paths.join '/'
+        dsPath = coala.appPath + path
+        dsFiles = ['.ds.hql', '.ds.sql', '.ds.sp', '.ds.js']
         if fs.exists dsPath + dsFiles[0]
-            @findByHql.call @, example, option
+            @findByHql.call @, example, option, dsPath + dsFiles[0]
         else if fs.exists dsPath + dsFiles[1] 
-            @findBySql.call @, example, option
+            @findBySql.call @, example, option, dsPath + dsFiles[1]
         else if fs.exists dsPath + dsFiles[2]
-            @findByProcedure.call @, example, option
+            @findByProcedure.call @, example, option, dsPath + dsFiles[2]
         else if fs.exists dsPath + dsFiles[3]
-            @findByMethod.call @, example, option
+            @findByMethod.call @, example, option, dsPath + dsFiles[3]
         else
             @findByEntity.call @, example, option
 
@@ -141,54 +148,43 @@ exports.createManager = (entityClass, name) ->
                     criteria.addOrder Order[value] property for property, value of order
             criteria.list()
 
-    findBySql: (example, option = {}) ->
-        parser = new SqlParser
-        meta = entityMetaResolver.resolveEntity entityClass
-        path = meta.path
-        path = path.replace /(^\/)|(\/$)/g, ''
-        [paths..., name] = path.split '/'
-        paths.push coala.scaffoldFolderName
-        paths.push name
-        path = paths.join '/'
-        dsPath = '/Volumes/MacRes/develop/framework/framework/zyeeda-drivebox-2.0/src/main/webapp/WEB-INF/app/'
-        sqlPath = dsPath + path + '.ds.sql'
+    findBySql: (example, option = {}, sqlPath) ->
         sql = fs.read sqlPath        
-        sql = parser.replaceSpace sql
-        print sql
+        sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
+        items = option.configs.fields
+        where = ''
+        orderBy = ''
+        for restrict in option.restricts
+            for f in items
+                if f.alias == restrict.name
+                    if f.type == 'boolean' or f.type == 'number'
+                        where += ' ' + f.name + ' = :' + f.alias + ' and'
+                    else
+                        where += ' ' + f.name + ' like :' + f.alias + ' and'
+                        restrict.value = '%' + restrict.value + '%'
+        where = where.substr 0, where.length - 4
+        if where then sql = sql.replace '{{where}}', 'where' + where else sql = sql.replace '{{where}}', 'where 0 = 0'
+        if option.orderBy
+            for order in option.orderBy
+                for property, value of order 
+                    for f in items
+                        if f.alias == property
+                            orderBy += ' ' + f.name + ' ' + value + ','
+        orderBy = orderBy.substr 0, orderBy.length - 1
+        if orderBy then sql = sql.replace '{{orderBy}}', 'order by' + orderBy else sql = sql.replace '{{orderBy}}', ''
         query = em.createNativeQuery sql
         params = query.parameters
         it = params.iterator()
-        isNullParams = false
         while it.hasNext()
             _next = it.next()
-            if example[_next.name]?
-                tempSql = sql.substr(0, sql.indexOf(':' + _next.name)).replace /(^\s*)|(\s*$)/g, ''
-                if 'like' == tempSql.substr tempSql.length - 4,  tempSql.length
-                    query.setParameter _next.name, '%' + example[_next.name] + '%'
-                else
-                    query.setParameter _next.name, example[_next.name]
-            else
-                isNullParams = true
-                sql = parser.subCond sql, ':' + _next.name
-
-        if isNullParams
-            query = em.createNativeQuery sql
-            params = query.parameters
-            it = params.iterator()
-            while it.hasNext()
-                _next = it.next()
-                tempSql = sql.substr(0, sql.indexOf(':' + _next.name)).replace /(^\s*)|(\s*$)/g, ''
-                if 'like' == tempSql.substr tempSql.length - 4,  tempSql.length
-                    query.setParameter _next.name, '%' + example[_next.name] + '%'
-                else
-                    query.setParameter _next.name, example[_next.name]
-
+            for restrict in option.restricts
+                if _next.name == restrict.name
+                    query.setParameter _next.name, restrict.value
         if option.fetchCount is true
             query.resultList.size()
         else
             pageInfo = getPageInfo option
             fillPageInfo query, pageInfo
-            fileds = parser.getSelectItems sql
             list = query.resultList
             results = []
             it = list.iterator()
@@ -196,8 +192,8 @@ exports.createManager = (entityClass, name) ->
                 _next = it.next()
                 i = 0
                 obj = {}
-                for f in fileds
-                    obj[f] = _next[i]
+                for f in items
+                    obj[f.alias] = _next[i]
                     i++ 
                 results.push obj
             results

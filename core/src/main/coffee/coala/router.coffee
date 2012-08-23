@@ -171,6 +171,7 @@ defaultHandlers =
         if configs?
             if restricts?
                 configs.restricts = restricts
+            configs.configs = options.configs
 
             configs.fetchCount = true
             pageSize = configs.maxResults

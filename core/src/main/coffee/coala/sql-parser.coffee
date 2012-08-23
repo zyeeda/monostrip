@@ -45,4 +45,58 @@ exports.SqlParser = ->
             print sql
             return sql
 
+
+        findBySql: (example, option = {}, sqlPath) ->
+            parser = new SqlParser
+            sql = fs.read sqlPath        
+            sql = parser.replaceSpace sql
+            query = em.createNativeQuery sql
+            params = query.parameters
+            it = params.iterator()
+            isNullParams = false
+            while it.hasNext()
+                _next = it.next()
+                if example[_next.name]?
+                    tempSql = sql.substr(0, sql.indexOf(':' + _next.name)).replace /(^\s*)|(\s*$)/g, ''
+                    if 'like' == tempSql.substr tempSql.length - 4,  tempSql.length
+                        query.setParameter _next.name, '%' + example[_next.name] + '%'
+                    else
+                        query.setParameter _next.name, example[_next.name]
+                else
+                    isNullParams = true
+                    sql = parser.subCond sql, ':' + _next.name
+
+            if isNullParams
+                query = em.createNativeQuery sql
+                params = query.parameters
+                it = params.iterator()
+                while it.hasNext()
+                    _next = it.next()
+                    tempSql = sql.substr(0, sql.indexOf(':' + _next.name)).replace /(^\s*)|(\s*$)/g, ''
+                    if 'like' == tempSql.substr tempSql.length - 4,  tempSql.length
+                        query.setParameter _next.name, '%' + example[_next.name] + '%'
+                    else
+                        query.setParameter _next.name, example[_next.name]
+
+            if option.fetchCount is true
+                query.resultList.size()
+            else
+                pageInfo = getPageInfo option
+                fillPageInfo query, pageInfo
+                fileds = parser.getSelectItems sql
+                list = query.resultList
+                results = []
+                it = list.iterator()
+                while it.hasNext() 
+                    _next = it.next()
+                    i = 0
+                    obj = {}
+                    for f in fileds
+                        obj[f] = _next[i]
+                        i++ 
+                    results.push obj
+                results
+
     parser
+
+
