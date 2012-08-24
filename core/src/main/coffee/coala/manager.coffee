@@ -1,4 +1,4 @@
-{Boolean, String, Integer, Double} = java.lang
+{Class, Boolean, String, Integer, Double} = java.lang
 {ArrayList, Date} = java.util
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 {EntityManager, EntityManagerFactory} = javax.persistence
@@ -7,8 +7,7 @@
 {Configuration} = org.hibernate.cfg
 {DatetimeUtils} = com.zyeeda.framework.utils
 {coala} = require 'coala/config'
-{type} = require 'coala/util'
-{SqlParser} = require 'coala/sql-parser'
+{type, objects} = require 'coala/util'
 
 entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
@@ -125,7 +124,7 @@ exports.createManager = (entityClass, name) ->
         else if fs.exists dsPath + dsFiles[2]
             @findByProcedure.call @, example, option, dsPath + dsFiles[2]
         else if fs.exists dsPath + dsFiles[3]
-            @findByMethod.call @, example, option, dsPath + dsFiles[3]
+            @findByMethod.call @, example, option, path + dsFiles[3]
         else
             @findByEntity.call @, example, option
 
@@ -149,63 +148,80 @@ exports.createManager = (entityClass, name) ->
             criteria.list()
 
     findBySql: (example, option = {}, sqlPath) ->
-        sql = fs.read sqlPath        
+        @findByQuery.call @, example, option, sqlPath, 'sql'
+
+    findByHql: (example, option = {}, hqlPath) ->
+        @findByQuery.call @, example, option, hqlPath, 'hql'
+
+    findByMethod: (example, option = {}, jsPath) ->
+        if option.fetchCount is true
+            recordCount = require(jsPath).recordCount
+            recordCount.call recordCount, example, option
+        else
+            results = require(jsPath).results
+            results.call results, example, option
+
+    findByProcedure: (example, option = {}) ->
+        query = em.createNativeQuery '{call pro_select_emp(?)}', entityClass
+        query.setParameter 1, example.name
+        query.resultList
+
+    findByQuery: (example, option = {}, path, type) ->
+        sql = fs.read path        
         sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
-        items = option.configs.fields
-        where = ''
+        fields = option.configs.fields
         orderBy = ''
-        for restrict in option.restricts
-            for f in items
-                if f.alias == restrict.name
-                    if f.type == 'boolean' or f.type == 'number'
-                        where += ' ' + f.name + ' = :' + f.alias + ' and'
-                    else
-                        where += ' ' + f.name + ' like :' + f.alias + ' and'
-                        restrict.value = '%' + restrict.value + '%'
-        where = where.substr 0, where.length - 4
+        result = joinWhere fields, option.restricts
+        where = result.where
+        restricts = result.restricts
         if where then sql = sql.replace '{{where}}', 'where' + where else sql = sql.replace '{{where}}', 'where 0 = 0'
         if option.orderBy
             for order in option.orderBy
                 for property, value of order 
-                    for f in items
-                        if f.alias == property
-                            orderBy += ' ' + f.name + ' ' + value + ','
+                    for f in fields
+                        if f.name == property
+                            orderBy += ' ' + f.alias + ' ' + value + ','
         orderBy = orderBy.substr 0, orderBy.length - 1
         if orderBy then sql = sql.replace '{{orderBy}}', 'order by' + orderBy else sql = sql.replace '{{orderBy}}', ''
-        query = em.createNativeQuery sql
+        if type == 'sql' 
+            query = em.createNativeQuery sql
+        else
+            if v = option.configs.resultClass
+                query = em.createQuery sql, Class.forName v
+            else
+                query = em.createQuery sql
         params = query.parameters
         it = params.iterator()
         while it.hasNext()
             _next = it.next()
-            for restrict in option.restricts
+            for restrict in restricts
                 if _next.name == restrict.name
-                    query.setParameter _next.name, restrict.value
+                    if restrict.type then _type = restrict.type.toUpperCase() else _type = ''
+                    if 'DATE' == _type
+                        _value = DatetimeUtils.parseDate restrict.value
+                    else if 'TIME' == _type
+                        _value = DatetimeUtils.parseDatetime restrict.value
+                    else if 'BOOLEAN' == _type
+                        _value = new Boolean restrict.value
+                    else
+                        _value = restrict.value
+                    query.setParameter _next.name, _value
         if option.fetchCount is true
             query.resultList.size()
         else
             pageInfo = getPageInfo option
             fillPageInfo query, pageInfo
             list = query.resultList
+            return list if option.configs.resultClass
             results = []
             it = list.iterator()
             while it.hasNext() 
                 _next = it.next()
-                i = 0
                 obj = {}
-                for f in items
-                    obj[f.alias] = _next[i]
-                    i++ 
+                for f in fields
+                    obj[f.name] = _next[f.index]
                 results.push obj
             results
-
-    findByHql: (example, option = {}) ->
-
-    findByMethod: (example, option = {}) ->
-
-    findByProcedure: (example, option = {}) ->
-        query = em.createNativeQuery '{call pro_select_emp(?)}', entityClass
-        query.setParameter 1, example.name
-        query.resultList
 
     __noSuchMethod__: (name,args) ->
         throw new Error 'can only support one argument call' if args?.length > 1
@@ -246,6 +262,44 @@ fillPageInfo = (query,pageInfo) ->
         query.setMaxResults pageInfo.maxResults
         return true
     false
+
+joinWhere = (fields, restricts) ->
+    operators = 
+        'EQ': '='
+        'NE': '<>'
+        'GT': '>'
+        'LT': '<'
+        'GE': '>='
+        'LE': '<='
+    where = ''
+    _restricts = []
+    for restrict in restricts
+        _restrict = {}
+        for f in fields
+            if f.name == restrict.name
+                if restrict.operator then _operator = restrict.operator.toUpperCase() else _operator = 'LIKE'              
+                _restrict = 
+                    name: restrict.name
+                    operator: _operator
+                _restrict.type = restrict.type if restrict.type
+                if _operator == 'LIKE'
+                    where += ' ' + f.alias + ' like :' + f.name + ' and'
+                    _restrict.value = '%' + restrict.value + '%'
+                else if _operator == 'BETWEEN'
+                    _value = restrict.value.split ','
+                    _restrict.value = _value[0]
+                    newRestrict = 
+                        name: 'end_' + restrict.name
+                        value: _value[1]
+                    newRestrict.type = restrict.type if restrict.type
+                    _restricts.push newRestrict
+                    where += ' ' + f.alias + ' between :' + f.name + ' and :' + 'end_' + f.name + ' and'
+                else
+                     where += ' ' + f.alias + ' ' + operators[_operator] + ' :' + f.name + ' and'
+                _restricts.push _restrict
+    where = where.substr 0, where.length - 4
+    where: where
+    restricts: _restricts
 
 defaultRestrict = (criteria, restrict, entityClass) ->
     _type = entityClass.getMethod('get' + restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)).returnType
@@ -319,6 +373,7 @@ fillRestrict = (criteria, restrictions, entityClass) ->
             else
                 criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name
     criteria
+
 
 
 if coala.development is true

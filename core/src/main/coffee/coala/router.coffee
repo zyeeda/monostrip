@@ -171,6 +171,7 @@ defaultHandlers =
         if configs?
             if restricts?
                 configs.restricts = restricts
+            options.configs.fields = setFieldsDefaultValue options.configs.fields
             configs.configs = options.configs
 
             configs.fetchCount = true
@@ -220,3 +221,20 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
         entity[key] = converter.convert value,entityMeta.getField(key)
     options.afterMerge? entity, type
     entity
+
+setFieldsDefaultValue = (fields) ->
+    isNullAlias = false
+    isNullIndex = false
+    if fields? and fields.length > 0
+        isNullAlias = true if not fields[0].alias
+        isNullIndex = true if not fields[0].index and fields[0].index != 0
+    else
+        return fields
+    _i = 0
+    _len = fields.length
+    while _i < _len
+        _field = fields[_i]
+        _field.alias = _field.name if isNullAlias 
+        _field.index = _i if isNullIndex
+        _i++
+    fields
