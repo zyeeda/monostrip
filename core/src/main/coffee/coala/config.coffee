@@ -16,6 +16,14 @@ defaultConfigure =
     servicePathSeperator: ':'
     defaultPageSize: 10
     dateFormat: 'yyyy-MM-dd'
+
+    booleanFieldPickerSource: [{value: 'true', label: '是'}, {value: 'false', label: '否'}]
+    defaultOperators:
+        add: {label: '添加', icon: 'icon-plus'},
+        edit: {label: '编辑', icon: 'icon-edit'},
+        del: {label: '删除', icon: 'icon-minus'},
+        show: {label: '查看', icon: 'icon-eye-open'}
+
     extractPaginationInfo: (params) ->
         pageSize = params['_pageSize']
         currentPage = params['_page']
