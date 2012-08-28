@@ -12,8 +12,9 @@
 ###
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
-{objects,type} = require 'coala/util'
+{objects, type} = require 'coala/util'
 _ = require 'underscore'
+log = require('ringo/logging').getLogger module.id
 
 handlers =
     tx: require('coala/marker/tx').handler
@@ -21,6 +22,7 @@ handlers =
     services: require('coala/marker/services').handler
     managers: require('coala/marker/managers').handler
     process: require('coala/marker/process').handler
+    knowledge: require('coala/marker/knowledge').handler
 
 loadExtraHandler = (moduleId) ->
     try
@@ -42,6 +44,8 @@ obj =
     # parameter attributes will pass into the handler which is found by name
     ###
     mark: (name, attributes...) ->
+        log.debug "Using #{name} marker, already used #{obj.keys}."
+        log.debug "obj.keys.indexOf('#{name}') = #{obj.keys.indexOf(name)}"
         throw new Error('one annotation once') if obj.keys.indexOf(name) isnt -1
         throw new Error("annotation #{name} is not supported") unless name of handlers
         attr = _.flatten attributes

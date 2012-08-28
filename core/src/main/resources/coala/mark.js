@@ -15,7 +15,7 @@
 
 
 (function() {
-  var Context, handlers, loadExtraHandler, name, obj, objects, type, _, _ref,
+  var Context, handlers, loadExtraHandler, log, name, obj, objects, type, _, _ref,
     __slice = [].slice;
 
   Context = com.zyeeda.framework.web.SpringAwareJsgiServlet.Context;
@@ -24,12 +24,15 @@
 
   _ = require('underscore');
 
+  log = require('ringo/logging').getLogger(module.id);
+
   handlers = {
     tx: require('coala/marker/tx').handler,
     beans: require('coala/marker/beans').handler,
     services: require('coala/marker/services').handler,
     managers: require('coala/marker/managers').handler,
-    process: require('coala/marker/process').handler
+    process: require('coala/marker/process').handler,
+    knowledge: require('coala/marker/knowledge').handler
   };
 
   loadExtraHandler = function(moduleId) {
@@ -59,6 +62,8 @@
     mark: function() {
       var attr, attributes, name;
       name = arguments[0], attributes = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      log.debug("Using " + name + " marker, already used " + obj.keys + ".");
+      log.debug("obj.keys.indexOf('" + name + "') = " + (obj.keys.indexOf(name)));
       if (obj.keys.indexOf(name) !== -1) {
         throw new Error('one annotation once');
       }
