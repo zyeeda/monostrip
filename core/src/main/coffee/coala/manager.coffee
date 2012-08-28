@@ -161,10 +161,31 @@ exports.createManager = (entityClass, name) ->
             results = require(jsPath).results
             results.call results, example, option
 
-    findByProcedure: (example, option = {}) ->
-        query = em.createNativeQuery '{call pro_select_emp(?)}', entityClass
-        query.setParameter 1, example.name
-        query.resultList
+    findByProcedure: (example, option = {}, sqlPath) ->
+        sql = fs.read path        
+        sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
+        query = em.createNativeQuery sql
+        for restrict, i in restricts
+            if restrict.type then _type = restrict.type.toUpperCase() else _type = ''
+            if 'DATE' == _type
+                _value = DatetimeUtils.parseDate restrict.value
+            else if 'TIME' == _type
+                _value = DatetimeUtils.parseDatetime restrict.value
+            else if 'BOOLEAN' == _type
+                _value = new Boolean restrict.value
+            else
+                _value = restrict.value
+        query.setParameter i + 1, _value
+        list = query.resultList
+        results = []
+        it = list.iterator()
+        while it.hasNext() 
+            _next = it.next()
+            obj = {}
+            for f in option.configs.fields
+                obj[f.name] = _next[f.index]
+            results.push obj
+        results
 
     findByQuery: (example, option = {}, path, type) ->
         sql = fs.read path        
