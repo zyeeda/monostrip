@@ -9,15 +9,17 @@ public class FieldMeta {
     private String name = null;
     private Class<?> type = null;
     private boolean entity = false;
+    private String path = null;
     
     private boolean manyToManyOwner = false;
     private Class<?> manyToManyTarget = null;
 
 
-    public FieldMeta(String name, Class<?> type, boolean entity, boolean manyToManyOwner, Class<?> manyToManyTarget) {
+    public FieldMeta(String name, Class<?> type, boolean entity, String path, boolean manyToManyOwner, Class<?> manyToManyTarget) {
         this.name = name;
         this.type = type;
         this.entity = entity;
+        this.path = path;
         this.manyToManyOwner = manyToManyOwner;
         this.manyToManyTarget = manyToManyTarget;
     }
@@ -44,6 +46,14 @@ public class FieldMeta {
 
     public void setEntity(boolean entity) {
         this.entity = entity;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public boolean isManyToManyOwner() {

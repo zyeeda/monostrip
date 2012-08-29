@@ -24,6 +24,33 @@
     servicePathSeperator: ':',
     defaultPageSize: 10,
     dateFormat: 'yyyy-MM-dd',
+    booleanFieldPickerSource: [
+      {
+        id: true,
+        text: '是'
+      }, {
+        id: false,
+        text: '否'
+      }
+    ],
+    defaultOperators: {
+      add: {
+        label: '添加',
+        icon: 'icon-plus'
+      },
+      edit: {
+        label: '编辑',
+        icon: 'icon-edit'
+      },
+      del: {
+        label: '删除',
+        icon: 'icon-minus'
+      },
+      show: {
+        label: '查看',
+        icon: 'icon-eye-open'
+      }
+    },
     extractPaginationInfo: function(params) {
       var currentPage, pageSize;
       pageSize = params['_pageSize'];

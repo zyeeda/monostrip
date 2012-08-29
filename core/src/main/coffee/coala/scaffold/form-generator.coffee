@@ -55,6 +55,8 @@ generateField = (config, meta, labels) ->
     field
 
 defineFieldType = (field, fieldMeta, entityMeta) ->
+    print JSON.stringify field
+    return if field.type
     if fieldMeta.getType() is java.lang.Boolean
         field.type = 'picker'
         field.pickerSource = coala.booleanFieldPickerSource
@@ -64,7 +66,7 @@ defineFieldType = (field, fieldMeta, entityMeta) ->
         return
     if fieldMeta.isEntity()
         field.type = 'picker'
-        field.pickerSource = entityMeta.getPath()
+        field.pickerSource = fieldMeta.getPath()
         return
 
     field.type = 'string'

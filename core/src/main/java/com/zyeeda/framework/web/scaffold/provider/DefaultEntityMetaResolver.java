@@ -96,14 +96,21 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                 String name = field.getName();
                 Class<?> type = field.getType();
                 boolean isEntity = type.getAnnotation(Entity.class) != null;
+                String path = null;
+                if (isEntity) {
+                    Scaffold scaffold = type.getAnnotation(Scaffold.class);
+                    if (scaffold != null) {
+                        path = scaffold.path();
+                    }
+                }
                 
                 if( Collection.class.isAssignableFrom(type)) {
                     boolean isManyToManyOwner = isManyToManyOwner(field);
                     if( isManyToManyOwner ) {
-                        meta.addField(new FieldMeta(name, type, isEntity, true, getManyToManyTargetClass(field)));
+                        meta.addField(new FieldMeta(name, type, isEntity, path, true, getManyToManyTargetClass(field)));
                     }
                 } else {
-                    meta.addField(new FieldMeta(name, type, isEntity, false, null));
+                    meta.addField(new FieldMeta(name, type, isEntity, path, false, null));
                 }
             }
             
