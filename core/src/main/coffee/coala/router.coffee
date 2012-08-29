@@ -5,6 +5,7 @@
 {json,html} = require 'coala/response'
 {createService} = require 'coala/scaffold/service'
 {createConverter} = require 'coala/scaffold/converter'
+defaultRouters = require 'coala/default-routers'
 
 log = require('ringo/logging').getLogger module.id
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
@@ -30,12 +31,13 @@ processRepository = (router, repo, prefix) ->
         processRepository router, r, prefix + r.getName() + '/'
     true
 
-exports.createMountPoint = (module)->
+exports.createApplication = (module, mountDefaultRouters = true)->
     router = new Application()
     router.configure 'mount'
     if module
         root = module.getRepository('./')
         processRepository router, root, '/'
+    defaultRouters.mountTo router if mountDefaultRouters
     router
 
 exports.createRouter = ->
