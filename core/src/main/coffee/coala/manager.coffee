@@ -148,10 +148,10 @@ exports.createManager = (entityClass, name) ->
             criteria.list()
 
     findBySql: (example, option = {}, sqlPath) ->
-        @findByQuery.call @, example, option, sqlPath, 'sql'
+        @findByStatement.call @, example, option, sqlPath, 'sql'
 
     findByHql: (example, option = {}, hqlPath) ->
-        @findByQuery.call @, example, option, hqlPath, 'hql'
+        @findByStatement.call @, example, option, hqlPath, 'hql'
 
     findByMethod: (example, option = {}, jsPath) ->
         if option.fetchCount is true
@@ -175,8 +175,15 @@ exports.createManager = (entityClass, name) ->
                 _value = new Boolean restrict.value
             else
                 _value = restrict.value
-        query.setParameter i + 1, _value
+            query.setParameter i + 1, _value
+        _len = restricts.length
+        pageInfo = getPageInfo option
+        query.setParameter _len + 1, option.fetchCount
+        query.setParameter _len + 2, pageInfo.firstResult
+        query.setParameter _len + 3, pageInfo.maxResults
         list = query.resultList
+        if option.fetchCount is true
+            return list.size()
         results = []
         it = list.iterator()
         while it.hasNext() 
@@ -187,7 +194,7 @@ exports.createManager = (entityClass, name) ->
             results.push obj
         results
 
-    findByQuery: (example, option = {}, path, type) ->
+    findByStatement: (example, option = {}, path, type) ->
         sql = fs.read path        
         sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
         fields = option.configs.fields
