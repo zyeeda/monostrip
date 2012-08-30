@@ -234,8 +234,10 @@
         if (restricts != null) {
           configs.restricts = restricts;
         }
-        options.configs.fields = setFieldsDefaultValue(options.configs.fields);
-        configs.configs = options.configs;
+        if (options.configs != null) {
+          options.configs.fields = setFieldsDefaultValue(options.configs.fields);
+          configs.configs = options.configs;
+        }
         configs.fetchCount = true;
         pageSize = configs.maxResults;
         count = service.list(entity, configs);
@@ -294,7 +296,7 @@
   };
 
   setFieldsDefaultValue = function(fields) {
-    var isNullAlias, isNullIndex, _field, _i, _len;
+    var f, i, isNullAlias, isNullIndex, _i, _j, _k, _len, _len1, _len2;
     isNullAlias = false;
     isNullIndex = false;
     if ((fields != null) && fields.length > 0) {
@@ -307,17 +309,25 @@
     } else {
       return fields;
     }
-    _i = 0;
-    _len = fields.length;
-    while (_i < _len) {
-      _field = fields[_i];
-      if (isNullAlias) {
-        _field.alias = _field.name;
+    if (isNullAlias && isNullIndex) {
+      for (i = _i = 0, _len = fields.length; _i < _len; i = ++_i) {
+        f = fields[i];
+        f.alias = f.name;
+        f.index = i + 1;
       }
-      if (isNullIndex) {
-        _field.index = _i;
+      return fields;
+    } else if (!isNullAlias && isNullIndex) {
+      for (i = _j = 0, _len1 = fields.length; _j < _len1; i = ++_j) {
+        f = fields[i];
+        f.index = i + 1;
       }
-      _i++;
+      return fields;
+    } else if (isNullAlias && !isNullIndex) {
+      for (i = _k = 0, _len2 = fields.length; _k < _len2; i = ++_k) {
+        f = fields[i];
+        f.alias = f.name;
+      }
+      return fields;
     }
     return fields;
   };

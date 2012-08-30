@@ -173,9 +173,9 @@ defaultHandlers =
         if configs?
             if restricts?
                 configs.restricts = restricts
-            options.configs.fields = setFieldsDefaultValue options.configs.fields
-            configs.configs = options.configs
-
+            if options.configs?
+                options.configs.fields = setFieldsDefaultValue options.configs.fields
+                configs.configs = options.configs
             configs.fetchCount = true
             pageSize = configs.maxResults
             count = service.list entity, configs
@@ -232,11 +232,17 @@ setFieldsDefaultValue = (fields) ->
         isNullIndex = true if not fields[0].index and fields[0].index != 0
     else
         return fields
-    _i = 0
-    _len = fields.length
-    while _i < _len
-        _field = fields[_i]
-        _field.alias = _field.name if isNullAlias 
-        _field.index = _i if isNullIndex
-        _i++
+    if isNullAlias and isNullIndex
+        for f, i in fields
+            f.alias = f.name
+            f.index = i + 1
+        return fields
+    else if !isNullAlias and isNullIndex
+        for f, i in fields
+            f.index = i + 1
+        return fields
+    else if isNullAlias and !isNullIndex
+        for f, i in fields
+            f.alias = f.name
+        return fields
     fields
