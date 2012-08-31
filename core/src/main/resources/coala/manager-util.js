@@ -210,7 +210,7 @@
             obj = {};
             for (_l = 0, _len3 = fields.length; _l < _len3; _l++) {
               f = fields[_l];
-              obj[f.name] = _next[f.index];
+              obj[f.name] = _next[f.position];
             }
             results.push(obj);
           }
@@ -250,8 +250,8 @@
                 name: restrict.name,
                 operator: _operator
               };
-              if (restrict.type) {
-                _restrict.type = restrict.type;
+              if (f.type) {
+                _restrict.type = f.type;
               }
               if (_operator === 'LIKE') {
                 where += ' ' + f.alias + ' like :' + f.name + ' and';
@@ -263,8 +263,8 @@
                   name: 'end_' + restrict.name,
                   value: _value[1]
                 };
-                if (restrict.type) {
-                  newRestrict.type = restrict.type;
+                if (f.type) {
+                  newRestrict.type = f.type;
                 }
                 _restricts.push(newRestrict);
                 where += ' ' + f.alias + ' between :' + f.name + ' and :' + 'end_' + f.name + ' and';
@@ -282,80 +282,31 @@
           restricts: _restricts
         };
       },
-      defaultRestrict: function(criteria, restrict, entityClass) {
-        var _other, _tempVal, _type, _value;
-        _type = entityClass.getMethod('get' + restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)).returnType;
-        if (_type == null) {
-          return criteria;
-        }
-        if (_type.equals(Date)) {
-          _tempVal = restrict.value.split(',');
-          _value = DatetimeUtils.parseDate(_tempVal[0]);
-          if (_tempVal[1]) {
-            _other = DatetimeUtils.parseDate(_tempVal[1]);
-          } else {
-            _other = _value;
-          }
-          criteria = criteria.add(Restrictions['between'].call(Restrictions, restrict.name, _value, _other));
-        } else if (_type.equals(Boolean) || _type.toString().equals('boolean')) {
-          if (restrict.value) {
-            _value = new Boolean(restrict.value);
-          }
-          criteria = criteria.add(Restrictions['eq'].call(Restrictions, restrict.name, _value));
-        } else if (_type.equals(Integer) || _type.equals(Double) || _type.toString().equals('int') || _type.toString().equals('double')) {
-          _tempVal = restrict.value.split(',');
-          _value = _tempVal[0];
-          _other = _tempVal[1];
-          criteria = criteria.add(Restrictions['between'].call(Restrictions, restrict.name, _value, _other));
-        } else if (_type.equals(String)) {
-          criteria = criteria.add(Restrictions['like'].call(Restrictions, restrict.name, restrict.value, MatchMode['ANYWHERE']));
-        } else {
-          criteria = criteria.add(Restrictions['eq'].call(Restrictions, restrict.name, restrict.value));
-        }
-        return criteria;
-      },
       fillRestrict: function(criteria, restrictions, entityClass) {
         var junc, restrict, _i, _len, _operator, _other, _tempVal, _type, _value;
         for (_i = 0, _len = restrictions.length; _i < _len; _i++) {
           restrict = restrictions[_i];
-          if (!restrict.operator) {
-            criteria = defaultRestrict(criteria, restrict, entityClass);
-            continue;
-          }
+          _type = entityClass.getMethod('get' + restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)).returnType;
           _operator = restrict.operator;
-          if (restrict.type) {
-            _type = restrict.type.toUpperCase();
-            if ('DATE' === _type) {
-              _tempVal = restrict.value.split(',');
-            }
-            if (_tempVal[0]) {
-              _value = DatetimeUtils.parseDate(_tempVal[0]);
-            }
+          if (_type.equals(Date)) {
+            _tempVal = restrict.value.split(',');
+            _value = DatetimeUtils.parseDate(_tempVal[0]);
             if (_tempVal[1]) {
               _other = DatetimeUtils.parseDate(_tempVal[1]);
-            } else if ('TIME' === _type) {
-              _tempVal = restrict.value.split(',');
-              if (_tempVal[0]) {
-                _value = DatetimeUtils.parseDatetime(_tempVal[0]);
-              }
-              if (_tempVal[1]) {
-                _other = DatetimeUtils.parseDatetime(_tempVal[1]);
-              }
-            } else if ('BOOLEAN' === _type) {
-              if (restrict.value) {
-                _value = new Boolean(restrict.value);
-              }
-              if (restrict.other) {
-                _other = new Boolean(restrict.other);
-              }
             } else {
-              if (restrict.value) {
-                _value = restrict.value;
-              }
-              if (restrict.other) {
-                _other = restrict.other;
-              }
+              _other = _value;
             }
+            _operator = _operator || 'between';
+          } else if (_type.equals(Boolean) || _type.toString().equals('boolean')) {
+            if (restrict.value) {
+              _value = new Boolean(restrict.value);
+            }
+            _operator = _operator || 'eq';
+          } else if (_type.equals(Integer) || _type.equals(Double) || _type.toString().equals('int') || _type.toString().equals('double')) {
+            _tempVal = restrict.value.split(',');
+            _value = _tempVal[0];
+            _other = _tempVal[1];
+            _operator = _operator || 'between';
           } else {
             if (restrict.value) {
               _value = restrict.value;
@@ -363,6 +314,7 @@
             if (restrict.other) {
               _other = restrict.other;
             }
+            _operator = _operator || 'like';
           }
           if ('or' === _operator) {
             junc = Restrictions.disjunction();
@@ -379,7 +331,7 @@
             criteria = criteria.add(Restrictions[_operator].call(Restrictions, restrict.name, _value, MatchMode['ANYWHERE']));
           } else {
             if (_value && _other) {
-              criteria = criteria.add(Restrictions[_operator].call(Restrictions, restrict.name, _value, otherVal));
+              criteria = criteria.add(Restrictions[_operator].call(Restrictions, restrict.name, _value, _other));
             } else if (restrict.value) {
               criteria = criteria.add(Restrictions[_operator].call(Restrictions, restrict.name, _value));
             } else {

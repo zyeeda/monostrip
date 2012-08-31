@@ -296,33 +296,33 @@
   };
 
   setFieldsDefaultValue = function(fields) {
-    var f, i, isNullAlias, isNullIndex, _i, _j, _k, _len, _len1, _len2;
+    var f, i, isNullAlias, isNullPosition, _i, _j, _k, _len, _len1, _len2;
     isNullAlias = false;
-    isNullIndex = false;
+    isNullPosition = false;
     if ((fields != null) && fields.length > 0) {
       if (!fields[0].alias) {
         isNullAlias = true;
       }
-      if (!fields[0].index && fields[0].index !== 0) {
-        isNullIndex = true;
+      if (!fields[0].position && fields[0].position !== 0) {
+        isNullPosition = true;
       }
     } else {
       return fields;
     }
-    if (isNullAlias && isNullIndex) {
+    if (isNullAlias && isNullPosition) {
       for (i = _i = 0, _len = fields.length; _i < _len; i = ++_i) {
         f = fields[i];
         f.alias = f.name;
-        f.index = i + 1;
+        f.position = i + 1;
       }
       return fields;
-    } else if (!isNullAlias && isNullIndex) {
+    } else if (!isNullAlias && isNullPosition) {
       for (i = _j = 0, _len1 = fields.length; _j < _len1; i = ++_j) {
         f = fields[i];
-        f.index = i + 1;
+        f.position = i + 1;
       }
       return fields;
-    } else if (isNullAlias && !isNullIndex) {
+    } else if (isNullAlias && !isNullPosition) {
       for (i = _k = 0, _len2 = fields.length; _k < _len2; i = ++_k) {
         f = fields[i];
         f.alias = f.name;

@@ -226,22 +226,22 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
 
 setFieldsDefaultValue = (fields) ->
     isNullAlias = false
-    isNullIndex = false
+    isNullPosition = false
     if fields? and fields.length > 0
         isNullAlias = true if not fields[0].alias
-        isNullIndex = true if not fields[0].index and fields[0].index != 0
+        isNullPosition = true if not fields[0].position and fields[0].position != 0
     else
         return fields
-    if isNullAlias and isNullIndex
+    if isNullAlias and isNullPosition
         for f, i in fields
             f.alias = f.name
-            f.index = i + 1
+            f.position = i + 1
         return fields
-    else if !isNullAlias and isNullIndex
+    else if !isNullAlias and isNullPosition
         for f, i in fields
-            f.index = i + 1
+            f.position = i + 1
         return fields
-    else if isNullAlias and !isNullIndex
+    else if isNullAlias and !isNullPosition
         for f, i in fields
             f.alias = f.name
         return fields

@@ -67,7 +67,7 @@ exports.createUtil = (em, entityClass) ->
                 _next = it.next()
                 obj = {}
                 for f in option.configs.fields
-                    obj[f.name] = _next[f.index]
+                    obj[f.name] = _next[f.position]
                 results.push obj
             results
 
@@ -128,7 +128,7 @@ exports.createUtil = (em, entityClass) ->
                     _next = it.next()
                     obj = {}
                     for f in fields
-                        obj[f.name] = _next[f.index]
+                        obj[f.name] = _next[f.position]
                     results.push obj
                 results
 
@@ -151,7 +151,7 @@ exports.createUtil = (em, entityClass) ->
                         _restrict = 
                             name: restrict.name
                             operator: _operator
-                        _restrict.type = restrict.type if restrict.type
+                        _restrict.type = f.type if f.type
                         if _operator == 'LIKE'
                             where += ' ' + f.alias + ' like :' + f.name + ' and'
                             _restrict.value = '%' + restrict.value + '%'
@@ -161,7 +161,7 @@ exports.createUtil = (em, entityClass) ->
                             newRestrict = 
                                 name: 'end_' + restrict.name
                                 value: _value[1]
-                            newRestrict.type = restrict.type if restrict.type
+                            newRestrict.type = f.type if f.type
                             _restricts.push newRestrict
                             where += ' ' + f.alias + ' between :' + f.name + ' and :' + 'end_' + f.name + ' and'
                         else
@@ -172,57 +172,27 @@ exports.createUtil = (em, entityClass) ->
             where: where
             restricts: _restricts
 
-        defaultRestrict: (criteria, restrict, entityClass) ->
-            _type = entityClass.getMethod('get' + restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)).returnType
-            return criteria unless _type?
-            if _type.equals(Date)
-                _tempVal = restrict.value.split ','
-                _value = DatetimeUtils.parseDate(_tempVal[0])
-                if _tempVal[1] then _other = DatetimeUtils.parseDate(_tempVal[1]) else _other = _value
-                criteria = criteria.add Restrictions['between'].call Restrictions, restrict.name, _value, _other
-            else if _type.equals(Boolean) or _type.toString().equals 'boolean'
-                _value = new Boolean(restrict.value) if restrict.value
-                criteria = criteria.add Restrictions['eq'].call Restrictions, restrict.name, _value
-            else if _type.equals(Integer) or _type.equals(Double) or _type.toString().equals('int') or _type.toString().equals('double')
-                _tempVal =  restrict.value.split ','
-                _value = _tempVal[0]
-                _other = _tempVal[1] 
-                criteria = criteria.add Restrictions['between'].call Restrictions, restrict.name, _value, _other
-            else if _type.equals String
-                criteria = criteria.add Restrictions['like'].call Restrictions, restrict.name, restrict.value, MatchMode['ANYWHERE']
-            else
-                criteria = criteria.add Restrictions['eq'].call Restrictions, restrict.name, restrict.value
-            criteria
-
         fillRestrict: (criteria, restrictions, entityClass) ->
             for restrict in restrictions
-                unless restrict.operator
-                    criteria = defaultRestrict criteria, restrict, entityClass
-                    continue
+                _type = entityClass.getMethod('get' + restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)).returnType
                 _operator = restrict.operator
-                if restrict.type
-                    _type = restrict.type.toUpperCase() 
-                    if 'DATE' == _type
-                         _tempVal =  restrict.value.split ','
-                        if _tempVal[0]
-                            _value = DatetimeUtils.parseDate(_tempVal[0])
-                        if _tempVal[1]
-                            _other = DatetimeUtils.parseDate(_tempVal[1]) 
-                    else if 'TIME' == _type
-                        _tempVal =  restrict.value.split ','
-                        if _tempVal[0]
-                            _value = DatetimeUtils.parseDatetime(_tempVal[0])
-                        if _tempVal[1]
-                            _other = DatetimeUtils.parseDatetime(_tempVal[1]) 
-                    else if 'BOOLEAN' == _type
-                        _value = new Boolean restrict.value if restrict.value
-                        _other = new Boolean restrict.other if restrict.other
-                    else
-                        _value = restrict.value if restrict.value
-                        _other = restrict.other if restrict.other
+                if _type.equals(Date)
+                    _tempVal = restrict.value.split ','
+                    _value = DatetimeUtils.parseDate(_tempVal[0])
+                    if _tempVal[1] then _other = DatetimeUtils.parseDate(_tempVal[1]) else _other = _value
+                    _operator = _operator || 'between'
+                else if _type.equals(Boolean) or _type.toString().equals 'boolean'
+                    _value = new Boolean(restrict.value) if restrict.value
+                    _operator = _operator || 'eq'
+                else if _type.equals(Integer) or _type.equals(Double) or _type.toString().equals('int') or _type.toString().equals('double')
+                    _tempVal =  restrict.value.split ','
+                    _value = _tempVal[0]
+                    _other = _tempVal[1] 
+                    _operator = _operator || 'between'
                 else
                     _value = restrict.value if restrict.value
                     _other = restrict.other if restrict.other
+                    _operator = _operator || 'like'
                 if 'or' == _operator
                     junc = Restrictions.disjunction()
                     criteria = criteria.add fillRestrict junc, _value
@@ -238,7 +208,7 @@ exports.createUtil = (em, entityClass) ->
                     criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, MatchMode['ANYWHERE']
                 else
                     if _value and _other
-                        criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, otherVal
+                        criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, _other
                     else if restrict.value
                         criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value 
                     else

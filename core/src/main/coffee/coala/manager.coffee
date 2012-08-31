@@ -1,11 +1,7 @@
-{Class, Boolean, String, Integer, Double} = java.lang
-{ArrayList, Date} = java.util
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 {EntityManager, EntityManagerFactory} = javax.persistence
 {EntityManagerFactoryUtils} = org.springframework.orm.jpa
-{Example, Order, Projections, MatchMode, Restrictions} = org.hibernate.criterion
 {Configuration} = org.hibernate.cfg
-{DatetimeUtils} = com.zyeeda.framework.utils
 {coala} = require 'coala/config'
 {type, objects} = require 'coala/util'
 {createUtil} = require 'coala/manager-util'
