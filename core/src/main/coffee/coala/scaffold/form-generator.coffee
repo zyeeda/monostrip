@@ -39,7 +39,8 @@ generateForm = (form, meta, labels) ->
 
     result.fields = []
     result.fields.push generateField(field, meta, labels) for field in form.fields
-
+    result.tabs = form.tabs
+    
     result
 
 generateField = (config, meta, labels) ->

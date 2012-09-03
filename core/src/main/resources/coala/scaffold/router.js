@@ -50,6 +50,28 @@
       }
       return json(grid);
     });
+    router.get('configuration/picker', function(request) {
+      var colModel, name, picker, value, _ref;
+      picker = options['picker'];
+      if (!picker && options.labels) {
+        colModel = [];
+        _ref = options.labels;
+        for (name in _ref) {
+          value = _ref[name];
+          colModel.push({
+            name: name,
+            index: name,
+            label: value
+          });
+        }
+        picker = {
+          grid: {
+            colModel: colModel
+          }
+        };
+      }
+      return json(picker);
+    });
     return router.get('configuration/:name', function(request, name) {
       return json(options[name]);
     });

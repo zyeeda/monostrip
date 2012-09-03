@@ -68,6 +68,7 @@ fields: [
       field = _ref2[_i];
       result.fields.push(generateField(field, meta, labels));
     }
+    result.tabs = form.tabs;
     return result;
   };
 
