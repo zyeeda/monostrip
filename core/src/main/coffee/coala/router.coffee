@@ -235,11 +235,11 @@ setFieldsDefaultValue = (fields) ->
     if isNullAlias and isNullPosition
         for f, i in fields
             f.alias = f.name
-            f.position = i + 1
+            f.position = i
         return fields
     else if !isNullAlias and isNullPosition
         for f, i in fields
-            f.position = i + 1
+            f.position = i
         return fields
     else if isNullAlias and !isNullPosition
         for f, i in fields

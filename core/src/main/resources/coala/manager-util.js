@@ -88,7 +88,7 @@
           } else if ('TIME' === _type) {
             _value = DatetimeUtils.parseDatetime(restrict.value);
           } else if ('BOOLEAN' === _type) {
-            _value = new Boolean(restrict.value);
+            _value = new Boolean(restrict.value === '1' ? true : false);
           } else {
             _value = restrict.value;
           }
@@ -111,7 +111,7 @@
           _ref3 = option.configs.fields;
           for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
             f = _ref3[_j];
-            obj[f.name] = _next[f.index];
+            obj[f.name] = _next[f.position];
           }
           results.push(obj);
         }
@@ -186,7 +186,7 @@
               } else if ('TIME' === _type) {
                 _value = DatetimeUtils.parseDatetime(restrict.value);
               } else if ('BOOLEAN' === _type) {
-                _value = new Boolean(restrict.value);
+                _value = new Boolean(restrict.value === '1' ? true : false);
               } else {
                 _value = restrict.value;
               }
@@ -218,7 +218,7 @@
         }
       },
       joinWhere: function(fields, restricts) {
-        var f, newRestrict, operators, restrict, where, _i, _j, _len, _len1, _operator, _restrict, _restricts, _value;
+        var f, i, inStr, newRestrict, operators, r, restrict, where, _i, _j, _k, _len, _len1, _len2, _operator, _restrict, _restricts, _value;
         if (!restricts) {
           return {
             where: where,
@@ -268,6 +268,23 @@
                 }
                 _restricts.push(newRestrict);
                 where += ' ' + f.alias + ' between :' + f.name + ' and :' + 'end_' + f.name + ' and';
+              } else if (_operator === 'IN') {
+                _value = restrict.value.split(',');
+                _restrict.value = _value.pop(0);
+                inStr = ':' + f.name;
+                for (i = _k = 0, _len2 = _value.length; _k < _len2; i = ++_k) {
+                  r = _value[i];
+                  newRestrict = {
+                    name: 'in_' + i + '_' + restrict.name,
+                    value: r
+                  };
+                  if (f.type) {
+                    newRestrict.type = f.type;
+                  }
+                  _restricts.push(newRestrict);
+                  inStr += ', :in_' + i + '_' + f.name;
+                }
+                where += ' ' + f.alias + ' in (' + inStr + ') and';
               } else {
                 _restrict.value = restrict.value;
                 where += ' ' + f.alias + ' ' + operators[_operator] + ' :' + f.name + ' and';
@@ -283,10 +300,19 @@
         };
       },
       fillRestrict: function(criteria, restrictions, entityClass) {
-        var junc, restrict, _i, _len, _operator, _other, _tempVal, _type, _value;
+        var junc, restrict, _i, _len, _operator, _other, _pname, _tempVal, _type, _value;
         for (_i = 0, _len = restrictions.length; _i < _len; _i++) {
           restrict = restrictions[_i];
-          _type = entityClass.getMethod('get' + restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)).returnType;
+          _pname = restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1);
+          try {
+            _type = entityClass.getMethod('get' + _pname).returnType;
+          } catch (e) {
+            try {
+              _type = entityClass.getMethod('is' + _pname).returnType;
+            } catch (ex) {
+              throw new Error("property " + restrict.name + " is not found");
+            }
+          }
           _operator = restrict.operator;
           if (_type.equals(Date)) {
             _tempVal = restrict.value.split(',');
@@ -298,9 +324,7 @@
             }
             _operator = _operator || 'between';
           } else if (_type.equals(Boolean) || _type.toString().equals('boolean')) {
-            if (restrict.value) {
-              _value = new Boolean(restrict.value);
-            }
+            _value = new Boolean(restrict.value === '1' ? true : false);
             _operator = _operator || 'eq';
           } else if (_type.equals(Integer) || _type.equals(Double) || _type.toString().equals('int') || _type.toString().equals('double')) {
             _tempVal = restrict.value.split(',');

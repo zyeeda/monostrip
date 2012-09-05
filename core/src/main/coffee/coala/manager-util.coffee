@@ -49,7 +49,7 @@ exports.createUtil = (em, entityClass) ->
                 else if 'TIME' == _type
                     _value = DatetimeUtils.parseDatetime restrict.value
                 else if 'BOOLEAN' == _type
-                    _value = new Boolean restrict.value
+                    _value = new Boolean if restrict.value == '1' then true else false
                 else
                     _value = restrict.value
                 query.setParameter i + 1, _value
@@ -111,7 +111,7 @@ exports.createUtil = (em, entityClass) ->
                         else if 'TIME' == _type
                             _value = DatetimeUtils.parseDatetime restrict.value
                         else if 'BOOLEAN' == _type
-                            _value = new Boolean restrict.value
+                            _value = new Boolean if restrict.value == '1' then true else false
                         else
                             _value = restrict.value
                         query.setParameter _next.name, _value
@@ -164,6 +164,18 @@ exports.createUtil = (em, entityClass) ->
                             newRestrict.type = f.type if f.type
                             _restricts.push newRestrict
                             where += ' ' + f.alias + ' between :' + f.name + ' and :' + 'end_' + f.name + ' and'
+                        else if _operator == 'IN'
+                            _value = restrict.value.split ','
+                            _restrict.value = _value.pop(0)
+                            inStr = ':' + f.name
+                            for r, i in _value
+                                newRestrict = 
+                                    name: 'in_' + i + '_' + restrict.name
+                                    value: r
+                                newRestrict.type = f.type if f.type
+                                _restricts.push newRestrict
+                                inStr += ', :in_' + i + '_' + f.name
+                            where += ' ' + f.alias + ' in (' + inStr + ') and'
                         else
                             _restrict.value = restrict.value
                             where += ' ' + f.alias + ' ' + operators[_operator] + ' :' + f.name + ' and'
@@ -174,7 +186,14 @@ exports.createUtil = (em, entityClass) ->
 
         fillRestrict: (criteria, restrictions, entityClass) ->
             for restrict in restrictions
-                _type = entityClass.getMethod('get' + restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)).returnType
+                _pname = restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)
+                try
+                    _type = entityClass.getMethod('get' + _pname).returnType 
+                catch e
+                    try
+                        _type = entityClass.getMethod('is' + _pname).returnType
+                    catch ex
+                        throw new Error "property #{restrict.name} is not found"
                 _operator = restrict.operator
                 if _type.equals(Date)
                     _tempVal = restrict.value.split ','
@@ -182,7 +201,7 @@ exports.createUtil = (em, entityClass) ->
                     if _tempVal[1] then _other = DatetimeUtils.parseDate(_tempVal[1]) else _other = _value
                     _operator = _operator || 'between'
                 else if _type.equals(Boolean) or _type.toString().equals 'boolean'
-                    _value = new Boolean(restrict.value) if restrict.value
+                    _value = new Boolean if restrict.value == '1' then true else false
                     _operator = _operator || 'eq'
                 else if _type.equals(Integer) or _type.equals(Double) or _type.toString().equals('int') or _type.toString().equals('double')
                     _tempVal =  restrict.value.split ','

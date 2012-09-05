@@ -313,13 +313,13 @@
       for (i = _i = 0, _len = fields.length; _i < _len; i = ++_i) {
         f = fields[i];
         f.alias = f.name;
-        f.position = i + 1;
+        f.position = i;
       }
       return fields;
     } else if (!isNullAlias && isNullPosition) {
       for (i = _j = 0, _len1 = fields.length; _j < _len1; i = ++_j) {
         f = fields[i];
-        f.position = i + 1;
+        f.position = i;
       }
       return fields;
     } else if (isNullAlias && !isNullPosition) {

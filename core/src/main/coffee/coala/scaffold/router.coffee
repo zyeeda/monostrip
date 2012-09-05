@@ -32,6 +32,12 @@ mountExtraRoutes = (router, meta, options) ->
     router.get('configuration/:name', (request, name) ->
         json options[name]
     )
+    router.get('configuration/fields', (request) ->
+        if options.configs and options.configs.fields
+            json options.configs.fields
+        else
+            json {}
+    )
 
 for meta in metas
     do (meta, mountExtraRoutes) ->

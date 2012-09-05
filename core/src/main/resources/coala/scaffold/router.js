@@ -50,8 +50,15 @@
       }
       return json(grid);
     });
-    return router.get('configuration/:name', function(request, name) {
+    router.get('configuration/:name', function(request, name) {
       return json(options[name]);
+    });
+    return router.get('configuration/fields', function(request) {
+      if (options.configs && options.configs.fields) {
+        return json(options.configs.fields);
+      } else {
+        return json({});
+      }
     });
   };
 
