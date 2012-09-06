@@ -7,14 +7,22 @@
 # mark('managers', [User, Organize, 'path-to-user-defined-manager'], function(userManager, organizeManager, custom){});
 
 {createService} = require 'coala/service'
-{type} = require 'coala/util'
+{type, paths} = require 'coala/util'
+{coala} = require 'coala/config'
 
 exports.handler = (context, attributes, fn, args) ->
-    if attributes
-        service = createService()
-        attr = if type(attributes) is 'array' then attributes else [attributes]
-        managers = []
+    service = createService()
 
-        managers.push(if type(clazz) is 'string' then require(clazz).createManager() else service.createManager clazz) for clazz in attr
-        args = managers.concat args
+    managers = []
+    for clazz in attributes
+        if type(clazz) is 'string'
+            names = clazz.split coala.servicePathSeperator
+            throw new Error("illegal manager path: #{m}, module:managerName") if names.length isnt 2
+            name = paths.join names[0], coala.managerFolderName, names[1]
+            manager = require(name).createManager()
+            managers.push manager
+        else
+            managers.push service.createManager clazz
+
+    args = managers.concat args
     fn.apply null, args

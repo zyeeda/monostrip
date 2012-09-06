@@ -11,6 +11,7 @@ syntax: glob
 *.~ml
 *.orig
 *.tlog
+.DS_Store
 
 .DS_Store
 
@@ -22,7 +23,6 @@ WEB-INF/classes
 WEB-INF/lib
 WEB-INF/app
 WEB-INF/modules/coala
-core/src/main/resources/coala
 
 src/main/webapp/scripts/main-dist.js
 

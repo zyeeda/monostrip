@@ -5,15 +5,39 @@
 {json,html} = require 'coala/response'
 {createService} = require 'coala/scaffold/service'
 {createConverter} = require 'coala/scaffold/converter'
+defaultRouters = require 'coala/default-routers'
 
 log = require('ringo/logging').getLogger module.id
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
-exports.createMountPoint = ->
+processRoot = (router, repo, prefix) ->
+    routersRepo = repo.getChildRepository coala.routerFoldername
+    print router, routersRepo, routersRepo.exists(), 'routers'
+    return if not routersRepo.exists()
+    routers = routersRepo.getResources false
+    for r in routers
+        try
+            module = r.getModuleName()
+            url = prefix + r.getBaseName()
+            log.debug "mount #{module} to #{url}"
+            router.mount url, module
+        catch e
+            log.warn "can't mount #{r.getModuleName()}, it is not export and router"
+    true
+
+processRepository = (router, repo, prefix) ->
+    processRoot router, repo, prefix
+    for r in repo.getRepositories()
+        processRepository router, r, prefix + r.getName() + '/'
+    true
+
+exports.createApplication = (module, mountDefaultRouters = true)->
     router = new Application()
     router.configure 'mount'
-    router.autoMount = (ctx) ->
-        autoMount.call ctx, router
+    if module
+        root = module.getRepository('./')
+        processRepository router, root, '/'
+    defaultRouters.mountTo router if mountDefaultRouters
     router
 
 exports.createRouter = ->
@@ -29,17 +53,15 @@ autoMount = (router)->
         try
             router.mount "/#{repo.getName()}", resource.getModuleName() if resource.exists()
         catch e
-            log.warn "can't mount #{resource.getModuleName()}, it had not export an router"
+            log.warn "can't mount #{resource.getModuleName()}, it is not export an router"
 
 extendRouter = (router) ->
     router.attachDomain = attachDomain.bind router, router
     router.resolveEntity = resolveEntity.bind router
     return
 
-resolveEntity = (entityClass, params, converters) ->
-    entityMeta = entityMetaResovler.resolveEntity entityClass
-    entity = createEntity entityMeta.entityClass
-
+resolveEntity = (entity, params, converters) ->
+    entityMeta = entityMetaResovler.resolveEntity entity.getClass()
     mergeEntityAndParameter converters: converters, params, entityMeta, 'resolve', entity
 
 # By default, the relationship of action, domain operate and url map is:
@@ -147,7 +169,13 @@ defaultHandlers =
 
         configs = coala.extractPaginationInfo request.params
         orders = coala.extractOrderInfo request.params
+        restricts = coala.extractRestrictInfo request.params
         if configs?
+            if restricts?
+                configs.restricts = restricts
+            if options.configs?
+                options.configs.fields = setFieldsDefaultValue options.configs.fields
+                configs.configs = options.configs
             configs.fetchCount = true
             pageSize = configs.maxResults
             count = service.list entity, configs
@@ -195,3 +223,26 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
         entity[key] = converter.convert value,entityMeta.getField(key)
     options.afterMerge? entity, type
     entity
+
+setFieldsDefaultValue = (fields) ->
+    isNullAlias = false
+    isNullPosition = false
+    if fields? and fields.length > 0
+        isNullAlias = true if not fields[0].alias
+        isNullPosition = true if not fields[0].position and fields[0].position != 0
+    else
+        return fields
+    if isNullAlias and isNullPosition
+        for f, i in fields
+            f.alias = f.name
+            f.position = i
+        return fields
+    else if !isNullAlias and isNullPosition
+        for f, i in fields
+            f.position = i
+        return fields
+    else if isNullAlias and !isNullPosition
+        for f, i in fields
+            f.alias = f.name
+        return fields
+    fields

@@ -7,11 +7,23 @@ catch e
     {}
 
 defaultConfigure =
-    development: true,
-    orms: ['src/main/resources/META-INF/orms/orm.xml'],
-    scaffoldRoot: 'scaffold',
-    defaultPageSize: 10,
+    development: true
+    orms: ['src/main/resources/META-INF/orms/orm.xml']
+    scaffoldFolderName: '__scaffold__'
+    serviceFolderName: '__services__'
+    managerFolderName: '__managers__'
+    routerFoldername: '__routers__'
+    servicePathSeperator: ':'
+    defaultPageSize: 10
     dateFormat: 'yyyy-MM-dd'
+
+    booleanFieldPickerSource: [{value: 'true', label: '是'}, {value: 'false', label: '否'}]
+    defaultOperators:
+        add: {label: '添加', icon: 'icon-plus'},
+        edit: {label: '编辑', icon: 'icon-edit'},
+        del: {label: '删除', icon: 'icon-minus'},
+        show: {label: '查看', icon: 'icon-eye-open'}
+
     extractPaginationInfo: (params) ->
         pageSize = params['_pageSize']
         currentPage = params['_page']
@@ -45,6 +57,12 @@ defaultConfigure =
             result.push o
 
         result
+
+    extractRestrictInfo: (params) ->
+        restricts = params['_filters']
+        return null if not restricts
+        delete params['_filters']
+        JSON.parse restricts
 
 exports.coala = objects.extend defaultConfigure, projectLevelConfigure.coala
 

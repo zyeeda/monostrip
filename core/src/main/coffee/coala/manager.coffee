@@ -1,10 +1,13 @@
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet;
-{EntityManager, EntityManagerFactory} = javax.persistence;
-{EntityManagerFactoryUtils} = org.springframework.orm.jpa;
-{Example, Order, Projections} = org.hibernate.criterion
+{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{EntityManager, EntityManagerFactory} = javax.persistence
+{EntityManagerFactoryUtils} = org.springframework.orm.jpa
 {Configuration} = org.hibernate.cfg
 {coala} = require 'coala/config'
-{type} = require 'coala/util'
+{type, objects} = require 'coala/util'
+{createUtil} = require 'coala/manager-util'
+
+entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
+
 
 context = Context.getInstance(module)
 # parameter name is the name of EntityManagerFactory which is configed in spring context
@@ -73,6 +76,9 @@ exports.createManager = (entityClass, name) ->
             em.refresh entity
         firstIfOnlyOne result
 
+    createNamedQuery: (name) ->
+        createQuery em, name
+
     # option can be like this:
     # {
     #     firstResult: 0,
@@ -92,28 +98,34 @@ exports.createManager = (entityClass, name) ->
                 builder[value] root.get property for property, value of order
             query.orderBy orders
 
-        q = em.createQuery(query)
+        q = em.createQuery query
 
         pageInfo = getPageInfo option
         fillPageInfo q, pageInfo
 
         q.getResultList()
 
-    # this implementation use native hibernate session
     findByExample: (example, option = {}) ->
-        ex = Example.create(example).excludeZeroes()
-        criteria = em.getDelegate().createCriteria(entityClass).add ex
-        if option.fetchCount is true
-            criteria.setProjection Projections.rowCount()
-            criteria.list().get(0)
+        managerUtil = new createUtil em, entityClass
+        meta = entityMetaResolver.resolveEntity entityClass
+        path = meta.path
+        path = path.replace /(^\/)|(\/$)/g, ''
+        [paths..., name] = path.split '/'
+        paths.push coala.scaffoldFolderName
+        paths.push name
+        path = paths.join '/'
+        dsPath = coala.appPath + path
+        dsFiles = ['.ds.hql', '.ds.sql', '.ds.sp', '.ds.js']
+        if fs.exists dsPath + dsFiles[0]
+            managerUtil.findByHql example, option, dsPath + dsFiles[0]
+        else if fs.exists dsPath + dsFiles[1] 
+            managerUtil.findBySql example, option, dsPath + dsFiles[1]
+        else if fs.exists dsPath + dsFiles[2]
+            managerUtil.findByProcedure example, option, dsPath + dsFiles[2]
+        else if fs.exists dsPath + dsFiles[3]
+            managerUtil.findByMethod example, option, path + dsFiles[3]
         else
-            pageInfo = getPageInfo option
-            fillPageInfo criteria, pageInfo
-
-            if option.orderBy
-                for order in option.orderBy
-                    criteria.addOrder Order[value] property for property, value of order
-            criteria.list()
+            managerUtil.findByEntity example, option
 
     __noSuchMethod__: (name,args) ->
         throw new Error 'can only support one argument call' if args?.length > 1
@@ -129,8 +141,11 @@ exports.createManager = (entityClass, name) ->
 
         for paramName, value of option
             query.setParameter paramName, value if paramName isnt 'firstResult' and paramName isnt 'maxResults'
-        if singleResult then query.getSingleResult() else query.getResultList()
 
+        if name.substring(0, 4) is 'find'
+            if singleResult then query.getSingleResult() else query.getResultList()
+        else
+            query.executeUpdate()
 
 getPageInfo = (object) ->
     result =
@@ -151,7 +166,6 @@ fillPageInfo = (query,pageInfo) ->
         query.setMaxResults pageInfo.maxResults
         return true
     false
-
 
 if coala.development is true
     fs = require 'fs'
