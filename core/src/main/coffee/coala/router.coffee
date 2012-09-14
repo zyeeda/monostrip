@@ -152,7 +152,7 @@ createEntity = (clazz) ->
     c.newInstance()
 
 getService = (options, entityMeta) ->
-    options.service or createService entityMeta.entityClass
+    options.service or createService entityMeta.entityClass, entityMeta
 
 
 getJsonFilter = (options, type) ->
@@ -187,25 +187,62 @@ defaultHandlers =
         json o, getJsonFilter(options, 'list')
 
     get: (options, service, entityMeta, request, id) ->
-        json service.get(id), getJsonFilter(options, 'get')
+        result = callHook 'before', 'Get', request.params['_formName_'], options, request, id
+        return result if result isnt true
+
+        entity = service.get id
+
+        result = callHook 'before', 'Get', request.params['_formName_'], options, request, entity
+        return result if result isnt true
+        json entity, getJsonFilter(options, 'get')
 
     create: (options, service, entityMeta, request) ->
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
-        json service.create(entity), getJsonFilter(options, 'create')
+
+        result = callHook 'before', 'Create', request.params['_formName_'], options, request, entity
+        return result if result isnt true
+
+        entity = service.create(entity)
+
+        result = callHook 'after', 'Create', request.params['_formName_'], options, request, entity
+        return result if result isnt true
+        json entity, getJsonFilter(options, 'create')
 
     update: (options, service, entityMeta, request, id) ->
+        result = callHook 'before', 'Update', request.params['_formName_'], options, request, id
+        return result if result isnt true
+
         entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, entityMeta, 'update')
+
+        result = callHook 'after', 'Update', request.params['_formName_'], options, request, entity
+        return result if result isnt true
         json entity, getJsonFilter(options, 'update')
 
     remove: (options, service, entityMeta, request, id) ->
-        json service.remove(id), getJsonFilter(options, 'remove')
+        result = callHook 'before', 'Remove', request.params['_formName_'], options, request, id
+        return result if result isnt true
+
+        entity = service.remove id
+
+        result = callHook 'after', 'Remove', request.params['_formName_'], options, request, entity
+        return result if result isnt true
+        json entity.id, getJsonFilter(options, 'remove')
 
     batchRemove: (options, service, entityMeta, request) ->
         ids = request.params.ids
         ids = if type(ids) is 'string' then [ids] else ids
-        result = service.remove.apply service, ids
-        json result, getJsonFilter(options, 'batchRemove')
+
+        result = callHook 'before', 'BatchRemove', request.params['_formName_'], options, request, ids
+        return result if result isnt true
+
+        r = service.remove.apply service, ids
+
+        result = callHook 'after', 'BatchRemove', request.params['_formName_'], options, request, r
+        return result if result isnt true
+
+        r = if type(r) is 'array' then (e.id for e in r) else r.id
+        json r, getJsonFilter(options, 'batchRemove')
 
 
 # the reason why put the entity in the end of argument list is that,
@@ -217,3 +254,13 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
         entity[key] = converter.convert value,entityMeta.getField(key)
     options.afterMerge? entity, type
     entity
+
+callHook = (hookType, action, formName, options, request, args...) ->
+    return true if not options.hooks
+    name = hookType + action
+    hook = options.hooks[name]
+    return true if not hook or type(hook) isnt 'function'
+
+    args.unshift request
+    args.unshift formName
+    hook.apply null, args

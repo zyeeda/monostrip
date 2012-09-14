@@ -72,4 +72,8 @@ public class EntityMeta {
     public FieldMeta getField(String name) {
         return fieldMetas.get(name);
     }
+    
+    public FieldMeta[] getFields() {
+        return fieldMetas.values().toArray(new FieldMeta[0]);
+    }
 }

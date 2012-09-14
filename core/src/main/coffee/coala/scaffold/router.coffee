@@ -13,8 +13,8 @@ router = exports.router = createRouter()
 metas = entityMetaResolver.resolveScaffoldEntities coala.entityPackages
 
 mountExtraRoutes = (router, meta, options) ->
-    router.get('configuration/forms', (request) ->
-        json generateForms(meta, options.labels, options.forms)
+    router.get('configuration/forms/:formName', (request, formName) ->
+        json generateForms(meta, options.labels, options.forms, formName)
     )
     router.get('configuration/operators', (request) ->
         operators = options['operators'] or coala.defaultOperators
@@ -34,7 +34,7 @@ mountExtraRoutes = (router, meta, options) ->
         if not picker and options.labels
             colModel = []
             colModel.push {name: name, index: name, label: value} for name, value of options.labels
-            picker = grid: 
+            picker = grid:
                 colModel: colModel
         json picker
     )

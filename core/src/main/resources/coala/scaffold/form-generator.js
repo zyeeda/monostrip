@@ -92,7 +92,12 @@ fields: [
   };
 
   defineFieldType = function(field, fieldMeta, entityMeta) {
-    print(JSON.stringify(field));
+    if (field.type === 'many-picker') {
+      if (fieldMeta.isManyToManyTarget() || fieldMeta.isOneToMany()) {
+        field.pickerSource = fieldMeta.getPath();
+        return;
+      }
+    }
     if (field.type) {
       return;
     }

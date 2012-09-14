@@ -16,15 +16,13 @@ fields: [
 {type, objects} = require 'coala/util'
 {coala} = require 'coala/config'
 
-exports.generateForms = (meta, labels = {}, forms) ->
+exports.generateForms = (meta, labels = {}, forms, formName) ->
     return null if not forms
 
     defaults = forms.defaults or {}
-    add = forms.add or defaults
-    edit = forms.edit or defaults
+    form = forms[formName] or defaults
 
-    add: generateForm add, meta, labels
-    edit: generateForm edit, meta, labels
+    generateForm form, meta, labels
 
 generateForm = (form, meta, labels) ->
     groups = DEFAULT: {label: null, columns: 1}
@@ -40,7 +38,7 @@ generateForm = (form, meta, labels) ->
     result.fields = []
     result.fields.push generateField(field, meta, labels) for field in form.fields
     result.tabs = form.tabs
-    
+
     result
 
 generateField = (config, meta, labels) ->
@@ -56,7 +54,11 @@ generateField = (config, meta, labels) ->
     field
 
 defineFieldType = (field, fieldMeta, entityMeta) ->
-    print JSON.stringify field
+    if field.type is 'many-picker'
+        if (fieldMeta.isManyToManyTarget() or fieldMeta.isOneToMany())
+            field.pickerSource = fieldMeta.getPath()
+            return
+
     return if field.type
     if fieldMeta.getType() is java.lang.Boolean
         field.type = 'picker'

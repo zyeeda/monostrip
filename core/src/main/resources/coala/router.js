@@ -211,7 +211,7 @@
   };
 
   getService = function(options, entityMeta) {
-    return options.service || createService(entityMeta.entityClass);
+    return options.service || createService(entityMeta.entityClass, entityMeta);
   };
 
   getJsonFilter = function(options, type) {
