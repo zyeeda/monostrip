@@ -1,4 +1,5 @@
 {mark} = require 'coala/mark'
+{objects} = require 'coala/util'
 {Date, Locale} = java.util
 {Integer, Boolean, Double, Float} = java.lang
 {Default} = javax.validation.groups
@@ -28,22 +29,22 @@ exports.createValidator = ->
             name = f
             if f instanceof Object
                 name = f.name
-                rules[name] = f.rules if f.rules
-                messages[name] = f.messages if f.messages
+                rules[name] = objects.extend {}, f.rules if f.rules
+                messages[name] = objects.extend {}, f.messages if f.messages
             rules[name] = {} unless rules[name]
             messages[name] = {} unless messages[name]
             annos = []
-            f = FieldUtils.getField entityClass, name, true
-            if f.type == Date
+            field = FieldUtils.getField entityClass, name, true
+            if field.type == Date
                 rules[name].date = true
                 messages[name].date = messageSource.getMessage 'com.zyeeda.framework.validator.constraints.Date.message', null, Locale.default
-            else if f.type == Integer or 'int'.equals f.type
+            else if field.type == Integer or 'int'.equals field.type
                 rules[name].digits = true
                 messages[name].digits = messageSource.getMessage 'com.zyeeda.framework.validator.constraints.Digits.message', null, Locale.default
-            else if f.type == Double or 'double'.equals f.type or f.type == Float or 'float'.equals f.type
+            else if field.type == Double or 'double'.equals field.type or field.type == Float or 'float'.equals field.type
                 rules[name].number= true
-                messages[name].date = messageSource.getMessage 'com.zyeeda.framework.validator.constraints.Number.message', null, Locale.default
-            annos = f.annotations
+                messages[name].number = messageSource.getMessage 'com.zyeeda.framework.validator.constraints.Number.message', null, Locale.default
+            annos = field.annotations
             upperCaseName = 'get' + name.substring(0, 1).toUpperCase() + name.substring 1, name.length
             m = entityClass.getMethod upperCaseName
             annos2 = m.annotations
@@ -81,11 +82,11 @@ exports.createValidator = ->
                         message = message.replace '{min}', map.get('min')
                         message = message.replace '{max}', map.get('max')
                         messages[name].rangelength = message
-                    else if a instanceof org.hibernate.validator.constraints.DecimalMax or a instanceof org.hibernate.validator.constraints.Max
+                    else if a instanceof javax.validation.constraints.DecimalMax or a instanceof javax.validation.constraints.constraints.Max
                         rules[name].max = map.get 'value'
                         message = message.replace '{value}', map.get('value')
                         messages[name].max = message
-                    else if a instanceof org.hibernate.validator.constraints.DecimalMin or a instanceof org.hibernate.validator.constraints.Min
+                    else if a instanceof javax.validation.constraints.DecimalMin or a instanceof javax.validation.constraints.Min
                         rules[name].min = map.get 'value'
                         message = message.replace '{value}', map.get('value')
                         messages[name].min = message
