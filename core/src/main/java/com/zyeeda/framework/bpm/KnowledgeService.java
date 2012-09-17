@@ -5,8 +5,8 @@ import org.drools.runtime.StatefulKnowledgeSession;
 
 public interface KnowledgeService {
 	
-	StatefulKnowledgeSession getProcessSession();
+	StatefulKnowledgeSession createKnowledgeSession();
 	
-	StatefulKnowledgeSession getProcessSession(int sessionId);
+	StatefulKnowledgeSession getKnowledgeSession(int sessionId);
 	
 }
