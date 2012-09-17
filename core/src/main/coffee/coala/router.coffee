@@ -5,8 +5,11 @@
 {json,html} = require 'coala/response'
 {createService} = require 'coala/scaffold/service'
 {createConverter} = require 'coala/scaffold/converter'
+{createValidator} = require 'coala/validator'
 defaultRouters = require 'coala/default-routers'
+{Add, Edit} = com.zyeeda.framework.validator.group
 
+validator = new createValidator()
 log = require('ringo/logging').getLogger module.id
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
@@ -199,6 +202,8 @@ defaultHandlers =
     create: (options, service, entityMeta, request) ->
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
+        result = validator.validate entity, Add
+        return json result if result.errors
 
         result = callHook 'before', 'Create', request.params['_formName_'], options, request, entity
         return result if result isnt true
@@ -214,6 +219,8 @@ defaultHandlers =
         return result if result isnt true
 
         entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, entityMeta, 'update')
+        result = validator.validate entity, Edit
+        return json result if result.errors
 
         result = callHook 'after', 'Update', request.params['_formName_'], options, request, entity
         return result if result isnt true
