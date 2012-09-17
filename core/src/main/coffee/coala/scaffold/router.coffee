@@ -4,6 +4,11 @@
 {coala} = require 'coala/config'
 {json} = require 'coala/response'
 {generateForms} = require 'coala/scaffold/form-generator'
+{createValidator} = require 'coala/validator'
+{Add, Edit} = com.zyeeda.framework.validator.group
+
+
+validator = new createValidator()
 
 log = require('ringo/logging').getLogger module.id
 entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
@@ -40,6 +45,16 @@ mountExtraRoutes = (router, meta, options) ->
     )
     router.get('configuration/:name', (request, name) ->
         json options[name]
+    )
+    router.get('configuration/rules', (request) ->
+        return null if not options.forms
+        defaults = options.forms.defaults or {}
+        add = options.forms.add or defaults
+        edit = options.forms.edit or defaults
+        json(
+            add: validator.buildValidateRules add.fields, meta.entityClass, Add    
+            edit: validator.buildValidateRules edit.fields, meta.entityClass, Edit 
+        )           
     )
 
 for meta in metas
