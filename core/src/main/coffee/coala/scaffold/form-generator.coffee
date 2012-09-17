@@ -15,6 +15,8 @@ fields: [
 ###
 {type, objects} = require 'coala/util'
 {coala} = require 'coala/config'
+{createValidator} = require 'coala/validator'
+{Add, Edit} = com.zyeeda.framework.validator.group
 
 exports.generateForms = (meta, labels = {}, forms, formName) ->
     return null if not forms
@@ -22,9 +24,9 @@ exports.generateForms = (meta, labels = {}, forms, formName) ->
     defaults = forms.defaults or {}
     form = forms[formName] or defaults
 
-    generateForm form, meta, labels
+    generateForm form, meta, labels, formName
 
-generateForm = (form, meta, labels) ->
+generateForm = (form, meta, labels, formName) ->
     groups = DEFAULT: {label: null, columns: 1}
     for name, value of form.groups or {}
         if value is null or type(value) is 'string'
@@ -38,6 +40,9 @@ generateForm = (form, meta, labels) ->
     result.fields = []
     result.fields.push generateField(field, meta, labels) for field in form.fields
     result.tabs = form.tabs
+
+    validateGroup = if formName == 'add' then Add else Edit
+    result.validator = createValidator().buildValidateRules result.fields, meta.entityClass, validateGroup
 
     result
 

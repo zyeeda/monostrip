@@ -28,8 +28,8 @@
   metas = entityMetaResolver.resolveScaffoldEntities(coala.entityPackages);
 
   mountExtraRoutes = function(router, meta, options) {
-    router.get('configuration/forms', function(request) {
-      return json(generateForms(meta, options.labels, options.forms));
+    router.get('configuration/forms/:formName', function(request, formName) {
+      return json(generateForms(meta, options.labels, options.forms, formName));
     });
     router.get('configuration/operators', function(request) {
       var operators;

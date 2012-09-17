@@ -45,11 +45,15 @@
         rules = {};
         messages = {};
         if (!fields) {
-          return rules;
+          return {
+            rules: rules,
+            messages: messages
+          };
         }
         for (_i = 0, _len = fields.length; _i < _len; _i++) {
           f = fields[_i];
           name = f;
+          annos = [];
           if (f instanceof Object) {
             name = f.name;
             if (f.rules) {
@@ -65,7 +69,6 @@
           if (!messages[name]) {
             messages[name] = {};
           }
-          annos = [];
           field = FieldUtils.getField(entityClass, name, true);
           if (field.type === Date) {
             rules[name].date = true;
