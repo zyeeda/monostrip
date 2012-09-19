@@ -5,8 +5,6 @@
 {json} = require 'coala/response'
 {generateForms} = require 'coala/scaffold/form-generator'
 
-validator = new createValidator()
-
 log = require('ringo/logging').getLogger module.id
 entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 

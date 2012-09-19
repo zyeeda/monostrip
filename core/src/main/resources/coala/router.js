@@ -286,15 +286,17 @@
     },
     update: function(options, service, entityMeta, request, id) {
       var entity, result;
+      entity = createEntity(entityMeta.entityClass);
+      mergeEntityAndParameter(options, request.params, entityMeta, 'create', entity);
+      result = validator.validate(entity, Edit);
+      if (result.errors) {
+        return json(result);
+      }
       result = callHook('before', 'Update', request.params['_formName_'], options, request, id);
       if (result !== true) {
         return result;
       }
       entity = service.update(id, mergeEntityAndParameter.bind(this, options, request.params, entityMeta, 'update'));
-      result = validator.validate(entity, Edit);
-      if (result.errors) {
-        return json(result);
-      }
       result = callHook('after', 'Update', request.params['_formName_'], options, request, entity);
       if (result !== true) {
         return result;

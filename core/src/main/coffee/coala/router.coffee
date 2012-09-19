@@ -202,6 +202,7 @@ defaultHandlers =
     create: (options, service, entityMeta, request) ->
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
+
         result = validator.validate entity, Add
         return json result if result.errors
 
@@ -215,12 +216,16 @@ defaultHandlers =
         json entity, getJsonFilter(options, 'create')
 
     update: (options, service, entityMeta, request, id) ->
+        entity = createEntity entityMeta.entityClass
+        mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
+
+        result = validator.validate entity, Edit
+        return json result if result.errors
+
         result = callHook 'before', 'Update', request.params['_formName_'], options, request, id
         return result if result isnt true
 
         entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, entityMeta, 'update')
-        result = validator.validate entity, Edit
-        return json result if result.errors
 
         result = callHook 'after', 'Update', request.params['_formName_'], options, request, entity
         return result if result isnt true
