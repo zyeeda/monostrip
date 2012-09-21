@@ -23,6 +23,7 @@ import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
+import com.zyeeda.framework.entities.base.TreeStyleEntity;
 import com.zyeeda.framework.web.scaffold.EntityMeta;
 import com.zyeeda.framework.web.scaffold.EntityMetaResolver;
 import com.zyeeda.framework.web.scaffold.FieldMeta;
@@ -164,6 +165,13 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                 Scaffold scaffold = meta.getEntityClass().getAnnotation(Scaffold.class);
                 if( scaffold != null ) {
                     meta.setPath(scaffold.path());
+                    if ("grid".equals(scaffold.type()) && TreeStyleEntity.class.isAssignableFrom(meta.getEntityClass())) {
+                        meta.setType("tree");
+                    } else if (("tree".equals(scaffold.type()) || "treeTable".equals(scaffold.type())) && !TreeStyleEntity.class.isAssignableFrom(meta.getEntityClass())) {
+                        meta.setType("grid");
+                    } else {
+                        meta.setType(scaffold.type());
+                    }
                     meta.setExcludedActions(scaffold.excludes());
                     Map<String, Filters> filters = new HashMap<String, Filters>();
                     for( Filters filter : scaffold.filters() ) {

@@ -1,4 +1,6 @@
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{ClassUtils} = org.springframework.util
+{TreeStyleEntity} = com.zyeeda.framework.entities.base
 
 {createRouter} = require 'coala/router'
 {coala} = require 'coala/config'
@@ -47,14 +49,20 @@ mountExtraRoutes = (router, meta, options) ->
         json options[name]
     )
     router.get('configuration/rules', (request) ->
-        return null if not options.forms
+        return json null if not options.forms
         defaults = options.forms.defaults or {}
         add = options.forms.add or defaults
         edit = options.forms.edit or defaults
         json(
-            add: validator.buildValidateRules add.fields, meta.entityClass, Add    
-            edit: validator.buildValidateRules edit.fields, meta.entityClass, Edit 
-        )           
+            add: validator.buildValidateRules add.fields, meta.entityClass, Add
+            edit: validator.buildValidateRules edit.fields, meta.entityClass, Edit
+        )
+    )
+    router.get('configuration/feature', (request) ->
+        return json options.feature if options.feature
+
+        json
+            type: meta.type
     )
 
 for meta in metas

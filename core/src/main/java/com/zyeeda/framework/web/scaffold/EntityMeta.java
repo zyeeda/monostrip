@@ -12,6 +12,7 @@ import com.zyeeda.framework.web.scaffold.annotation.Filters;
 public class EntityMeta {
 
     private String path = null;
+    private String type = null;
     private String[] excludedActions = null;
     private Map<String, Filters> jsonFilters = null;
     
@@ -76,4 +77,13 @@ public class EntityMeta {
     public FieldMeta[] getFields() {
         return fieldMetas.values().toArray(new FieldMeta[0]);
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+    
 }

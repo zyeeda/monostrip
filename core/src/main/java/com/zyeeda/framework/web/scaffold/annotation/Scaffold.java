@@ -14,6 +14,7 @@ import java.lang.annotation.Target;
 public @interface Scaffold {
 
     String path();
+    String type() default "grid"; // grid, tree, treeTable
     String[] excludes() default {};
     Filters[] filters() default {@Filters};
     

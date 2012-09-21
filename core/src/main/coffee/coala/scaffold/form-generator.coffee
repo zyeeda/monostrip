@@ -36,6 +36,13 @@ generateForm = (form, meta, labels) ->
     result.groups = groups
 
     result.fields = []
+    print 'meta', meta.type
+    if meta.type is 'tree'
+        result.fields.push
+            label: 'Parent Name', name: 'parentName', value: 'parent.name', colspan: 2, rowspan: 1, group: 'DEFAULT', type: 'string', readOnly: true
+        result.fields.push
+            name: 'parent', value: 'parent.id', colspan: 1, rowspan: 1, group: 'DEFAULT', type: 'hidden'
+
     result.fields.push generateField(field, meta, labels) for field in form.fields
     result.tabs = form.tabs
 
