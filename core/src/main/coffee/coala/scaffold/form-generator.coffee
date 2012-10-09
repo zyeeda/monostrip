@@ -37,9 +37,9 @@ generateForm = (form, meta, labels) ->
 
     result.fields = []
     print 'meta', meta.type
-    if meta.type is 'tree'
+    if meta.type is 'tree' or meta.type is 'treeTable'
         result.fields.push
-            label: 'Parent Name', name: 'parentName', value: 'parent.name', colspan: 2, rowspan: 1, group: 'DEFAULT', type: 'string', readOnly: true
+            label: '父节点', name: 'parentName', value: 'parent.name', colspan: 2, rowspan: 1, group: 'DEFAULT', type: 'string', readOnly: true
         result.fields.push
             name: 'parent', value: 'parent.id', colspan: 1, rowspan: 1, group: 'DEFAULT', type: 'hidden'
 

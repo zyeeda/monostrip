@@ -172,6 +172,8 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                     } else {
                         meta.setType(scaffold.type());
                     }
+                    String processId = scaffold.processId();
+                    meta.setBoundProcess((processId == null || processId.length() == 0) ? null : processId);
                     meta.setExcludedActions(scaffold.excludes());
                     Map<String, Filters> filters = new HashMap<String, Filters>();
                     for( Filters filter : scaffold.filters() ) {

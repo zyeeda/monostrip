@@ -2,6 +2,9 @@
 {mark} = require 'coala/mark'
 {createService} = require 'coala/service'
 {type} = require 'coala/util'
+createProcessService = require('coala/process-service').createService
+
+{ProcessStatusAware} = com.zyeeda.framework.entities.base
 
 exports.createService = (entityClass, entityMeta) ->
     baseService = createService()
@@ -48,6 +51,21 @@ exports.createService = (entityClass, entityMeta) ->
             manager = baseService.createManager service.entityClass
             entity = manager.save entity
             manySideUpdate entity
+
+            if entityMeta.isProcessBound()
+                processId = entityMeta.boundProcess
+                processSession = createProcessService().getProcessSession()
+                processInstance = processSession.startProcess processId,
+                    ENTITY: entity.id
+                    SUBMITTER: 'current user id'
+                    ENTITYCLASS: service.entityClass
+                processSession.insert entity
+                if entity instanceof ProcessStatusAware
+                    entity.processId = processId
+                    entity.processInstanceId = processInstance.id
+                    entity.knowledgeSessionId = processSession.id
+                    entity.status = processId
+
             entity
 
         update: mark('tx').on (id, fn) ->

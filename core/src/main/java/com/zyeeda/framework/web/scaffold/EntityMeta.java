@@ -19,6 +19,8 @@ public class EntityMeta {
     private Class<?> entityClass = null;
     private Map<String, FieldMeta> fieldMetas = null;
     
+    private String boundProcess = null;
+    
     public EntityMeta() {
         fieldMetas = new HashMap<String, FieldMeta>();
     }
@@ -85,5 +87,16 @@ public class EntityMeta {
     public void setType(String type) {
         this.type = type;
     }
+
+    public String getBoundProcess() {
+        return boundProcess;
+    }
+
+    public void setBoundProcess(String boundProcess) {
+        this.boundProcess = boundProcess;
+    }
     
+    public boolean isProcessBound() {
+        return boundProcess != null;
+    }
 }
