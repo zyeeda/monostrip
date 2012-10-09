@@ -9,8 +9,6 @@ import org.drools.persistence.jpa.JPAKnowledgeService;
 import org.drools.runtime.Environment;
 import org.drools.runtime.EnvironmentName;
 import org.drools.runtime.StatefulKnowledgeSession;
-import org.jbpm.process.audit.JPAProcessInstanceDbLog;
-import org.jbpm.process.audit.JPAWorkingMemoryDbLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
@@ -65,8 +63,8 @@ public class DefaultKnowledgeService implements KnowledgeService {
 	    KnowledgeRuntimeLoggerFactory.newConsoleLogger(ksession);
 	    
 	    // TODO: Rewrite HistoryLogger
-	    JPAProcessInstanceDbLog.setEnvironment(env);
-	    new JPAWorkingMemoryDbLogger(ksession);
+	    //JPAProcessInstanceDbLog.setEnvironment(env);
+	    //new JPAWorkingMemoryDbLogger(ksession);
 	}
 	
 	/**
