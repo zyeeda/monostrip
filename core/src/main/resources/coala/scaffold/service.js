@@ -10,8 +10,71 @@
   type = require('coala/util').type;
 
   exports.createService = function(entityClass, entityMeta) {
-    var baseService, service;
+    var baseService, manySideUpdate, service;
     baseService = createService();
+    manySideUpdate = function(entity, previousValues) {
+      var e, fieldManager, fieldMeta, value, values, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+      if (previousValues == null) {
+        previousValues = {};
+      }
+      _ref = entityMeta.getFields();
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        fieldMeta = _ref[_i];
+        if (fieldMeta.isOneToMany()) {
+          fieldManager = baseService.createManager(fieldMeta.manyType);
+          _ref1 = previousValues[fieldMeta.name] || [];
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            e = _ref1[_j];
+            e[fieldMeta.mappedBy] = null;
+            fieldManager.merge(e);
+          }
+          values = entity[fieldMeta.name];
+          if (values !== null && values.isEmpty && !values.isEmpty()) {
+            _results.push((function() {
+              var _k, _len2, _ref2, _results1;
+              _ref2 = values.toArray();
+              _results1 = [];
+              for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+                value = _ref2[_k];
+                value[fieldMeta.mappedBy] = entity;
+                _results1.push(fieldManager.merge(value));
+              }
+              return _results1;
+            })());
+          } else {
+            _results.push(void 0);
+          }
+        } else if (fieldMeta.isManyToManyTarget()) {
+          fieldManager = baseService.createManager(fieldMeta.manyToManyOwnerType);
+          _ref2 = previousValues[fieldMeta.name] || [];
+          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+            e = _ref2[_k];
+            e[fieldMeta.mappedBy].remove(entity);
+            fieldManager.merge(e);
+          }
+          values = entity[fieldMeta.name];
+          if (values !== null && values.isEmpty && !values.isEmpty()) {
+            _results.push((function() {
+              var _l, _len3, _ref3, _results1;
+              _ref3 = values.toArray();
+              _results1 = [];
+              for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
+                value = _ref3[_l];
+                value[fieldMeta.mappedBy].add(entity);
+                _results1.push(fieldManager.merge(value));
+              }
+              return _results1;
+            })());
+          } else {
+            _results.push(void 0);
+          }
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
     service = {
       entityClass: entityClass,
       list: function(entity, options) {
@@ -25,44 +88,34 @@
         return manager.find(id);
       },
       create: mark('tx').on(function(entity) {
-        var fieldManager, fieldMeta, manager, value, values, _i, _j, _len, _len1, _ref, _ref1;
+        var manager;
         manager = baseService.createManager(service.entityClass);
         entity = manager.save(entity);
-        _ref = entityMeta.getFields();
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          fieldMeta = _ref[_i];
-          if (fieldMeta.isOneToMany()) {
-            values = entity[fieldMeta.name];
-            if (values !== null && values.isEmpty && !values.isEmpty()) {
-              fieldManager = baseService.createManager(fieldMeta.manyType);
-              _ref1 = values.toArray();
-              for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-                value = _ref1[_j];
-                value[fieldMeta.mappedBy] = entity;
-                fieldManager.merge(value);
-              }
-            }
-          }
-        }
+        manySideUpdate(entity);
         return entity;
       }),
       update: mark('tx').on(function(id, fn) {
-        var entity, manager;
+        var entity, fieldMeta, manager, pre, _i, _len, _ref;
         manager = baseService.createManager(service.entityClass);
         entity = manager.find(id);
+        pre = {};
+        _ref = entityMeta.getFields();
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          fieldMeta = _ref[_i];
+          if (fieldMeta.isOneToMany() || fieldMeta.isManyToManyTarget()) {
+            pre[fieldMeta.name] = entity[fieldMeta.name].toArray();
+          }
+        }
         fn(entity, service);
-        return manager.merge(entity);
+        manager.merge(entity);
+        manySideUpdate(entity, pre);
+        return entity;
       }),
       remove: mark('tx').on(function() {
         var id, manager;
         id = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         manager = baseService.createManager(service.entityClass);
-        manager.removeById.apply(manager, id);
-        if (id.length === 1) {
-          return id[0];
-        } else {
-          return id;
-        }
+        return manager.removeById.apply(manager, id);
       })
     };
     return service;

@@ -202,8 +202,13 @@ defaultHandlers =
     create: (options, service, entityMeta, request) ->
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
-        result = validator.validate entity, Add
-        return json result if result.errors
+
+        errors = []
+        result = callValidator 'create', request.params['_formName_'], options, request, entity
+        conts = validator.validate entity, Add
+        errors = errors.concat result.errors if result.errors
+        errors = errors.concat conts.errors if conts.errors
+        return json errors: errors if errors.length > 0
 
         result = callHook 'before', 'Create', options, entityMeta, request, entity
         return result if result isnt true
@@ -216,18 +221,28 @@ defaultHandlers =
         json entity, getJsonFilter(options, 'create')
 
     update: (options, service, entityMeta, request, id) ->
+        entity = createEntity entityMeta.entityClass
+        mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
+        errors = []
+        result = callValidator 'update', request.params['_formName_'], options, request, id
+        conts = validator.validate entity, Edit
+        errors = errors.concat result.errors if result.errors
+        errors = errors.concat conts.errors if conts.errors
+        return json errors: errors if errors.length > 0
+
         result = callHook 'before', 'Update', options, entityMeta, request, id
         return result if result isnt true
 
         entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, entityMeta, 'update')
-        result = validator.validate entity, Edit
-        return json result if result.errors
 
         result = callHook 'after', 'Update', options, entityMeta, request, entity
         return result if result isnt true
         json entity, getJsonFilter(options, 'update')
 
     remove: (options, service, entityMeta, request, id) ->
+        result = callValidator 'remove', request.params['_formName_'], options, request, id
+        return json result if result isnt true
+        
         result = callHook 'before', 'Remove', options, entityMeta, request, id
         return result if result isnt true
 
@@ -238,6 +253,9 @@ defaultHandlers =
         json entity.id, getJsonFilter(options, 'remove')
 
     batchRemove: (options, service, entityMeta, request) ->
+        result = callValidator 'batchRemove', request.params['_formName_'], options, request, ids
+        return json result if result isnt true
+
         ids = request.params.ids
         ids = if type(ids) is 'string' then [ids] else ids
 
@@ -273,3 +291,12 @@ callHook = (hookType, action, options, meta, request, args...) ->
     args.unshift request.params['_formName_']
     args.unshift meta
     hook.apply null, args
+
+callValidator = (action, formName, options, request, args...) ->
+    return true if not options.validators
+    valid = options.validators[action]
+    return true if not valid or type(valid) isnt 'function'
+
+    args.unshift request
+    args.unshift formName
+    valid.apply null, args

@@ -5,11 +5,12 @@
 {Default} = javax.validation.groups
 {FieldUtils} = org.apache.commons.lang.reflect
 {ArrayUtils} = org.apache.commons.lang
-{AnnotationUtils} = org.springframework.core.annotation 
+{AnnotationUtils} = org.springframework.core.annotation
 
-exports.createValidator = -> 
-    validate: mark('beans', 'validationFactory').on (validationFactory, entity, group) -> 
-        constraintViolations = if group then validationFactory.validator.validate entity, Default, group else validationFactory.validator.validate entity, Default
+exports.createValidator = ->
+    validate: mark('beans', 'validationFactory').on (validationFactory, entity, group) ->
+        constraintViolations = if group then validationFactory.validator.validate entity, Default, group
+        else validationFactory.validator.validate entity, Default
         consts = []
         it = constraintViolations.iterator()
         while it.hasNext()
@@ -19,21 +20,19 @@ exports.createValidator = ->
             msg.message = prop.message.toString()
             # msg.value = prop.invalidValue
             consts.push msg
-        if consts.length > 0 then return errors: consts else return {}           
+        if consts.length > 0 then return errors: consts else return {}
 
     buildValidateRules: mark('beans', 'messageSource').on (messageSource, fields, entityClass, group) ->
-        rules = {}
-        messages = {}
-        return rules unless fields
+        rules = {}; messages = {}
+        return rules: rules, messages: messages unless fields
         for f in fields
-            name = f
+            name = f; annos = []
             if f instanceof Object
                 name = f.name
                 rules[name] = objects.extend {}, f.rules if f.rules
                 messages[name] = objects.extend {}, f.messages if f.messages
             rules[name] = {} unless rules[name]
             messages[name] = {} unless messages[name]
-            annos = []
             field = FieldUtils.getField entityClass, name, true
             if field.type == Date
                 rules[name].date = true
@@ -51,16 +50,16 @@ exports.createValidator = ->
             newAnnos = annos.concat annos2
             for a in newAnnos
                 map = AnnotationUtils.getAnnotationAttributes a
-                groups = map.get('groups')
+                groups = map.get 'groups'
                 continue unless groups
-                messageExp = map.get('message')
+                messageExp = map.get 'message'
                 messageKey = messageExp.substring(1, messageExp.length - 1)
                 message = messageSource.getMessage messageKey, null, Locale.default
                 if groups.length == 0 or ArrayUtils.contains groups, group
                     if a instanceof javax.validation.constraints.NotNull or a instanceof org.hibernate.validator.constraints.NotBlank
                         rules[name].required = true
                         messages[name].required = message
-                    else if a instanceof java.validator.constraints.Digits 
+                    else if a instanceof java.validator.constraints.Digits
                         rules[name].digits = true
                         messages[name].digits = message
                     else if a instanceof org.hibernate.validator.constraints.Email
