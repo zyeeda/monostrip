@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- $Id: pom.xml,v 5a599f0fcec9 2012/10/09 06:26:22 tangrui $ -->
+<!-- $Id: pom.xml,v cf8163f1b942 2012/10/09 08:35:02 tangrui $ -->
 
 <!--
 Copyright 2012 Zyeeda Co. Ltd.
@@ -470,5 +470,29 @@ limitations under the License.
                 <targetPath>packages</targetPath>
             </resource>
         </resources>
+        <plugins>
+            <plugin>
+                <groupId>com.github.iron9light</groupId>
+                <artifactId>coffeescript-maven-plugin</artifactId>
+                <version>1.1.2</version>
+                <configuration>
+                    <srcDir>${basedir}/src/main/coffee</srcDir>
+                    <outputDir>${project.build.outputDirectory}</outputDir>
+                    <bare>false</bare>
+                    <modifiedOnly>false</modifiedOnly>
+                    <allowedDelete>true</allowedDelete>
+                    <compilerUrl></compilerUrl>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>coffeescript</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>
