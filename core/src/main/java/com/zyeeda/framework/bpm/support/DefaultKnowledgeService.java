@@ -15,7 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 
+import com.zyeeda.framework.bpm.HumanTaskService;
 import com.zyeeda.framework.bpm.KnowledgeService;
+import com.zyeeda.framework.bpm.handler.LocalHumanTaskWorkItemHandler;
 
 /**
  * Domain object for retrieving pre-configured KnowledgeSessions.
@@ -28,6 +30,31 @@ public class DefaultKnowledgeService implements KnowledgeService {
 	private EntityManagerFactory entityManagerFactory;
 	private AbstractPlatformTransactionManager transactionManager;
 	
+	private DefaultHumanTaskService taskService;
+	
+	@Override
+	public void initialize() {
+	    this.taskService = new DefaultHumanTaskService();
+	    this.taskService.setEntityManagerFactory(this.entityManagerFactory);
+	    this.taskService.setTransactionManager(this.transactionManager);
+	    this.taskService.setKnowledgeService(this);
+	    this.taskService.initialize();
+	}
+	
+	public void setKbase(KnowledgeBase kbase) {
+        this.kbase = kbase;
+    }
+
+    public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
+        this.entityManagerFactory = entityManagerFactory;
+    }
+
+    public void setTransactionManager(AbstractPlatformTransactionManager transactionManager) {
+        logger.debug("Setting transaction manager: {}", transactionManager);
+        this.transactionManager = transactionManager;
+    }
+	
+	@Override
 	public StatefulKnowledgeSession createKnowledgeSession() {
 	    logger.debug("Create a new StatefulKnowledgeSession.");
 	    
@@ -37,6 +64,7 @@ public class DefaultKnowledgeService implements KnowledgeService {
 	    return ksession;
 	}
 	
+	@Override
 	public StatefulKnowledgeSession getKnowledgeSession(int sessionId) {
 	    logger.debug("Load StatefulKnowledgeSession with id {}.", sessionId);
 	    
@@ -46,8 +74,18 @@ public class DefaultKnowledgeService implements KnowledgeService {
 	    return ksession;
 	}
 	
+	@Override
+	public HumanTaskService getHumanTaskService() {
+	    return this.taskService;
+	}
+	
 	private void prepareKnowledgeSession(StatefulKnowledgeSession ksession, Environment env) {
 	    KnowledgeRuntimeLoggerFactory.newConsoleLogger(ksession);
+	    
+	    LocalHumanTaskWorkItemHandler handler = new LocalHumanTaskWorkItemHandler(ksession);
+	    handler.setHumanTaskService(this.taskService);
+	    
+	    ksession.getWorkItemManager().registerWorkItemHandler("Human Task", handler);
 	    // TODO: Rewrite HistoryLogger
 	    JPAProcessInstanceDbLog.setEnvironment(env);
 	    new JPAWorkingMemoryDbLogger(ksession);
@@ -69,19 +107,6 @@ public class DefaultKnowledgeService implements KnowledgeService {
 		env.set(EnvironmentName.TRANSACTION_MANAGER, transactionManager);
 		
 		return env;
-	}
-
-	public void setKbase(KnowledgeBase kbase) {
-		this.kbase = kbase;
-	}
-
-	public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
-		this.entityManagerFactory = entityManagerFactory;
-	}
-
-	public void setTransactionManager(AbstractPlatformTransactionManager transactionManager) {
-		logger.debug("Setting transaction manager: {}", transactionManager);
-		this.transactionManager = transactionManager;
 	}
 
 }

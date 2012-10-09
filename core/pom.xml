@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- $Id$ -->
+<!-- $Id: pom.xml,v efaabbf438dc 2012/08/03 11:06:47 guyong $ -->
 
 <!--
 Copyright 2012 Zyeeda Co. Ltd.
@@ -459,6 +459,17 @@ limitations under the License.
                     <groupId>org.hibernate</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-engine</artifactId>
+            <version>${activiti.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-spring</artifactId>
+            <version>${activiti.version}</version>
         </dependency>
 
         <dependency>
