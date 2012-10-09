@@ -1,4 +1,4 @@
-package com.zyeeda.framework.bpm.support;
+package com.zyeeda.framework.knowledge.support;
 
 import javax.persistence.EntityManagerFactory;
 
@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 
-import com.zyeeda.framework.bpm.KnowledgeService;
+import com.zyeeda.framework.knowledge.KnowledgeService;
 
 /**
  * Domain object for retrieving pre-configured KnowledgeSessions.
@@ -28,6 +28,20 @@ public class DefaultKnowledgeService implements KnowledgeService {
 	private EntityManagerFactory entityManagerFactory;
 	private AbstractPlatformTransactionManager transactionManager;
 	
+	public void setKbase(KnowledgeBase kbase) {
+        this.kbase = kbase;
+    }
+
+    public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
+        this.entityManagerFactory = entityManagerFactory;
+    }
+
+    public void setTransactionManager(AbstractPlatformTransactionManager transactionManager) {
+        logger.debug("Setting transaction manager: {}", transactionManager);
+        this.transactionManager = transactionManager;
+    }
+	
+	@Override
 	public StatefulKnowledgeSession createKnowledgeSession() {
 	    logger.debug("Create a new StatefulKnowledgeSession.");
 	    
@@ -37,6 +51,7 @@ public class DefaultKnowledgeService implements KnowledgeService {
 	    return ksession;
 	}
 	
+	@Override
 	public StatefulKnowledgeSession getKnowledgeSession(int sessionId) {
 	    logger.debug("Load StatefulKnowledgeSession with id {}.", sessionId);
 	    
@@ -48,6 +63,7 @@ public class DefaultKnowledgeService implements KnowledgeService {
 	
 	private void prepareKnowledgeSession(StatefulKnowledgeSession ksession, Environment env) {
 	    KnowledgeRuntimeLoggerFactory.newConsoleLogger(ksession);
+	    
 	    // TODO: Rewrite HistoryLogger
 	    JPAProcessInstanceDbLog.setEnvironment(env);
 	    new JPAWorkingMemoryDbLogger(ksession);
@@ -69,19 +85,6 @@ public class DefaultKnowledgeService implements KnowledgeService {
 		env.set(EnvironmentName.TRANSACTION_MANAGER, transactionManager);
 		
 		return env;
-	}
-
-	public void setKbase(KnowledgeBase kbase) {
-		this.kbase = kbase;
-	}
-
-	public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
-		this.entityManagerFactory = entityManagerFactory;
-	}
-
-	public void setTransactionManager(AbstractPlatformTransactionManager transactionManager) {
-		logger.debug("Setting transaction manager: {}", transactionManager);
-		this.transactionManager = transactionManager;
 	}
 
 }
