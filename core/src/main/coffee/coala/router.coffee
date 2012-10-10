@@ -191,12 +191,12 @@ defaultHandlers =
 
     get: (options, service, entityMeta, request, id) ->
         result = callHook 'before', 'Get', options, entityMeta, request, id
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
 
         entity = service.get id
 
         result = callHook 'before', 'Get', options, entityMeta, request, entity
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
         json entity, getJsonFilter(options, 'get')
 
     create: (options, service, entityMeta, request) ->
@@ -211,12 +211,12 @@ defaultHandlers =
         return json errors: errors if errors.length > 0
 
         result = callHook 'before', 'Create', options, entityMeta, request, entity
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
 
         entity = service.create(entity)
 
         result = callHook 'after', 'Create', options, entityMeta, request, entity
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
 
         json entity, getJsonFilter(options, 'create')
 
@@ -231,25 +231,25 @@ defaultHandlers =
         return json errors: errors if errors.length > 0
 
         result = callHook 'before', 'Update', options, entityMeta, request, id
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
 
         entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, entityMeta, 'update')
 
         result = callHook 'after', 'Update', options, entityMeta, request, entity
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
         json entity, getJsonFilter(options, 'update')
 
     remove: (options, service, entityMeta, request, id) ->
         result = callValidator 'remove', request.params['_formName_'], options, request, id
         return json result if result isnt true
-        
+
         result = callHook 'before', 'Remove', options, entityMeta, request, id
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
 
         entity = service.remove id
 
         result = callHook 'after', 'Remove', options, entityMeta, request, entity
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
         json entity.id, getJsonFilter(options, 'remove')
 
     batchRemove: (options, service, entityMeta, request) ->
@@ -260,12 +260,12 @@ defaultHandlers =
         ids = if type(ids) is 'string' then [ids] else ids
 
         result = callHook 'before', 'BatchRemove', options, entityMeta, request, ids
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
 
         r = service.remove.apply service, ids
 
         result = callHook 'after', 'BatchRemove', options, entityMeta, request, r
-        return result if result isnt true
+        return result if result isnt true and result isnt undefined
 
         r = if type(r) is 'array' then (e.id for e in r) else r.id
         json r, getJsonFilter(options, 'batchRemove')

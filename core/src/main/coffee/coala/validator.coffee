@@ -34,6 +34,7 @@ exports.createValidator = ->
             rules[name] = {} unless rules[name]
             messages[name] = {} unless messages[name]
             field = FieldUtils.getField entityClass, name, true
+            continue if not field
             if field.type == Date
                 rules[name].date = true
                 messages[name].date = messageSource.getMessage 'com.zyeeda.framework.validator.constraints.Date.message', null, Locale.default
