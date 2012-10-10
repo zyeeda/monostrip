@@ -8,19 +8,25 @@
 
 router = exports.router = createRouter()
 
-router.get '/', mark('beans', TaskService).on (taskService, request) ->
+router.get '/', (request) ->
     currentUser = ''
-    json taskService.getTasks(currentUser)
+    json {}
 
-router.get '/completed',  mark('beans', TaskService).on (taskService, request) ->
+router.get '/completed', (request) ->
     currentUser = ''
-    json taskService.getCompletedTasks(currentUser)
+    json {}
 
 router.get '/comments/:taskId',  mark('beans', TaskService).on (taskService, request, taskId) ->
     json taskService.getComments(taskId)
 
 router.get '/configuration/feature', ->
-    json type: 'grid'
+    json views: [{name: 'views:operators', region: 'operators'}, {name: 'views:grid', region: 'grid'}]
+
+router.get '/configuration/operators', ->
+    json audit: {label: 'Audit', icon: 'icon-plus'}
+
+router.get '/configuration/grid', ->
+    json {}
 
 router.get '/configuration/forms/:taskId', mark('beans', [TaskService, EntityMetaResolver]).on (taskService, resolver, request, taskId) ->
     task = taskService.getTask taskId
