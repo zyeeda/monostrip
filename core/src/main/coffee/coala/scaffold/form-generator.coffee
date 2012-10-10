@@ -15,18 +15,18 @@ fields: [
 ###
 {type, objects} = require 'coala/util'
 {coala} = require 'coala/config'
+{createValidator} = require 'coala/validator'
+{Add, Edit} = com.zyeeda.framework.validator.group
 
-exports.generateForms = (meta, labels = {}, forms) ->
+exports.generateForms = (meta, labels = {}, forms, formName) ->
     return null if not forms
 
     defaults = forms.defaults or {}
-    add = forms.add or defaults
-    edit = forms.edit or defaults
+    form = forms[formName] or defaults
 
-    add: generateForm add, meta, labels
-    edit: generateForm edit, meta, labels
+    generateForm form, meta, labels, formName
 
-generateForm = (form, meta, labels) ->
+generateForm = (form, meta, labels, formName) ->
     groups = DEFAULT: {label: null, columns: 1}
     for name, value of form.groups or {}
         if value is null or type(value) is 'string'
@@ -38,7 +38,18 @@ generateForm = (form, meta, labels) ->
     result.groups = groups
 
     result.fields = []
+    print 'meta', meta.type
+    if meta.type is 'tree' or meta.type is 'treeTable'
+        result.fields.push
+            label: '父节点', name: 'parentName', value: 'parent.name', colspan: 2, rowspan: 1, group: 'DEFAULT', type: 'string', readOnly: true
+        result.fields.push
+            name: 'parent', value: 'parent.id', colspan: 1, rowspan: 1, group: 'DEFAULT', type: 'hidden'
+
     result.fields.push generateField(field, meta, labels) for field in form.fields
+    result.tabs = form.tabs
+
+    validateGroup = if formName == 'add' then Add else Edit
+    result.validator = createValidator().buildValidateRules result.fields, meta.entityClass, validateGroup
 
     result
 
@@ -55,6 +66,12 @@ generateField = (config, meta, labels) ->
     field
 
 defineFieldType = (field, fieldMeta, entityMeta) ->
+    if field.type is 'many-picker'
+        if (fieldMeta.isManyToManyTarget() or fieldMeta.isOneToMany())
+            field.pickerSource = fieldMeta.getPath()
+            return
+
+    return if field.type
     if fieldMeta.getType() is java.lang.Boolean
         field.type = 'picker'
         field.pickerSource = coala.booleanFieldPickerSource
@@ -64,7 +81,7 @@ defineFieldType = (field, fieldMeta, entityMeta) ->
         return
     if fieldMeta.isEntity()
         field.type = 'picker'
-        field.pickerSource = entityMeta.getPath()
+        field.pickerSource = fieldMeta.getPath()
         return
 
     field.type = 'string'

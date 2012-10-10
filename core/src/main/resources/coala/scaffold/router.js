@@ -22,8 +22,8 @@
   metas = entityMetaResolver.resolveScaffoldEntities(coala.entityPackages);
 
   mountExtraRoutes = function(router, meta, options) {
-    router.get('configuration/forms', function(request) {
-      return json(generateForms(meta, options.labels, options.forms));
+    router.get('configuration/forms/:formName', function(request, formName) {
+      return json(generateForms(meta, options.labels, options.forms, formName));
     });
     router.get('configuration/operators', function(request) {
       var operators;
@@ -50,8 +50,38 @@
       }
       return json(grid);
     });
+    router.get('configuration/picker', function(request) {
+      var colModel, name, picker, value, _ref;
+      picker = options['picker'];
+      if (!picker && options.labels) {
+        colModel = [];
+        _ref = options.labels;
+        for (name in _ref) {
+          value = _ref[name];
+          colModel.push({
+            name: name,
+            index: name,
+            label: value
+          });
+        }
+        picker = {
+          grid: {
+            colModel: colModel
+          }
+        };
+      }
+      return json(picker);
+    });
     router.get('configuration/:name', function(request, name) {
       return json(options[name]);
+    });
+    router.get('configuration/feature', function(request) {
+      if (options.feature) {
+        return json(options.feature);
+      }
+      return json({
+        type: meta.type
+      });
     });
     return router.get('configuration/fields', function(request) {
       if (options.configs && options.configs.fields) {

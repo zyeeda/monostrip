@@ -5,8 +5,11 @@
 {json,html} = require 'coala/response'
 {createService} = require 'coala/scaffold/service'
 {createConverter} = require 'coala/scaffold/converter'
+{createValidator} = require 'coala/validator'
 defaultRouters = require 'coala/default-routers'
+{Add, Edit} = com.zyeeda.framework.validator.group
 
+validator = new createValidator()
 log = require('ringo/logging').getLogger module.id
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
@@ -152,7 +155,7 @@ createEntity = (clazz) ->
     c.newInstance()
 
 getService = (options, entityMeta) ->
-    options.service or createService entityMeta.entityClass
+    options.service or createService entityMeta.entityClass, entityMeta
 
 
 getJsonFilter = (options, type) ->
@@ -169,13 +172,7 @@ defaultHandlers =
 
         configs = coala.extractPaginationInfo request.params
         orders = coala.extractOrderInfo request.params
-        restricts = coala.extractRestrictInfo request.params
         if configs?
-            if restricts?
-                configs.restricts = restricts
-            if options.configs?
-                options.configs.fields = setFieldsDefaultValue options.configs.fields
-                configs.configs = options.configs
             configs.fetchCount = true
             pageSize = configs.maxResults
             count = service.list entity, configs
@@ -193,25 +190,85 @@ defaultHandlers =
         json o, getJsonFilter(options, 'list')
 
     get: (options, service, entityMeta, request, id) ->
-        json service.get(id), getJsonFilter(options, 'get')
+        result = callHook 'before', 'Get', options, entityMeta, request, id
+        return result if result isnt true
+
+        entity = service.get id
+
+        result = callHook 'before', 'Get', options, entityMeta, request, entity
+        return result if result isnt true
+        json entity, getJsonFilter(options, 'get')
 
     create: (options, service, entityMeta, request) ->
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
-        json service.create(entity), getJsonFilter(options, 'create')
+
+        errors = []
+        result = callValidator 'create', request.params['_formName_'], options, request, entity
+        conts = validator.validate entity, Add
+        errors = errors.concat result.errors if result.errors
+        errors = errors.concat conts.errors if conts.errors
+        return json errors: errors if errors.length > 0
+
+        result = callHook 'before', 'Create', options, entityMeta, request, entity
+        return result if result isnt true
+
+        entity = service.create(entity)
+
+        result = callHook 'after', 'Create', options, entityMeta, request, entity
+        return result if result isnt true
+
+        json entity, getJsonFilter(options, 'create')
 
     update: (options, service, entityMeta, request, id) ->
+        entity = createEntity entityMeta.entityClass
+        mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
+        errors = []
+        result = callValidator 'update', request.params['_formName_'], options, request, id
+        conts = validator.validate entity, Edit
+        errors = errors.concat result.errors if result.errors
+        errors = errors.concat conts.errors if conts.errors
+        return json errors: errors if errors.length > 0
+
+        result = callHook 'before', 'Update', options, entityMeta, request, id
+        return result if result isnt true
+
         entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, entityMeta, 'update')
+
+        result = callHook 'after', 'Update', options, entityMeta, request, entity
+        return result if result isnt true
         json entity, getJsonFilter(options, 'update')
 
     remove: (options, service, entityMeta, request, id) ->
-        json service.remove(id), getJsonFilter(options, 'remove')
+        result = callValidator 'remove', request.params['_formName_'], options, request, id
+        return json result if result isnt true
+        
+        result = callHook 'before', 'Remove', options, entityMeta, request, id
+        return result if result isnt true
+
+        entity = service.remove id
+
+        result = callHook 'after', 'Remove', options, entityMeta, request, entity
+        return result if result isnt true
+        json entity.id, getJsonFilter(options, 'remove')
 
     batchRemove: (options, service, entityMeta, request) ->
+        result = callValidator 'batchRemove', request.params['_formName_'], options, request, ids
+        return json result if result isnt true
+
         ids = request.params.ids
         ids = if type(ids) is 'string' then [ids] else ids
-        result = service.remove.apply service, ids
-        json result, getJsonFilter(options, 'batchRemove')
+
+        result = callHook 'before', 'BatchRemove', options, entityMeta, request, ids
+        return result if result isnt true
+
+        r = service.remove.apply service, ids
+
+        result = callHook 'after', 'BatchRemove', options, entityMeta, request, r
+        return result if result isnt true
+
+        r = if type(r) is 'array' then (e.id for e in r) else r.id
+        json r, getJsonFilter(options, 'batchRemove')
 
 
 # the reason why put the entity in the end of argument list is that,
@@ -224,25 +281,22 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
     options.afterMerge? entity, type
     entity
 
-setFieldsDefaultValue = (fields) ->
-    isNullAlias = false
-    isNullPosition = false
-    if fields? and fields.length > 0
-        isNullAlias = true if not fields[0].alias
-        isNullPosition = true if not fields[0].position and fields[0].position != 0
-    else
-        return fields
-    if isNullAlias and isNullPosition
-        for f, i in fields
-            f.alias = f.name
-            f.position = i
-        return fields
-    else if !isNullAlias and isNullPosition
-        for f, i in fields
-            f.position = i
-        return fields
-    else if isNullAlias and !isNullPosition
-        for f, i in fields
-            f.alias = f.name
-        return fields
-    fields
+callHook = (hookType, action, options, meta, request, args...) ->
+    return true if not options.hooks
+    name = hookType + action
+    hook = options.hooks[name]
+    return true if not hook or type(hook) isnt 'function'
+
+    args.unshift request
+    args.unshift request.params['_formName_']
+    args.unshift meta
+    hook.apply null, args
+
+callValidator = (action, formName, options, request, args...) ->
+    return true if not options.validators
+    valid = options.validators[action]
+    return true if not valid or type(valid) isnt 'function'
+
+    args.unshift request
+    args.unshift formName
+    valid.apply null, args

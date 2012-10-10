@@ -26,11 +26,11 @@
     dateFormat: 'yyyy-MM-dd',
     booleanFieldPickerSource: [
       {
-        value: 'true',
-        label: '是'
+        id: true,
+        text: '是'
       }, {
-        value: 'false',
-        label: '否'
+        id: false,
+        text: '否'
       }
     ],
     defaultOperators: {

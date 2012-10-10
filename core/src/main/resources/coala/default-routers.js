@@ -9,6 +9,7 @@
     if (coala.development) {
       router.mount('/helper', 'coala/frontend-development-helper-router');
     }
+    router.mount('/scaffold/tasks', 'coala/scaffold/task');
     return router;
   };
 

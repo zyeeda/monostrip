@@ -2,8 +2,10 @@
 res = require 'ringo/jsgi/response'
 log = require('ringo/logging').getLogger module.id
 {objects,type} = require 'coala/util'
+{coala} = require 'coala/config'
 
-{ObjectMapper} = org.codehaus.jackson.map
+{SimpleDateFormat} = java.text
+{ObjectMapper, SerializationConfig} = org.codehaus.jackson.map
 {SimpleFilterProvider, SimpleBeanPropertyFilter} = org.codehaus.jackson.map.ser.impl
 
 charset = 'utf-8'
@@ -114,7 +116,7 @@ exports.json = (object, config) ->
             return if @_isStream is true
 
             unless @_jsonResult?
-                mapper = buildObjectMapper @_included, @_excluded
+                mapper = buildObjectMapper @_included, @_excluded, result
                 @_jsonResult = mapper.writeValueAsString @_object
                 log.debug "generate json, json result:#{@_jsonResult}"
             log.debug "forEach called, json result:#{@_jsonResult}"
@@ -127,7 +129,7 @@ exports.json = (object, config) ->
                 headers: @headers
                 status: @status
                 body: (stream) =>
-                    mapper = buildObjectMapper @_included, @_excluded
+                    mapper = buildObjectMapper @_included, @_excluded, result
                     mapper.writeValue stream, @_object
                     return
 
@@ -136,11 +138,12 @@ exports.json = (object, config) ->
         result.exclude k, v for k, v of config.exclude
         result.status = config.status or result.status
         result.headers = objects.extend result.headers, config.headers or {}
+        result.dateFormat = config.dateFormat
 
     result.body = result
     result
 
-buildObjectMapper = (included, excluded) ->
+buildObjectMapper = (included, excluded, result) ->
     filter = new SimpleFilterProvider()
 
     for k, v of included
@@ -150,6 +153,10 @@ buildObjectMapper = (included, excluded) ->
     filter.addFilter k, SimpleBeanPropertyFilter.serializeAllExcept v for k, v of excluded
 
     mapper = new ObjectMapper()
+    mapper.configure SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false
+    df = new SimpleDateFormat (result.dateFormat or coala.dateFormat)
+    mapper.getSerializationConfig().setDateFormat df
+    
     mapper.writer filter
 
 exports.stream = (request, callback) ->

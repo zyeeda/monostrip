@@ -12,11 +12,14 @@ import com.zyeeda.framework.web.scaffold.annotation.Filters;
 public class EntityMeta {
 
     private String path = null;
+    private String type = null;
     private String[] excludedActions = null;
     private Map<String, Filters> jsonFilters = null;
     
     private Class<?> entityClass = null;
     private Map<String, FieldMeta> fieldMetas = null;
+    
+    private String boundProcess = null;
     
     public EntityMeta() {
         fieldMetas = new HashMap<String, FieldMeta>();
@@ -71,5 +74,29 @@ public class EntityMeta {
     
     public FieldMeta getField(String name) {
         return fieldMetas.get(name);
+    }
+    
+    public FieldMeta[] getFields() {
+        return fieldMetas.values().toArray(new FieldMeta[0]);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getBoundProcess() {
+        return boundProcess;
+    }
+
+    public void setBoundProcess(String boundProcess) {
+        this.boundProcess = boundProcess;
+    }
+    
+    public boolean isProcessBound() {
+        return boundProcess != null;
     }
 }

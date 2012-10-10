@@ -17,7 +17,7 @@ defaultConfigure =
     defaultPageSize: 10
     dateFormat: 'yyyy-MM-dd'
 
-    booleanFieldPickerSource: [{value: 'true', label: '是'}, {value: 'false', label: '否'}]
+    booleanFieldPickerSource: [{id: true, text: '是'}, {id: false, text: '否'}]
     defaultOperators:
         add: {label: '添加', icon: 'icon-plus'},
         edit: {label: '编辑', icon: 'icon-edit'},

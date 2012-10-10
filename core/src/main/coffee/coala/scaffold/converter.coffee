@@ -17,6 +17,15 @@ innerConverters =
     'java.util.Calendar': (value, fieldMeta) ->
         parseDate.apply null, [coala.dateFormat, Calendar, value]
 
+handleArray = (service, fieldType, targetType, value) ->
+    value = if type(value) is 'string' then [value] else value
+    list = if ClassUtils.isAssignable fieldType, ArrayList then new ArrayList() else new HashSet()
+
+    manager = service.createManager targetType
+    list.add manager.find id for id in value
+
+    list
+
 defaultConverter = (value, fieldMeta) ->
     service = createService()
 
@@ -24,13 +33,11 @@ defaultConverter = (value, fieldMeta) ->
         manager = service.createManager fieldMeta.type
         manager.find value
     else if fieldMeta.isManyToManyOwner()
-        value = if type(value) is 'string' then [value] else value
-        list = if ClassUtils.isAssignable fieldMeta.type, ArrayList then new ArrayList() else new HashSet()
-
-        manager = service.createManager fieldMeta.manyToManyTarget
-        list.add manager.find id for id in value
-
-        list
+        handleArray service, fieldMeta.type, fieldMeta.manyToManyTargetType, value
+    else if fieldMeta.isManyToManyTarget()
+        handleArray service, fieldMeta.type, fieldMeta.manyToManyOwnerType, value
+    else if fieldMeta.isOneToMany()
+        handleArray service, fieldMeta.type, fieldMeta.manyType, value
     else
         return value if fieldMeta.type is java.lang.String
         c = fieldMeta.type.getConstructor java.lang.String
