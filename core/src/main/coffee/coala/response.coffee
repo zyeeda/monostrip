@@ -1,6 +1,10 @@
 
+fs = require 'fs'
+handlebars = require 'handlebars'
+
 res = require 'ringo/jsgi/response'
 log = require('ringo/logging').getLogger module.id
+
 {objects,type} = require 'coala/util'
 {coala} = require 'coala/config'
 
@@ -18,7 +22,7 @@ exports.charset = (c) ->
 
 exports.redirect = res.redirect
 
-exports.html = (args...) ->
+exports.html = html = (args...) ->
     result =
         status: 200
         headers: getContentType 'text/html'
@@ -31,6 +35,19 @@ exports.html = (args...) ->
     result.body = [result.body] if type(result.body) isnt 'array'
 
     result
+
+exports.template = (request, path, params) ->
+    req = request.env.servletRequest
+    pathTranslated = req.getPathTranslated()
+    pathInfo = req.getPathInfo()
+    index = pathTranslated.lastIndexOf pathInfo
+    root = pathTranslated.substring 0, index
+    tplPath = "#{root}/WEB-INF/templates/#{path}"
+    log.debug "template path = #{tplPath}"
+    content = fs.read tplPath
+    template = handlebars.compile content
+
+    html template params
 
 exports.xml = (args...) ->
     result =
