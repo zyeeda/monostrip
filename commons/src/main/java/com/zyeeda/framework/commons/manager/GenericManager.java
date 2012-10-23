@@ -16,7 +16,7 @@ import java.util.Map;
  * @param <T>
  * @param <ID>
  */
-public interface BaseManager<T, ID extends Serializable> {
+public interface GenericManager<T, ID extends Serializable> {
 
     /**
      * 根据指定id获取实体对象

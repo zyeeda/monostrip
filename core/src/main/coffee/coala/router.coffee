@@ -1,21 +1,25 @@
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 {Application} = require 'stick'
+
+{getLogger} = require 'ringo/logging'
 {objects, type, paths} = require 'coala/util'
 {coala} = require 'coala/config'
-{json,html} = require 'coala/response'
+{json, html, notFound, internalServerError} = require 'coala/response'
+
 {createService} = require 'coala/scaffold/service'
 {createConverter} = require 'coala/scaffold/converter'
-{createValidator} = require 'coala/validator'
-defaultRouters = require 'coala/default-routers'
-{Add, Edit} = com.zyeeda.framework.validator.group
+{createValidator} = require 'coala/validation/validator'
+{createValidationContext} = require 'coala/validation/validation-context'
 
+{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{Create, Update} = com.zyeeda.framework.validation.group
+
+log = getLogger module.id
 validator = new createValidator()
-log = require('ringo/logging').getLogger module.id
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
 processRoot = (router, repo, prefix) ->
     routersRepo = repo.getChildRepository coala.routerFoldername
-    print router, routersRepo, routersRepo.exists(), 'routers'
+    log.debug "routersRepo.exists = #{routersRepo.exists()}"
     return if not routersRepo.exists()
     routers = routersRepo.getResources false
     for r in routers
@@ -25,7 +29,7 @@ processRoot = (router, repo, prefix) ->
             log.debug "mount #{module} to #{url}"
             router.mount url, module
         catch e
-            log.warn "can't mount #{r.getModuleName()}, it is not export and router"
+            log.error "Cannot mount #{r.getModuleName()}."
     true
 
 processRepository = (router, repo, prefix) ->
@@ -34,13 +38,19 @@ processRepository = (router, repo, prefix) ->
         processRepository router, r, prefix + r.getName() + '/'
     true
 
-exports.createApplication = (module, mountDefaultRouters = true)->
+exports.createApplication = (module, mountDefaultRouters = true) ->
     router = new Application()
     router.configure 'mount'
+
     if module
         root = module.getRepository('./')
         processRepository router, root, '/'
-    defaultRouters.mountTo router if mountDefaultRouters
+
+    if mountDefaultRouters
+        router.mount '/helper', 'coala/frontend-development-helper-router' if coala.development
+        router.mount '/scaffold', 'coala/scaffold/router'
+        router.mount '/scaffold/tasks', 'coala/scaffold/task'
+
     router
 
 exports.createRouter = ->
@@ -49,18 +59,9 @@ exports.createRouter = ->
     extendRouter router
     router
 
-autoMount = (router)->
-    repos = @getRepository('./').getRepositories()
-    for repo in repos
-        resource = repo.getResource 'module.js'
-        try
-            router.mount "/#{repo.getName()}", resource.getModuleName() if resource.exists()
-        catch e
-            log.warn "can't mount #{resource.getModuleName()}, it is not export an router"
-
 extendRouter = (router) ->
-    router.attachDomain = attachDomain.bind router, router
-    router.resolveEntity = resolveEntity.bind router
+    router.attachDomain = attachDomain.bind null, router
+    router.resolveEntity = resolveEntity.bind null
     return
 
 resolveEntity = (entity, params, converters) ->
@@ -107,9 +108,8 @@ attachDomain = (router, path, clazz, options = {}) ->
     entityMeta.path = path if entityMeta.path is null
     path = entityMeta.path
 
-    listUrl = path
+    listUrl = createUrl = path
     removeUrl = updateUrl = getUrl = path + ID_SUFFIX
-    createUrl = path
     batchRemoveUrl = path + '/delete'
 
     excludes = {}
@@ -148,7 +148,7 @@ createMockRouter = ->
 mountMockRouter = (target, path, router) ->
     for name in ['get', 'post', 'put', 'del']
         do (name) ->
-            target[name].call target, paths.join(path, url), fn for url,fn of router[name + 's']
+            target[name].call target, paths.join(path, url), fn for url, fn of router[name + 's']
 
 createEntity = (clazz) ->
     c = clazz.getConstructor()
@@ -157,11 +157,9 @@ createEntity = (clazz) ->
 getService = (options, entityMeta) ->
     options.service or createService entityMeta.entityClass, entityMeta
 
-
 getJsonFilter = (options, type) ->
     return {} unless options.filters
     options.filters[type] or options.filters.defaults or {}
-
 
 defaultHandlers =
     list: (options, service, entityMeta, request) ->
@@ -190,86 +188,83 @@ defaultHandlers =
         json o, getJsonFilter(options, 'list')
 
     get: (options, service, entityMeta, request, id) ->
-        result = callHook 'before', 'Get', options, entityMeta, request, id
-        return result if result isnt true and result isnt undefined
-
         entity = service.get id
+        return notFound() if entity is null
 
-        result = callHook 'before', 'Get', options, entityMeta, request, entity
-        return result if result isnt true and result isnt undefined
         json entity, getJsonFilter(options, 'get')
 
     create: (options, service, entityMeta, request) ->
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
 
-        errors = []
-        result = callValidator 'create', request.params['_formName_'], options, request, entity
-        conts = validator.validate entity, Add
-        errors = errors.concat result.errors if result.errors
-        errors = errors.concat conts.errors if conts.errors
-        return json errors: errors if errors.length > 0
+        violations = callValidators 'create', options, request, entity
+        return json violations: violations if violations.length > 0
 
         result = callHook 'before', 'Create', options, entityMeta, request, entity
-        return result if result isnt true and result isnt undefined
+        return result if result isnt undefined
 
         entity = service.create(entity)
 
         result = callHook 'after', 'Create', options, entityMeta, request, entity
-        return result if result isnt true and result isnt undefined
+        return result if result isnt undefined
 
-        json entity, getJsonFilter(options, 'create')
+        json entity, objects.extend getJsonFilter(options, 'create'), { status: 201 }
 
     update: (options, service, entityMeta, request, id) ->
-        entity = createEntity entityMeta.entityClass
-        mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
-        errors = []
-        result = callValidator 'update', request.params['_formName_'], options, request, id
-        conts = validator.validate entity, Edit
-        errors = errors.concat result.errors if result.errors
-        errors = errors.concat conts.errors if conts.errors
-        return json errors: errors if errors.length > 0
+        entity = service.get id
+        return notFound() if entity is null
 
-        result = callHook 'before', 'Update', options, entityMeta, request, id
-        return result if result isnt true and result isnt undefined
+        mergeEntityAndParameter options, request.params, entityMeta, 'update', entity
 
-        entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, entityMeta, 'update')
+        violations = callValidators 'update', options, request, entity
+        return json violations: violations if violations.length > 0
+
+        result = callHook 'before', 'Update', options, entityMeta, request, entity
+        return result if result isnt undefined
+
+        service.update entity
 
         result = callHook 'after', 'Update', options, entityMeta, request, entity
-        return result if result isnt true and result isnt undefined
+        return result if result isnt undefined
+
         json entity, getJsonFilter(options, 'update')
 
     remove: (options, service, entityMeta, request, id) ->
-        result = callValidator 'remove', request.params['_formName_'], options, request, id
-        return json result if result isnt true
+        entity = service.get id
+        return notFound() if entity is null
 
-        result = callHook 'before', 'Remove', options, entityMeta, request, id
-        return result if result isnt true and result isnt undefined
+        violations = callValidators 'remove', options, request, entity
+        return json violations: violations if violations.length > 0
 
-        entity = service.remove id
+        result = callHook 'before', 'Remove', options, entityMeta, request, entity
+        return result if result isnt undefined
+
+        service.remove entity
 
         result = callHook 'after', 'Remove', options, entityMeta, request, entity
-        return result if result isnt true and result isnt undefined
-        json entity.id, getJsonFilter(options, 'remove')
+        return result if result isnt undefined
+
+        json id
 
     batchRemove: (options, service, entityMeta, request) ->
-        result = callValidator 'batchRemove', request.params['_formName_'], options, request, ids
-        return json result if result isnt true
-
         ids = request.params.ids
         ids = if type(ids) is 'string' then [ids] else ids
 
-        result = callHook 'before', 'BatchRemove', options, entityMeta, request, ids
-        return result if result isnt true and result isnt undefined
+        entities = (service.get id for id in ids)
 
-        r = service.remove.apply service, ids
+        violations = callValidators 'batchRemove', options, request, entities
+        return json violations: violations if violations.length > 0
 
-        result = callHook 'after', 'BatchRemove', options, entityMeta, request, r
-        return result if result isnt true and result isnt undefined
+        result = callHook 'before', 'BatchRemove', options, entityMeta, request, entities
+        return result if result isnt undefined
 
-        r = if type(r) is 'array' then (e.id for e in r) else r.id
-        json r, getJsonFilter(options, 'batchRemove')
+        service.remove.apply service, entities
 
+        result = callHook 'after', 'BatchRemove', options, entityMeta, request, entities
+        return result if result isnt undefined
+
+        r = (entity.id for entity in entities)
+        json r
 
 # the reason why put the entity in the end of argument list is that,
 # when update, the arguments before entity are all bound
@@ -277,26 +272,40 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
     converter = createConverter options.converters
     for key, value of params
         continue if not entityMeta.hasField key
-        entity[key] = converter.convert value,entityMeta.getField(key)
+        entity[key] = converter.convert value, entityMeta.getField(key)
     options.afterMerge? entity, type
     entity
 
-callHook = (hookType, action, options, meta, request, args...) ->
-    return true if not options.hooks
-    name = hookType + action
-    hook = options.hooks[name]
-    return true if not hook or type(hook) isnt 'function'
+validationGroupMapping =
+    create: Create
+    update: Update
 
-    args.unshift request
-    args.unshift request.params['_formName_']
-    args.unshift meta
-    hook.apply null, args
+callValidators = (action, options, request, entity) ->
+    context = createValidationContext()
+    formName = request.params['_formName_'] or 'defaults'
 
-callValidator = (action, formName, options, request, args...) ->
-    return true if not options.validators
-    valid = options.validators[action]
-    return true if not valid or type(valid) isnt 'function'
+    customValidator = options.validators?[action]?[formName]
+    if customValidator? and type(customValidator) is 'function'
+        customValidator.call null, context, entity, request
 
-    args.unshift request
-    args.unshift formName
-    valid.apply null, args
+    log.debug "context.isBeanValidationSkipped = #{context.isBeanValidationSkipped}"
+
+    if not context.isBeanValidationSkipped and (action is 'create' or action is 'update')
+        validator.validate context, entity, validationGroupMapping[action]
+
+    log.debug "context.hasViolations() = #{context.hasViolations()}"
+    log.debug "context.violations.length = #{context.violations.length}"
+
+    context.collectViolations()
+
+callHook = (hookType, action, options, meta, request, entity) ->
+    hookName = hookType + action
+    formName = request.params['_formName_'] or 'defaults'
+
+    hook = options.hooks?[hookName]?[formName]
+    if hook? and type(hook) is 'function'
+        try
+            hook.call null, entity, request, meta
+        catch e
+            internalServerError e
+

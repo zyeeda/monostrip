@@ -3,7 +3,7 @@ package com.zyeeda.framework.web.scaffold;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.zyeeda.framework.web.scaffold.annotation.Filters;
+import com.zyeeda.framework.commons.annotation.scaffold.Filters;
 
 /**
  * @author guyong

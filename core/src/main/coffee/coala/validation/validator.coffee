@@ -8,19 +8,17 @@
 {AnnotationUtils} = org.springframework.core.annotation
 
 exports.createValidator = ->
-    validate: mark('beans', 'validationFactory').on (validationFactory, entity, group) ->
-        constraintViolations = if group then validationFactory.validator.validate entity, Default, group
-        else validationFactory.validator.validate entity, Default
-        consts = []
+    validate: mark('beans', 'validatorFactory').on (validatorFactory, validationContext, entity, group) ->
+        validator = validatorFactory.getValidator()
+        constraintViolations = if group? then validator.validate entity, Default, group else validator.validator entity, Default
         it = constraintViolations.iterator()
         while it.hasNext()
-            msg = {}
-            prop = it.next()
-            msg.property = prop.propertyPath.toString()
-            msg.message = prop.message.toString()
-            # msg.value = prop.invalidValue
-            consts.push msg
-        if consts.length > 0 then return errors: consts else return {}
+            v = it.next()
+            properties = v.propertyPath.toString()
+            properties = v.getConstraintDescriptor().getAttributes().get('bindingProperties') if properties is ''
+            message = v.getMessage()
+
+            validationContext.addViolation properties: properties, message: message
 
     buildValidateRules: mark('beans', 'messageSource').on (messageSource, fields, entityClass, group) ->
         rules = {}; messages = {}

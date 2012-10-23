@@ -68,22 +68,26 @@ exports.createService = (entityClass, entityMeta) ->
 
             entity
 
-        update: mark('tx').on (id, fn) ->
+        update: mark('tx').on (entity) ->
             manager = baseService.createManager service.entityClass
-            entity = manager.find id
 
             pre = {}
             for fieldMeta in entityMeta.getFields()
                 if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget()
                     pre[fieldMeta.name] = entity[fieldMeta.name].toArray()
 
-            fn entity, service
-            manager.merge entity
+            manager.flush()
             manySideUpdate entity, pre
             entity
 
+        ###
         remove: mark('tx').on (id...) ->
             manager = baseService.createManager service.entityClass
             manager.removeById.apply manager, id
+        ###
+
+        remove: mark('tx').on (entities...) ->
+            manager = baseService.createManager service.entityClass
+            manager.remove.apply manager, entities
 
     service

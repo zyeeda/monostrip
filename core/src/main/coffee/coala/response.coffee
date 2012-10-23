@@ -5,7 +5,7 @@ handlebars = require 'handlebars'
 res = require 'ringo/jsgi/response'
 log = require('ringo/logging').getLogger module.id
 
-{objects,type} = require 'coala/util'
+{objects, type} = require 'coala/util'
 {coala} = require 'coala/config'
 
 {SimpleDateFormat} = java.text
@@ -14,23 +14,39 @@ log = require('ringo/logging').getLogger module.id
 
 charset = 'utf-8'
 
-getContentType = (type) ->
-    'Content-Type': if charset then "#{type}; charset=#{charset}" else type
-
 exports.charset = (c) ->
     charset = c
 
+contentType = (type) ->
+    'Content-Type': if charset then "#{type}; charset=#{charset}" else type
+
 exports.redirect = res.redirect
 
-exports.html = html = (args...) ->
+exports.html = (args...) ->
     result =
         status: 200
-        headers: getContentType 'text/html'
+        headers: contentType 'text/html'
         body: args
 
     if args.length is 1 and type(args[0]) is 'object'
         config = args[0]
         (result[name] = config[name] if config[name]) for name of result
+
+    result.body = [result.body] if type(result.body) isnt 'array'
+
+    result
+
+exports.xml = (args...) ->
+    result =
+        status: 200
+        headers: contentType 'application/xml'
+        body: args
+
+    if args.length is 1
+        if typeof args[0] is 'xml'
+            result.body = args[0].toXmlString()
+        else if type(args[0]) is 'object'
+            (result[name] = args[0][name] if args[0][name]) for name of result
 
     result.body = [result.body] if type(result.body) isnt 'array'
 
@@ -47,33 +63,7 @@ exports.template = (request, path, params) ->
     content = fs.read tplPath
     template = handlebars.compile content
 
-    html template params
-
-exports.xml = (args...) ->
-    result =
-        status: 200
-        headers: getContentType 'application/xml'
-        body: args
-
-    if args.length is 1
-        if typeof args[0] is 'xml'
-            result.body = args[0].toXmlString()
-        else if type(args[0]) is 'object'
-            (result[name] = args[0][name] if args[0][name]) for name of result
-
-    result.body = [result.body] if type(result.body) isnt 'array'
-
-    result
-
-exports.notFound = (args...) ->
-    status: 404
-    headers: getContentType 'text/html'
-    body: args
-
-exports.error = (args...) ->
-    status: 500
-    headers: getContentType 'text/html'
-    body: args
+    exports.html template params
 
 ###
 generate json response, support three ways:
@@ -100,7 +90,6 @@ response.json(object)
     .add('filter1',['field1','field2']).add('filter2','field3')
     .add('filter3',['field4','field5'],'exclude').add('filter4','field6','e');
 ###
-
 exports.json = (object, config) ->
     contentType = 'application/json'
     contentType = "#{contentType}; charset=#{res.charset()}" if res.charset()
@@ -173,7 +162,7 @@ buildObjectMapper = (included, excluded, result) ->
     mapper.configure SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false
     df = new SimpleDateFormat (result.dateFormat or coala.dateFormat)
     mapper.getSerializationConfig().setDateFormat df
-    
+
     mapper.writer filter
 
 exports.stream = (request, callback) ->
@@ -202,9 +191,45 @@ exports.stream = (request, callback) ->
     try
         callback servletResponse.getOutputStream()
     catch error
-        return exports.error error
+        return exports.internalServerError error
 
     status: status
     headers:
         'X-JSGI-Skip-Response': true
     body: []
+
+###
+errors =
+    items: []
+
+    append: (item) ->
+        @items.push item
+
+    size : ->
+        @items.length
+
+    collect: (asJson) ->
+        return true if @items.length is 0
+
+        items = @items
+        @items = []
+        result = { errors : items }
+        result = exports.json result if asJson is true
+        result
+
+exports.error = (args...) ->
+    errors.append arg for arg in args
+
+    errors
+###
+
+exports.notFound = (args...) ->
+    status: 404
+    headers: contentType 'text/html'
+    body: args
+
+exports.internalServerError = (args...) ->
+    status: 500
+    headers: contentType 'text/html'
+    body: args
+

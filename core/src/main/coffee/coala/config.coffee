@@ -8,7 +8,8 @@ catch e
 
 defaultConfigure =
     development: true
-    orms: ['src/main/resources/META-INF/orms/orm.xml']
+    # orms: ['src/main/resources/META-INF/orms/orm.xml']
+    orms: []
     scaffoldFolderName: '__scaffold__'
     serviceFolderName: '__services__'
     managerFolderName: '__managers__'

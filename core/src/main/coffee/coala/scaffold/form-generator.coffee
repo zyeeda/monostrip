@@ -15,7 +15,7 @@ fields: [
 ###
 {type, objects} = require 'coala/util'
 {coala} = require 'coala/config'
-{createValidator} = require 'coala/validator'
+{createValidator} = require 'coala/validation/validator'
 {Add, Edit} = com.zyeeda.framework.validator.group
 
 exports.generateForms = (meta, labels = {}, forms, formName) ->

@@ -1,4 +1,4 @@
-package com.zyeeda.framework.web.scaffold.annotation;
+package com.zyeeda.framework.commons.annotation.scaffold;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -8,13 +8,13 @@ import java.lang.annotation.Target;
 
 /**
  * @author guyong
- *
  */
 @Target(TYPE)
 @Retention(RUNTIME)
-public @interface Filter {
+public @interface Filters {
     
-    String name();
-    String[] fields() default {};
+    ActionType type() default ActionType.DEFAULT;
+    Filter[] includes() default {};
+    Filter[] excludes() default {};
     
 }

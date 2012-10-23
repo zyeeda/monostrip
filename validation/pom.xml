@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- $Id: pom.xml,v 39af1620db86 2012/08/27 12:43:07 tangrui $ -->
+<!-- $Id$ -->
 
 <!--
 Copyright 2012 Zyeeda Co. Ltd.
@@ -30,36 +30,59 @@ limitations under the License.
         <version>2.0.0.B2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-framework-commons</artifactId>
-    <name>Zyeeda :: Framework :: Commons</name>
+    <artifactId>zyeeda-framework-validation</artifactId>
+    <name>Zyeeda :: Framework :: Validation</name>
     <packaging>jar</packaging>
+
+    <properties>
+        <validation.api.version>1.0.0.GA</validation.api.version>
+    </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.zyeeda</groupId>
-            <artifactId>zyeeda-framework-validation</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
         </dependency>
         
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
         </dependency>
-        
+
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
         </dependency>
-        
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-        </dependency>
+
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+		</dependency>
     </dependencies>
 
 </project>

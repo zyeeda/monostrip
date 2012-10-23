@@ -1,4 +1,4 @@
-package com.zyeeda.framework.web.scaffold.annotation;
+package com.zyeeda.framework.commons.annotation.scaffold;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

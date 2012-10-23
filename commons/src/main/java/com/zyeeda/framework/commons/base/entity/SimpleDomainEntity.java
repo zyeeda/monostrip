@@ -1,4 +1,8 @@
-package com.zyeeda.framework.entities.base;
+package com.zyeeda.framework.commons.base.entity;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+
 
 @javax.persistence.MappedSuperclass
 public class SimpleDomainEntity extends DomainEntity {
@@ -8,8 +12,8 @@ public class SimpleDomainEntity extends DomainEntity {
     private String name;
     private String description;
     
-    @javax.persistence.Basic
-    @javax.persistence.Column(name = "F_NAME")
+    @Basic
+    @Column(name = "F_NAME")
     public String getName() {
         return this.name;
     }
@@ -17,8 +21,8 @@ public class SimpleDomainEntity extends DomainEntity {
         this.name = name;
     }
     
-    @javax.persistence.Basic
-    @javax.persistence.Column(name = "F_DESC", length = 2000)
+    @Basic
+    @Column(name = "F_DESC", length = 2000)
     public String getDescription() {
         return this.description;
     }

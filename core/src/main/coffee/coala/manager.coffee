@@ -70,6 +70,9 @@ exports.createManager = (entityClass, name) ->
     flush: ->
         em.flush()
 
+    clear: ->
+        em.clear()
+
     refresh: (entities...) ->
         result = for entity in entities
             throw new Error('entity can not be null') unless entity?

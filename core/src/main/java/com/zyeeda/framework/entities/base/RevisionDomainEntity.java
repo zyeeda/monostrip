@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.TemporalType;
 
+import com.zyeeda.framework.commons.base.entity.SimpleDomainEntity;
+
 @javax.persistence.MappedSuperclass
 public class RevisionDomainEntity extends SimpleDomainEntity {
 
