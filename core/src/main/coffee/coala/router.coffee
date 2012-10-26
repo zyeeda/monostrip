@@ -163,11 +163,34 @@ getJsonFilter = (options, type) ->
 
 defaultHandlers =
     list: (options, service, entityMeta, request) ->
-        result = {}
-
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
 
+        result = {}
+        config = {}
+
+        paginationInfo = coala.extractPaginationInfo request.params
+        if paginationInfo?
+            paginationInfo.fetchCount = true
+
+            pageSize = paginationInfo.maxResults
+            count = service.list entity, paginationInfo
+
+            result.recordCount = count
+            result.pageCount = Math.ceil count/pageSize
+
+            delete paginationInfo.fetchCount
+            _.extend config, paginationInfo
+
+        orderInfo = coala.extractOrderInfo request.params
+        if orderInfo?.length isnt 0
+            config.orderBy = orderInfo
+
+        restrictInfo = coala.extractRestrictInfo request.params
+        if restrictInfo?.length isnt 0
+            config.restricts = restrictInfo
+
+        ###
         configs = coala.extractPaginationInfo request.params
         orders = coala.extractOrderInfo request.params
         if configs?
@@ -182,9 +205,10 @@ defaultHandlers =
             configs = configs or {}
             configs.orderBy = orders
 
-        result.results = service.list entity, configs
+        ###
+        result.results = service.list entity, config
 
-        o = coala.generateListResult result.results, configs.currentPage, configs.maxResults, result.recordCount, result.pageCount
+        o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
         json o, getJsonFilter(options, 'list')
 
     get: (options, service, entityMeta, request, id) ->
