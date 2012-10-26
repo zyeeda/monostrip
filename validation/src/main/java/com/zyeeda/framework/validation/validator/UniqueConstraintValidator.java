@@ -11,6 +11,7 @@ import javax.persistence.Query;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.NestedNullException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
@@ -19,7 +20,7 @@ import com.zyeeda.framework.validation.constraint.Unique;
 
 public class UniqueConstraintValidator extends CustomConstraintValidator<Unique, Object> {
 
-	private final static Logger logger = LoggerFactory.getLogger(UniqueConstraintValidator.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(UniqueConstraintValidator.class);
 	
 	private Unique constraint;
 	
@@ -41,19 +42,32 @@ public class UniqueConstraintValidator extends CustomConstraintValidator<Unique,
             for (Parameter<?> param : params) {
                 try {
                     String name = param.getName();
-                    query.setParameter(name, BeanUtils.getNestedProperty(obj, name));
+                    String replacedName = name.replace('$', '.');
+                    Object value = null;
+                    try {
+                        value = BeanUtils.getNestedProperty(obj, replacedName);
+                    } catch (NestedNullException e) {
+                        LOGGER.trace(e.getMessage(), e);
+                    }
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("parameter name = {}", name);
+                        LOGGER.debug("replaced parameter name = {}", replacedName);
+                        LOGGER.debug("parameter value = {}", value);
+                    }
+                    
+                    query.setParameter(name, value);
                 } catch (NoSuchMethodException e) {
-                    logger.error(e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 } catch (IllegalAccessException e) {
-                    logger.error(e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 } catch (InvocationTargetException e) {
-                    logger.error(e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
             long count = (Long) query.getSingleResult();
             return count == 0;
         } catch (PersistenceException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
         return false;
 	}

@@ -32,8 +32,8 @@ import com.zyeeda.framework.validation.group.Update;
 @Table(name = "ZDA_ACCOUNT")
 @Scaffold(path = "/system/accounts")
 @Unique.List({
-    @Unique(groups = { Create.class }, namedQuery = "findDuplicateUsernameCountOnCreate", bindingProperties = "username"),
-    @Unique(groups = { Update.class }, namedQuery = "findDuplicateUsernameCountOnUpdate", bindingProperties = "username")
+        @Unique(groups = { Create.class }, namedQuery = "findDuplicateUsernameCountOnCreate", bindingProperties = "username"),
+        @Unique(groups = { Update.class }, namedQuery = "findDuplicateUsernameCountOnUpdate", bindingProperties = "username")
 })
 @Matches(source = "password", target = "password2", bindingProperties = "password")
 @Audited

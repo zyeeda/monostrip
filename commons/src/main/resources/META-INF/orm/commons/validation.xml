@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm classpath:///META-INF/schema/orm_2_0.xsd"
+    version="2.0">
+    
+    <named-query name="findDuplicateUsernameCountOnCreate">
+        <query>
+            select count(u) from Account u where u.username = :username
+        </query>
+    </named-query>
+    
+    <named-query name="findDuplicateUsernameCountOnUpdate">
+        <query>
+            select
+                count(u)
+            from
+                Account u 
+            where
+                u.username = :username and u.id &lt;&gt; :id
+        </query>
+    </named-query>
+    
+    <named-query name="findDuplicateDeptNameOnCreate">
+        <query>
+            select
+                count(d)
+            from
+                Department d
+            where
+                d.name = :name and
+                (d.parent.id = :parent$id or d.parent is null)
+        </query>
+    </named-query>
+    
+    <named-query name="findDuplicateDeptNameOnUpdate">
+        <query>
+            select
+                count(d)
+            from
+                Department d
+            where
+                d.name = :name and
+                d.id &lt;&gt; :id and
+                (d.parent.id = :parent$id or d.parent is null)
+        </query>
+    </named-query>
+    
+</entity-mappings>
