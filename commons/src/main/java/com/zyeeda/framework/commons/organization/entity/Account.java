@@ -14,13 +14,13 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.zyeeda.framework.commons.annotation.scaffold.Scaffold;
 import com.zyeeda.framework.commons.base.entity.DomainEntity;
 import com.zyeeda.framework.validation.constraint.Matches;
@@ -31,7 +31,6 @@ import com.zyeeda.framework.validation.group.Update;
 @Entity
 @Table(name = "ZDA_ACCOUNT")
 @Scaffold(path = "/system/accounts")
-@JsonFilter("accountFilter")
 @Unique.List({
     @Unique(groups = { Create.class }, namedQuery = "findDuplicateUsernameCountOnCreate", bindingProperties = "username"),
     @Unique(groups = { Update.class }, namedQuery = "findDuplicateUsernameCountOnUpdate", bindingProperties = "username")
@@ -69,7 +68,7 @@ public class Account extends DomainEntity {
     
     @Basic
     @Column(name = "F_PASSWORD", length = 60)
-    @NotBlank
+    @NotNull
     @Size(min = 6)
     public String getPassword() {
         return password;
@@ -80,7 +79,7 @@ public class Account extends DomainEntity {
     }
 
     @Transient
-    @NotBlank
+    @NotNull
     @Size(min = 6, max = 60)
     public String getPassword2() {
         return password2;
