@@ -1,4 +1,5 @@
-{objects} = require 'coala/util'
+# {objects} = require 'coala/util'
+_ = require 'underscore'
 log = require('ringo/logging').getLogger module.id
 
 projectLevelConfigure = try
@@ -65,6 +66,7 @@ defaultConfigure =
         delete params['_filters']
         JSON.parse restricts
 
-exports.coala = objects.extend defaultConfigure, projectLevelConfigure.coala
+# exports.coala = objects.extend defaultConfigure, projectLevelConfigure.coala
+exports.coala = _.extend defaultConfigure, projectLevelConfigure.coala
 
 log.debug "environment variable #{name}:#{value}" for name, value of exports.coala

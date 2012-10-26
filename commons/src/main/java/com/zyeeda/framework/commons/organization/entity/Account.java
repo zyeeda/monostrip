@@ -16,10 +16,11 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.Size;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
+import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.zyeeda.framework.commons.annotation.scaffold.Scaffold;
 import com.zyeeda.framework.commons.base.entity.DomainEntity;
 import com.zyeeda.framework.validation.constraint.Matches;
@@ -36,6 +37,7 @@ import com.zyeeda.framework.validation.group.Update;
     @Unique(groups = { Update.class }, namedQuery = "findDuplicateUsernameCountOnUpdate", bindingProperties = "username")
 })
 @Matches(source = "password", target = "password2", bindingProperties = "password")
+@Audited
 public class Account extends DomainEntity {
 
     private static final long serialVersionUID = 8017378952695485417L;

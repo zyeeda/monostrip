@@ -2,6 +2,9 @@ package com.zyeeda.framework.commons.base.entity;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotBlank;
 
 
 @javax.persistence.MappedSuperclass
@@ -13,7 +16,9 @@ public class SimpleDomainEntity extends DomainEntity {
     private String description;
     
     @Basic
-    @Column(name = "F_NAME")
+    @Column(name = "F_NAME", length = 30)
+    @NotBlank
+    @Size(min = 6)
     public String getName() {
         return this.name;
     }
