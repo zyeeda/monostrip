@@ -130,6 +130,30 @@ exports.createManager = (entityClass, name) ->
         else
             managerUtil.findByEntity example, option
 
+    __noSuchMethod__: (name, args) ->
+        params = args[0] or {}
+        pageInfo = args[1]
+
+        if pageInfo is true
+            executeUpdate = true
+            pageInfo = null
+        else if pageInfo is 1 or pageInfo is 'singleResult'
+            singleResult = true
+            pageInfo = null
+
+        query = createQuery em, name
+        fillPageInfo query, pageInfo
+
+        for key, value of params
+            query.setParameter key, value
+
+        if executeUpdate
+            query.executeUpdate()
+        else
+            if singleResult then query.getSingleResult() else query.getResultList()
+
+
+    ###
     __noSuchMethod__: (name,args) ->
         throw new Error 'can only support one argument call' if args?.length > 1
         option = args[0]
@@ -149,6 +173,7 @@ exports.createManager = (entityClass, name) ->
             if singleResult then query.getSingleResult() else query.getResultList()
         else
             query.executeUpdate()
+    ###
 
 getPageInfo = (object) ->
     result =
@@ -200,13 +225,13 @@ if coala.development is true
             namedQueries[name] = queries.get(name).getQuery()
         namedQueries
 
-    createQuery = (em, name, option) ->
+    createQuery = (em, name) ->
         loadOrms() if modified()
         query = namedQueries[name]
         throw new Error("no query with name:#{name}") unless query?
         em.createQuery query
 else
-    createQuery = (em, name, option) ->
+    createQuery = (em, name) ->
         em.createNamedQuery name
 
 firstIfOnlyOne = (array) ->
