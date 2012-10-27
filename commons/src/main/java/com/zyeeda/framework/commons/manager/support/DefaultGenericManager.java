@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.zyeeda.framework.commons.manager;
+package com.zyeeda.framework.commons.manager.support;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -25,16 +25,18 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Example;
 
+import com.zyeeda.framework.commons.manager.GenericManager;
+
 /**
  * @author guyong
  *
  */
-public abstract class AbstractBaseManager<T, ID extends Serializable> implements BaseManager<T, ID> {
+public class DefaultGenericManager<T, ID extends Serializable> implements GenericManager<T, ID> {
     
     private Class<T> entityClass = null;
     private EntityManager entityManager = null;
     
-    public AbstractBaseManager() {
+    public DefaultGenericManager() {
         entityClass = getObjectClass();
     }
     

@@ -1,36 +1,52 @@
 
-fs = require 'fs'
-handlebars = require 'handlebars'
+fs          = require 'fs'
+handlebars  = require 'handlebars'
 
 res = require 'ringo/jsgi/response'
 log = require('ringo/logging').getLogger module.id
 
-{objects,type} = require 'coala/util'
-{coala} = require 'coala/config'
+{objects, type} = require 'coala/util'
+{coala}         = require 'coala/config'
+{objectMapper}  = require 'coala/jackson'
 
-{SimpleDateFormat} = java.text
-{ObjectMapper, SerializationConfig} = org.codehaus.jackson.map
-{SimpleFilterProvider, SimpleBeanPropertyFilter} = org.codehaus.jackson.map.ser.impl
+{SimpleFilterProvider}      = com.fasterxml.jackson.databind.ser.impl
+{SimpleBeanPropertyFilter}  = com.zyeeda.framework.jackson
 
 charset = 'utf-8'
-
-getContentType = (type) ->
-    'Content-Type': if charset then "#{type}; charset=#{charset}" else type
 
 exports.charset = (c) ->
     charset = c
 
+contentType = (type) ->
+    'Content-Type': if charset then "#{type}; charset=#{charset}" else type
+
 exports.redirect = res.redirect
 
-exports.html = html = (args...) ->
+exports.html = (args...) ->
     result =
         status: 200
-        headers: getContentType 'text/html'
+        headers: contentType 'text/html'
         body: args
 
     if args.length is 1 and type(args[0]) is 'object'
         config = args[0]
         (result[name] = config[name] if config[name]) for name of result
+
+    result.body = [result.body] if type(result.body) isnt 'array'
+
+    result
+
+exports.xml = (args...) ->
+    result =
+        status: 200
+        headers: contentType 'application/xml'
+        body: args
+
+    if args.length is 1
+        if typeof args[0] is 'xml'
+            result.body = args[0].toXmlString()
+        else if type(args[0]) is 'object'
+            (result[name] = args[0][name] if args[0][name]) for name of result
 
     result.body = [result.body] if type(result.body) isnt 'array'
 
@@ -47,33 +63,7 @@ exports.template = (request, path, params) ->
     content = fs.read tplPath
     template = handlebars.compile content
 
-    html template params
-
-exports.xml = (args...) ->
-    result =
-        status: 200
-        headers: getContentType 'application/xml'
-        body: args
-
-    if args.length is 1
-        if typeof args[0] is 'xml'
-            result.body = args[0].toXmlString()
-        else if type(args[0]) is 'object'
-            (result[name] = args[0][name] if args[0][name]) for name of result
-
-    result.body = [result.body] if type(result.body) isnt 'array'
-
-    result
-
-exports.notFound = (args...) ->
-    status: 404
-    headers: getContentType 'text/html'
-    body: args
-
-exports.error = (args...) ->
-    status: 500
-    headers: getContentType 'text/html'
-    body: args
+    exports.html template params
 
 ###
 generate json response, support three ways:
@@ -100,7 +90,6 @@ response.json(object)
     .add('filter1',['field1','field2']).add('filter2','field3')
     .add('filter3',['field4','field5'],'exclude').add('filter4','field6','e');
 ###
-
 exports.json = (object, config) ->
     contentType = 'application/json'
     contentType = "#{contentType}; charset=#{res.charset()}" if res.charset()
@@ -111,12 +100,13 @@ exports.json = (object, config) ->
         _excluded: {},
         _jsonResult: null,
         _isStream: false,
+
         status: 200,
         headers:
             'Content-Type': contentType
 
-        add: (filter, fields, t) ->
-            target = if t is 'e' or t is 'exclude' then @_excluded else @_included
+        add: (filter, fields, type) ->
+            target = if type is 'exclude' then @_excluded else @_included
             fields = if Array.isArray fields then fields else [fields]
 
             filters = target[filter]
@@ -132,49 +122,58 @@ exports.json = (object, config) ->
         forEach: (fn) ->
             return if @_isStream is true
 
+            if @_jsonResult is null
+                log.debug 'Cached json result is null, generate it.'
+                writer = getObjectWriter @_included, @_excluded
+                # mapper = buildObjectMapper @_included, @_excluded, result
+                @_jsonResult = writer.writeValueAsString @_object
+                log.debug "Generation finished. json result = #{@_jsonResult}"
+            else
+                log.debug "Using cached json result. json result = #{@_jsonResult}"
+
+            ###
             unless @_jsonResult?
                 mapper = buildObjectMapper @_included, @_excluded, result
                 @_jsonResult = mapper.writeValueAsString @_object
                 log.debug "generate json, json result:#{@_jsonResult}"
             log.debug "forEach called, json result:#{@_jsonResult}"
+            ###
             fn @_jsonResult
 
         asStream: (request) ->
             @_isStream = true
-            log.debug JSON.stringify @headers
+            log.debug "headers = #{JSON.stringify @headers}"
             exports.stream request,
                 headers: @headers
                 status: @status
                 body: (stream) =>
-                    mapper = buildObjectMapper @_included, @_excluded, result
-                    mapper.writeValue stream, @_object
+                    writer = getObjectWriter @_included, @_excluded
+                    # mapper = buildObjectMapper @_included, @_excluded, result
+                    writer.writeValue stream, @_object
                     return
 
     if config?
         result.include k, v for k, v of config.include
         result.exclude k, v for k, v of config.exclude
-        result.status = config.status or result.status
-        result.headers = objects.extend result.headers, config.headers or {}
-        result.dateFormat = config.dateFormat
+        result.status = config.status if config.status?
+        result.headers = objects.extend result.headers, config.headers if config.headers?
+        # result.status = config.status or result.status
+        # result.headers = objects.extend result.headers, config.headers or {}
+        # result.dateFormat = config.dateFormat
 
     result.body = result
     result
 
-buildObjectMapper = (included, excluded, result) ->
+getObjectWriter = (included, excluded, result) ->
     filter = new SimpleFilterProvider()
 
     for k, v of included
-        throw new Error("filter:#{key} have both include and exclude property") if k in excluded
+        throw new Error("Filter '#{key}' exists in both included and excluded configuration.") if k in excluded
         filter.addFilter k, SimpleBeanPropertyFilter.filterOutAllExcept v
 
     filter.addFilter k, SimpleBeanPropertyFilter.serializeAllExcept v for k, v of excluded
 
-    mapper = new ObjectMapper()
-    mapper.configure SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false
-    df = new SimpleDateFormat (result.dateFormat or coala.dateFormat)
-    mapper.getSerializationConfig().setDateFormat df
-    
-    mapper.writer filter
+    objectMapper.writer filter
 
 exports.stream = (request, callback) ->
     unless request? and request.env? and (type(callback) is 'function' or type(callback) is 'object')
@@ -202,9 +201,45 @@ exports.stream = (request, callback) ->
     try
         callback servletResponse.getOutputStream()
     catch error
-        return exports.error error
+        return exports.internalServerError error
 
     status: status
     headers:
         'X-JSGI-Skip-Response': true
     body: []
+
+###
+errors =
+    items: []
+
+    append: (item) ->
+        @items.push item
+
+    size : ->
+        @items.length
+
+    collect: (asJson) ->
+        return true if @items.length is 0
+
+        items = @items
+        @items = []
+        result = { errors : items }
+        result = exports.json result if asJson is true
+        result
+
+exports.error = (args...) ->
+    errors.append arg for arg in args
+
+    errors
+###
+
+exports.notFound = (args...) ->
+    status: 404
+    headers: contentType 'text/html'
+    body: args
+
+exports.internalServerError = (args...) ->
+    status: 500
+    headers: contentType 'text/html'
+    body: args
+

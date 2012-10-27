@@ -23,12 +23,12 @@ import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
+import com.zyeeda.framework.commons.annotation.scaffold.Filters;
+import com.zyeeda.framework.commons.annotation.scaffold.Scaffold;
 import com.zyeeda.framework.entities.base.TreeStyleEntity;
 import com.zyeeda.framework.web.scaffold.EntityMeta;
 import com.zyeeda.framework.web.scaffold.EntityMetaResolver;
 import com.zyeeda.framework.web.scaffold.FieldMeta;
-import com.zyeeda.framework.web.scaffold.annotation.Filters;
-import com.zyeeda.framework.web.scaffold.annotation.Scaffold;
 
 /**
  * @author guyong
