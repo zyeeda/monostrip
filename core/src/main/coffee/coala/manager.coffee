@@ -121,7 +121,7 @@ exports.createManager = (entityClass, name) ->
         dsFiles = ['.ds.hql', '.ds.sql', '.ds.sp', '.ds.js']
         if fs.exists dsPath + dsFiles[0]
             managerUtil.findByHql example, option, dsPath + dsFiles[0]
-        else if fs.exists dsPath + dsFiles[1] 
+        else if fs.exists dsPath + dsFiles[1]
             managerUtil.findBySql example, option, dsPath + dsFiles[1]
         else if fs.exists dsPath + dsFiles[2]
             managerUtil.findByProcedure example, option, dsPath + dsFiles[2]

@@ -5,7 +5,7 @@
 fs = fs || require 'fs'
 
 exports.createUtil = (em, entityClass) ->
-    util = 
+    util =
         # this implementation use native hibernate session
         findByEntity: (example, option = {}) ->
             # ex = Example.create(example).excludeZeroes().enableLike(MatchMode.ANYWHERE)
@@ -39,7 +39,7 @@ exports.createUtil = (em, entityClass) ->
                 results.call results, example, option
 
         findByProcedure: (example, option = {}, sqlPath) ->
-            sql = fs.read path        
+            sql = fs.read path
             sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
             query = em.createNativeQuery sql
             for restrict, i in restricts
@@ -63,7 +63,7 @@ exports.createUtil = (em, entityClass) ->
                 return list.size()
             results = []
             it = list.iterator()
-            while it.hasNext() 
+            while it.hasNext()
                 _next = it.next()
                 obj = {}
                 for f in option.configs.fields
@@ -74,9 +74,9 @@ exports.createUtil = (em, entityClass) ->
         findByStatement: (example, option = {}, path, type) ->
             sql = ''
             if option.fetchCount is true
-                sql = fs.read path + '.count'       
+                sql = fs.read path + '.count'
             else
-                sql = fs.read path        
+                sql = fs.read path
             sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
             fields = option.configs.fields
             orderBy = ''
@@ -86,13 +86,13 @@ exports.createUtil = (em, entityClass) ->
             if where then sql = sql.replace '{{where}}', 'where' + where else sql = sql.replace '{{where}}', 'where 0 = 0'
             if option.orderBy
                 for order in option.orderBy
-                    for property, value of order 
+                    for property, value of order
                         for f in fields
                             if f.name == property
                                 orderBy += ' ' + f.alias + ' ' + value + ','
             orderBy = orderBy.substr 0, orderBy.length - 1
             if orderBy then sql = sql.replace '{{orderBy}}', 'order by' + orderBy else sql = sql.replace '{{orderBy}}', ''
-            if type == 'sql' 
+            if type == 'sql'
                 query = em.createNativeQuery sql
             else
                 if option.configs.resultClass? and !option.fetchCount
@@ -124,7 +124,7 @@ exports.createUtil = (em, entityClass) ->
                 return list if option.configs.resultClass
                 results = []
                 it = list.iterator()
-                while it.hasNext() 
+                while it.hasNext()
                     _next = it.next()
                     obj = {}
                     for f in fields
@@ -134,7 +134,7 @@ exports.createUtil = (em, entityClass) ->
 
         joinWhere: (fields, restricts) ->
             return where: where, restricts: restricts unless restricts
-            operators = 
+            operators =
                 'EQ': '='
                 'NE': '<>'
                 'GT': '>'
@@ -147,8 +147,8 @@ exports.createUtil = (em, entityClass) ->
                 _restrict = {}
                 for f in fields
                     if f.name == restrict.name
-                        if restrict.operator then _operator = restrict.operator.toUpperCase() else _operator = 'LIKE'              
-                        _restrict = 
+                        if restrict.operator then _operator = restrict.operator.toUpperCase() else _operator = 'LIKE'
+                        _restrict =
                             name: restrict.name
                             operator: _operator
                         _restrict.type = f.type if f.type
@@ -158,7 +158,7 @@ exports.createUtil = (em, entityClass) ->
                         else if _operator == 'BETWEEN'
                             _value = restrict.value.split ','
                             _restrict.value = _value[0]
-                            newRestrict = 
+                            newRestrict =
                                 name: 'end_' + restrict.name
                                 value: _value[1]
                             newRestrict.type = f.type if f.type
@@ -169,7 +169,7 @@ exports.createUtil = (em, entityClass) ->
                             _restrict.value = _value.pop(0)
                             inStr = ':' + f.name
                             for r, i in _value
-                                newRestrict = 
+                                newRestrict =
                                     name: 'in_' + i + '_' + restrict.name
                                     value: r
                                 newRestrict.type = f.type if f.type
@@ -186,32 +186,41 @@ exports.createUtil = (em, entityClass) ->
 
         fillRestrict: (criteria, restrictions, entityClass) ->
             for restrict in restrictions
-                _pname = restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)
-                try
-                    _type = entityClass.getMethod('get' + _pname).returnType 
-                catch e
-                    try
-                        _type = entityClass.getMethod('is' + _pname).returnType
-                    catch ex
-                        throw new Error "property #{restrict.name} is not found"
-                _operator = restrict.operator
-                if _type.equals(Date)
-                    _tempVal = restrict.value.split ','
-                    _value = DatetimeUtils.parseDate(_tempVal[0])
-                    if _tempVal[1] then _other = DatetimeUtils.parseDate(_tempVal[1]) else _other = _value
-                    _operator = _operator || 'between'
-                else if _type.equals(Boolean) or _type.toString().equals 'boolean'
-                    _value = new Boolean if restrict.value == '1' then true else false
-                    _operator = _operator || 'eq'
-                else if _type.equals(Integer) or _type.equals(Double) or _type.toString().equals('int') or _type.toString().equals('double')
-                    _tempVal =  restrict.value.split ','
-                    _value = _tempVal[0]
-                    _other = _tempVal[1] 
-                    _operator = _operator || 'between'
+                _value = undefined; _other = undefined
+                if restrict.name and restrict.name.indexOf('.') isnt -1
+                    if restrict.value
+                        _value = restrict.value
+                        _operator = 'eq'
+                    else
+                        _operator = 'isNull'
                 else
-                    _value = restrict.value if restrict.value
-                    _other = restrict.other if restrict.other
-                    _operator = _operator || 'like'
+                    _pname = restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)
+                    try
+                        _type = entityClass.getMethod('get' + _pname).returnType
+                    catch e
+                        try
+                            _type = entityClass.getMethod('is' + _pname).returnType
+                        catch ex
+                            throw new Error "property #{restrict.name} is not found"
+                    _operator = restrict.operator
+                    if _type.equals(Date)
+                        _tempVal = restrict.value.split ','
+                        _value = DatetimeUtils.parseDate(_tempVal[0])
+                        if _tempVal[1] then _other = DatetimeUtils.parseDate(_tempVal[1]) else _other = _value
+                        _operator = _operator || 'between'
+                    else if _type.equals(Boolean) or _type.toString().equals 'boolean'
+                        _value = new Boolean if restrict.value == '1' then true else false
+                        _operator = _operator || 'eq'
+                    else if _type.equals(Integer) or _type.equals(Double) or _type.toString().equals('int') or _type.toString().equals('double')
+                        _tempVal =  restrict.value.split ','
+                        _value = _tempVal[0]
+                        _other = _tempVal[1]
+                        _operator = _operator || 'between'
+                    else
+                        _value = restrict.value if restrict.value
+                        _other = restrict.other if restrict.other
+                        _operator = _operator || 'like'
+
                 if 'or' == _operator
                     junc = Restrictions.disjunction()
                     criteria = criteria.add fillRestrict junc, _value
@@ -226,10 +235,10 @@ exports.createUtil = (em, entityClass) ->
                 else if 'like' == _operator or 'ilike' == _operator
                     criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, MatchMode['ANYWHERE']
                 else
-                    if _value and _other
+                    if _value isnt undefined and _other isnt undefined
                         criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, _other
-                    else if restrict.value
-                        criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value 
+                    else if _value isnt undefined
+                        criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value
                     else
                         criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name
             criteria
