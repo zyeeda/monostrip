@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- $Id$ -->
+<!-- $Id: pom.xml,v 0e978a8d047c 2012/10/27 06:24:04 tangrui $ -->
 
 <!--
 Copyright 2012 Zyeeda Co. Ltd.
@@ -18,7 +18,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -50,7 +52,10 @@ limitations under the License.
     </repositories>
 
     <properties>
+        <servlet.api.version>2.5</servlet.api.version>
+        <transaction.api.version>1.1</transaction.api.version>
         <spring.version>3.1.1.RELEASE</spring.version>
+        <hibernate.jpa2.api.version>1.0.1.Final</hibernate.jpa2.api.version>
         <hibernate.version>4.1.7.Final</hibernate.version>
         <hibernate.validator.version>4.3.0.Final</hibernate.validator.version>
         <hibernate.envers.version>4.1.7.Final</hibernate.envers.version>
@@ -61,6 +66,22 @@ limitations under the License.
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>${servlet.api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.transaction</groupId>
+                <artifactId>jta</artifactId>
+                <version>${transaction.api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- spring -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
@@ -93,7 +114,24 @@ limitations under the License.
                 <artifactId>spring-web</artifactId>
                 <version>${spring.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-tx</artifactId>
+                <version>${spring.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>commons-logging</artifactId>
+                        <groupId>commons-logging</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
+            <!-- hibernate entity manager -->
+            <dependency>
+                <artifactId>hibernate-jpa-2.0-api</artifactId>
+                <groupId>org.hibernate.javax.persistence</groupId>
+                <version>${hibernate.jpa2.api.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-entitymanager</artifactId>
@@ -113,6 +151,8 @@ limitations under the License.
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <!-- hibernate ehcache -->
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-ehcache</artifactId>
@@ -125,22 +165,23 @@ limitations under the License.
                 </exclusions>
             </dependency>
 
+            <!-- hibernate validator -->
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${validation.api.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate.validator.version}</version>
             </dependency>
 
+            <!-- hibernate envers -->
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-envers</artifactId>
                 <version>${hibernate.envers.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.validation</groupId>
-                <artifactId>validation-api</artifactId>
-                <version>${validation.api.version}</version>
             </dependency>
 
             <dependency>
@@ -155,6 +196,7 @@ limitations under the License.
                 </exclusions>
             </dependency>
 
+            <!-- jackson -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
@@ -180,21 +222,14 @@ limitations under the License.
                 <artifactId>jackson-datatype-joda</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.transaction</groupId>
-            <artifactId>jta</artifactId>
-            <version>1.1</version>
-            <scope>provided</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -206,8 +241,10 @@ limitations under the License.
     </scm>
 
     <modules>
-        <module>commons</module>
         <module>validation</module>
+        <module>commons</module>
+        <module>knowledge</module>
+        <module>bpm</module>
         <module>core</module>
     </modules>
 

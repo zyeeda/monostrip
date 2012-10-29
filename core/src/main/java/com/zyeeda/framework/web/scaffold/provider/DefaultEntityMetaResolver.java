@@ -15,6 +15,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -25,7 +27,7 @@ import org.springframework.util.ReflectionUtils;
 
 import com.zyeeda.framework.commons.annotation.scaffold.Filters;
 import com.zyeeda.framework.commons.annotation.scaffold.Scaffold;
-import com.zyeeda.framework.entities.base.TreeStyleEntity;
+import com.zyeeda.framework.commons.base.data.TreeNode;
 import com.zyeeda.framework.web.scaffold.EntityMeta;
 import com.zyeeda.framework.web.scaffold.EntityMetaResolver;
 import com.zyeeda.framework.web.scaffold.FieldMeta;
@@ -35,6 +37,8 @@ import com.zyeeda.framework.web.scaffold.FieldMeta;
  *
  */
 public class DefaultEntityMetaResolver implements EntityMetaResolver {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEntityMetaResolver.class);
     
     private Map<Class<?>, EntityMeta> classCache = null;
     private Map<String, List<EntityMeta>> packageCache = null;
@@ -160,14 +164,15 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
     public synchronized EntityMeta[] resolveScaffoldEntities(String... packages) {
         final List<EntityMeta> result = new ArrayList<EntityMeta>();
         for( String pkg : packages ) {
+            LOGGER.debug("resolve entities in package: {}", pkg);
             List<EntityMeta> metas = resovePackage(pkg);
             for( EntityMeta meta : metas ) {
                 Scaffold scaffold = meta.getEntityClass().getAnnotation(Scaffold.class);
                 if( scaffold != null ) {
                     meta.setPath(scaffold.path());
-                    if ("grid".equals(scaffold.type()) && TreeStyleEntity.class.isAssignableFrom(meta.getEntityClass())) {
+                    if ("grid".equals(scaffold.type()) && TreeNode.class.isAssignableFrom(meta.getEntityClass())) {
                         meta.setType("tree");
-                    } else if (("tree".equals(scaffold.type()) || "treeTable".equals(scaffold.type())) && !TreeStyleEntity.class.isAssignableFrom(meta.getEntityClass())) {
+                    } else if (("tree".equals(scaffold.type()) || "treeTable".equals(scaffold.type())) && !TreeNode.class.isAssignableFrom(meta.getEntityClass())) {
                         meta.setType("grid");
                     } else {
                         meta.setType(scaffold.type());

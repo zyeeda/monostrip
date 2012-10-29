@@ -17,6 +17,7 @@ log = getLogger module.id
 validator = new createValidator()
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
+###
 processRoot = (router, repo, prefix) ->
     routersRepo = repo.getChildRepository coala.routerFoldername
     log.debug "routersRepo.exists = #{routersRepo.exists()}"
@@ -52,6 +53,7 @@ exports.createApplication = (module, mountDefaultRouters = true) ->
         router.mount '/scaffold/tasks', 'coala/scaffold/task'
 
     router
+###
 
 exports.createRouter = ->
     router = new Application()

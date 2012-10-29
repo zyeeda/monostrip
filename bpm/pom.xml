@@ -30,41 +30,38 @@ limitations under the License.
         <version>2.0.0.B2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-framework-validation</artifactId>
-    <name>Zyeeda :: Framework :: Validation</name>
+    <artifactId>zyeeda-framework-bpm</artifactId>
+    <name>Zyeeda :: Framework :: BPM</name>
     <packaging>jar</packaging>
 
     <properties>
-        <validation.api.version>1.0.0.GA</validation.api.version>
+        <activiti.version>5.10</activiti.version>
     </properties>
 
     <dependencies>
-    
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
-        </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-engine</artifactId>
+            <version>${activiti.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-spring</artifactId>
+            <version>${activiti.version}</version>
         </dependency>
 
-		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-		</dependency>
-		
     </dependencies>
 
 </project>
