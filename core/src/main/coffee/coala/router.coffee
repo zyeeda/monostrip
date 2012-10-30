@@ -50,7 +50,7 @@ exports.createApplication = (module, mountDefaultRouters = true) ->
     if mountDefaultRouters
         router.mount '/helper', 'coala/frontend-development-helper-router' if coala.development
         router.mount '/scaffold', 'coala/scaffold/router'
-        router.mount '/scaffold/tasks', 'coala/scaffold/task'
+        router.mount '/scaffold/tmasks', 'coala/scaffold/task'
 
     router
 ###
@@ -157,9 +157,9 @@ createEntity = (clazz) ->
     c.newInstance()
 
 getService = (options, entityMeta) ->
-    options.service or createService entityMeta.entityClass, entityMeta
+    options.service or createService entityMeta.entityClass, entityMeta, options
 
-getJsonFilter = (options, type) ->
+getJsonFilter = exports.getJsonFilter = (options, type) ->
     return {} unless options.filters
     options.filters[type] or options.filters.defaults or {}
 

@@ -13,12 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 public @interface Scaffold {
 
-    String path();
-    String type() default "grid"; // grid, tree, treeTable
-    
-    String processId() default "";
-    
-    String[] excludes() default {};
-    Filters[] filters() default {@Filters};
+    String value();
     
 }

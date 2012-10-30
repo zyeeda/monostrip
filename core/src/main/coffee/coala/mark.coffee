@@ -44,7 +44,7 @@ obj =
     # parameter attributes will pass into the handler which is found by name
     ###
     mark: (name, attributes...) ->
-        log.debug "Using #{name} marker, already used #{obj.keys}."
+        log.debug "Using #{name} marker, already used #{obj.keys}. #{attributes}"
         log.debug "obj.keys.indexOf('#{name}') = #{obj.keys.indexOf(name)}"
         throw new Error('one annotation once') if obj.keys.indexOf(name) isnt -1
         throw new Error("annotation #{name} is not supported") unless name of handlers
@@ -65,8 +65,10 @@ obj =
         result.reduce ((memo, anno) ->
             handler = handlers[anno.name] or loadExtraHandler anno.name
             attributes = anno.attributes
-            (args...) ->
-                handler.apply(null,[context, attributes, memo, args])), fn.bind me
+            ((ctx, att, me, args...) ->
+                handler.apply(null,[ctx, att, me, args])
+            ).bind null, context, attributes, memo
+        ), fn.bind me
 
 exports.mark = obj.mark
 

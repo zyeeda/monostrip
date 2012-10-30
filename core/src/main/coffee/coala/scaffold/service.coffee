@@ -2,11 +2,10 @@
 {mark} = require 'coala/mark'
 {createService} = require 'coala/service'
 {type} = require 'coala/util'
-createProcessService = require('coala/process-service').createService
 
 {ProcessStatusAware} = com.zyeeda.framework.entities.base
 
-exports.createService = (entityClass, entityMeta) ->
+exports.createService = (entityClass, entityMeta, scaffold) ->
     baseService = createService()
 
     manySideUpdate = (entity, previousValues = {}) ->
@@ -36,6 +35,24 @@ exports.createService = (entityClass, entityMeta) ->
                         value[fieldMeta.mappedBy].add entity
                         fieldManager.merge value
 
+    startProcess = mark('beans', 'runtimeService').on (runtimeService, entity, manager) ->
+        processId = scaffold.boundProcessId
+        variables =
+            ENTITY: entity.id
+            ENTITYCLASS: entityMeta.entityClass.getName()
+            SUBMITTER: 'current user id'
+        for property, value of entity
+            variables[property] = value if value isnt undefined and type(value) isnt 'function' and value isnt null
+
+        processInstance = runtimeService.startProcessInstanceByKey processId, variables
+        if entity instanceof ProcessStatusAware
+            entity.processId = processId
+            entity.processInstanceId = processInstance.id
+            entity.status = processId
+            manager.merge entity
+
+        processInstance
+
     service =
         entityClass: entityClass
 
@@ -52,20 +69,8 @@ exports.createService = (entityClass, entityMeta) ->
             entity = manager.save entity
             manySideUpdate entity
 
-            if entityMeta.isProcessBound()
-                processId = entityMeta.boundProcess
-                processSession = createProcessService().getProcessSession()
-                processInstance = processSession.startProcess processId,
-                    ENTITY: entity.id
-                    SUBMITTER: 'current user id'
-                    ENTITYCLASS: service.entityClass
-                processSession.insert entity
-                if entity instanceof ProcessStatusAware
-                    entity.processId = processId
-                    entity.processInstanceId = processInstance.id
-                    entity.knowledgeSessionId = processSession.id
-                    entity.status = processId
-
+            if scaffold.boundProcessId
+                startProcess entity, manager
             entity
 
         update: mark('tx').on (entity) ->

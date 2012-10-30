@@ -14,7 +14,7 @@ metas = entityMetaResolver.resolveScaffoldEntities coala.entityPackages
 
 mountExtraRoutes = (router, meta, options) ->
     router.get('configuration/forms/:formName', (request, formName) ->
-        json generateForms(meta, options.labels, options.forms, formName)
+        json generateForms(meta, options.labels, options.forms, options.fieldGroups, formName, options)
     )
     router.get('configuration/operators', (request) ->
         operators = options['operators'] or coala.defaultOperators
@@ -45,7 +45,7 @@ mountExtraRoutes = (router, meta, options) ->
         return json options.feature if options.feature
 
         json
-            type: meta.type
+            type: options.style
     )
     router.get('configuration/fields', (request) ->
         if options.configs and options.configs.fields
@@ -54,19 +54,24 @@ mountExtraRoutes = (router, meta, options) ->
             json {}
     )
 
+requireScaffoldConfig = exports.requireScaffoldConfig = (path) ->
+    path = path.replace /(^\/)|(\/$)/g, ''
+    [paths..., name] = path.split '/'
+    paths.push coala.scaffoldFolderName
+    paths.push name
+    path = paths.join '/'
+
+    options = try
+        require path
+    catch e
+        {}
+
+    options
+
 for meta in metas
     do (meta, mountExtraRoutes) ->
         path = meta.path
-        path = path.replace /(^\/)|(\/$)/g, ''
-        [paths..., name] = path.split '/'
-        paths.push coala.scaffoldFolderName
-        paths.push name
-        path = paths.join '/'
-
-        options = try
-            require path
-        catch e
-            {}
+        options = requireScaffoldConfig path
         log.debug "find scaffolding entity:#{meta.entityClass} bind to #{meta.path}, with options:#{JSON.stringify options}"
         doWithRouter = options.doWithRouter or ->
         options.doWithRouter = (router) ->
