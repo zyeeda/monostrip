@@ -30,7 +30,7 @@ import com.zyeeda.framework.validation.group.Update;
 
 @Entity
 @Table(name = "ZDA_ACCOUNT")
-@Scaffold(path = "/system/accounts")
+@Scaffold("/system/accounts")
 @Unique.List({
         @Unique(groups = { Create.class }, namedQuery = "findDuplicateUsernameCountOnCreate", bindingProperties = "username"),
         @Unique(groups = { Update.class }, namedQuery = "findDuplicateUsernameCountOnUpdate", bindingProperties = "username")

@@ -25,7 +25,7 @@ import com.zyeeda.framework.validation.group.Update;
 
 @Entity
 @Table(name = "ZDA_DEPARTMENT")
-@Scaffold(path = "/system/departments", type = "tree")
+@Scaffold("/system/departments")
 @Audited
 @Unique.List({
         @Unique(groups = Create.class, namedQuery = "findDuplicateDeptNameOnCreate", bindingProperties = "name"),
