@@ -18,34 +18,40 @@ fields: [
 {createValidator} = require 'coala/validator'
 {Add, Edit} = com.zyeeda.framework.validator.group
 
-exports.generateForms = (meta, labels = {}, forms, formName) ->
-    return null if not forms
+exports.generateForms = (meta, labels = {}, forms, groups, formName, options) ->
+    return null if not groups
 
-    defaults = forms.defaults or {}
-    form = forms[formName] or defaults
+    if not forms or not forms.defaults
+        defaults = if groups['DEFAULT'] then groups: ['DEFAULT'] else groups: (groupName for groupName of groups)
+    else
+        defaults = forms.defaults
+    if not forms or not forms[formName]
+        form = if groups[formName] then groups: [formName] else defaults
+    else
+        form = forms[formName]
 
-    generateForm form, meta, labels, formName
+    generateForm form, meta, labels, groups, formName, options
 
-generateForm = (form, meta, labels, formName) ->
-    groups = DEFAULT: {label: null, columns: 1}
-    for name, value of form.groups or {}
-        if value is null or type(value) is 'string'
-            groups[name] = label: value, columns: 1
+generateForm = (form, meta, labels, fieldGroups, formName, options) ->
+    groups = {}
+    for value in form.groups or []
+        if type(value) is 'string'
+            groups[value] = label: null, columns: 1, readOnly: false
         else
-            groups[name] = value
+            groups[value.name] = value
 
     result = {}
     result.groups = groups
 
     result.fields = []
-    print 'meta', meta.type
-    if meta.type is 'tree' or meta.type is 'treeTable'
+    if options.style is 'tree' or options.style is 'treeTable'
         result.fields.push
             label: '父节点', name: 'parentName', value: 'parent.name', colspan: 2, rowspan: 1, group: 'DEFAULT', type: 'string', readOnly: true
         result.fields.push
             name: 'parent', value: 'parent.id', colspan: 1, rowspan: 1, group: 'DEFAULT', type: 'hidden'
 
-    result.fields.push generateField(field, meta, labels) for field in form.fields
+    for groupName, group of groups
+        result.fields.push generateField(field, meta, labels, groupName, group) for field in fieldGroups[groupName] or []
     result.tabs = form.tabs
 
     validateGroup = if formName == 'add' then Add else Edit
@@ -53,14 +59,15 @@ generateForm = (form, meta, labels, formName) ->
 
     result
 
-generateField = (config, meta, labels) ->
+generateField = (config, meta, labels, groupName, group) ->
     field = config
     field = name: config if type(field) is 'string'
 
     defaults =
-        label: labels[field.name], colspan: 1, rowspan: 1, group: 'DEFAULT'
+        label: labels[field.name], colspan: 1, rowspan: 1, group: 'DEFAULT', readOnly: !!group.readOnly
 
     field = objects.extend defaults, field
+    field.group = groupName
     defineFieldType field, meta.getField(field.name), meta
 
     field

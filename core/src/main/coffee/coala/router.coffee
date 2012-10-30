@@ -155,10 +155,10 @@ createEntity = (clazz) ->
     c.newInstance()
 
 getService = (options, entityMeta) ->
-    options.service or createService entityMeta.entityClass, entityMeta
+    options.service or createService entityMeta.entityClass, entityMeta, options
 
 
-getJsonFilter = (options, type) ->
+getJsonFilter = exports.getJsonFilter = (options, type) ->
     return {} unless options.filters
     options.filters[type] or options.filters.defaults or {}
 
@@ -230,10 +230,14 @@ defaultHandlers =
         errors = errors.concat conts.errors if conts.errors
         return json errors: errors if errors.length > 0
 
-        result = callHook 'before', 'Update', options, entityMeta, request, id
-        return result if result isnt true and result isnt undefined
+        result = true
+        updateIt = (entity) ->
+            mergeEntityAndParameter options, request.params, entityMeta, 'update', entity
+            result = callHook 'before', 'Update', options, entityMeta, request, entity
+            return false if result isnt true and result isnt undefined
 
-        entity = service.update id, mergeEntityAndParameter.bind(@, options, request.params, entityMeta, 'update')
+        entity = service.update id, updateIt
+        return result if result isnt true and result isnt undefined
 
         result = callHook 'after', 'Update', options, entityMeta, request, entity
         return result if result isnt true and result isnt undefined

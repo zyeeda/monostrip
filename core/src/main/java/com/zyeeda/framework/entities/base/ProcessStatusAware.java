@@ -10,6 +10,5 @@ public interface ProcessStatusAware {
     
     void setProcessId(String processId);
     void setProcessInstanceId(Long id);
-    void setKnowledgeSessionId(Long id);
-    
+    void setSubmitter(String submitter);
 }

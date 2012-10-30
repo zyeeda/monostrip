@@ -23,11 +23,9 @@ import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
-import com.zyeeda.framework.entities.base.TreeStyleEntity;
 import com.zyeeda.framework.web.scaffold.EntityMeta;
 import com.zyeeda.framework.web.scaffold.EntityMetaResolver;
 import com.zyeeda.framework.web.scaffold.FieldMeta;
-import com.zyeeda.framework.web.scaffold.annotation.Filters;
 import com.zyeeda.framework.web.scaffold.annotation.Scaffold;
 
 /**
@@ -132,7 +130,7 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
         if (isEntity) {
             Scaffold scaffold = type.getAnnotation(Scaffold.class);
             if (scaffold != null) {
-                path = scaffold.path();
+                path = scaffold.value();
             }
         }
         
@@ -140,7 +138,7 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
             Class<?> parameterizedType = getParameterizedType(field);
             Scaffold scaffold = parameterizedType.getAnnotation(Scaffold.class);
             if (scaffold != null) {
-                path = scaffold.path();
+                path = scaffold.value();
             }
             if (isManyToManyOwner(field)) {
                 return new FieldMeta(name, type, isEntity, path, true, parameterizedType);
@@ -164,7 +162,8 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
             for( EntityMeta meta : metas ) {
                 Scaffold scaffold = meta.getEntityClass().getAnnotation(Scaffold.class);
                 if( scaffold != null ) {
-                    meta.setPath(scaffold.path());
+                    meta.setPath(scaffold.value());
+                    /*
                     if ("grid".equals(scaffold.type()) && TreeStyleEntity.class.isAssignableFrom(meta.getEntityClass())) {
                         meta.setType("tree");
                     } else if (("tree".equals(scaffold.type()) || "treeTable".equals(scaffold.type())) && !TreeStyleEntity.class.isAssignableFrom(meta.getEntityClass())) {
@@ -180,6 +179,7 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                         filters.put(filter.type().toString(), filter);
                     }
                     meta.setJsonFilters(filters);
+                    */
                     result.add(meta);
                 }
             }

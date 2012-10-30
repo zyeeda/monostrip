@@ -3,5 +3,5 @@
 exports.mountTo = (router) ->
     router.mount '/scaffold', 'coala/scaffold/router'
     router.mount '/helper', 'coala/frontend-development-helper-router' if coala.development
-    router.mount '/scaffold/tasks', 'coala/scaffold/task'
+    router.mount '/scaffold/main/tasks', 'coala/scaffold/task'
     router
