@@ -191,6 +191,9 @@ defaultHandlers =
         restrictInfo = coala.extractRestrictInfo request.params
         if restrictInfo?.length isnt 0
             config.restricts = restrictInfo
+            if options.configs?
+                options.configs.fields = setFieldsDefaultValue options.configs.fields
+                config.configs = options.configs
 
         ###
         configs = coala.extractPaginationInfo request.params
@@ -334,3 +337,26 @@ callHook = (hookType, action, options, meta, request, entity) ->
             hook.call null, entity, request, meta
         catch e
             internalServerError e
+
+setFieldsDefaultValue = (fields) ->
+    isNullAlias = false
+    isNullPosition = false
+    if fields? and fields.length > 0
+        isNullAlias = true if not fields[0].alias
+        isNullPosition = true if not fields[0].position and fields[0].position != 0
+    else
+        return fields
+    if isNullAlias and isNullPosition
+        for f, i in fields
+            f.alias = f.name
+            f.position = i
+        return fields
+    else if !isNullAlias and isNullPosition
+        for f, i in fields
+            f.position = i
+        return fields
+    else if isNullAlias and !isNullPosition
+        for f, i in fields
+            f.alias = f.name
+        return fields
+    fields

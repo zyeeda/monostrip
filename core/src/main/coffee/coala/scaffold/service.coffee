@@ -1,9 +1,13 @@
-
 {mark} = require 'coala/mark'
 {createService} = require 'coala/service'
 {type} = require 'coala/util'
+fs = require 'fs'
+{coala} = require 'coala/config'
+createProcessService = require('coala/process-service').createService
 
+{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 {ProcessStatusAware} = com.zyeeda.framework.entities.base
+entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
 exports.createService = (entityClass, entityMeta, scaffold) ->
     baseService = createService()
@@ -58,7 +62,28 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
 
         list: (entity, options) ->
             manager = baseService.createManager service.entityClass
-            manager.findByExample entity, options
+            meta = entityMetaResolver.resolveEntity entityClass
+            path = meta.path
+            path = path.replace /(^\/)|(\/$)/g, ''
+            [paths..., name] = path.split '/'
+            paths.push coala.scaffoldFolderName
+            paths.push name
+            path = paths.join '/'
+            dsPath = coala.appPath + path
+            dsFiles = ['.ds.hql', '.ds.sql', '.ds.sp', '.ds.js']
+            if fs.exists dsPath + dsFiles[0]
+                manager.findByHql example, options, dsPath + dsFiles[0]
+            else if fs.exists dsPath + dsFiles[1]
+                manager.findBySql example, options, dsPath + dsFiles[1]
+            else if fs.exists dsPath + dsFiles[2]
+                manager.findByProcedure example, options, dsPath + dsFiles[2]
+            else if fs.exists dsPath + dsFiles[3]
+                manager.findByMethod example, options, path + dsFiles[3]
+            else
+                if options.restricts
+                    manager.findByEntity entity, options
+                else
+                    manager.findByExample entity, options
 
         get: (id) ->
             manager = baseService.createManager service.entityClass
