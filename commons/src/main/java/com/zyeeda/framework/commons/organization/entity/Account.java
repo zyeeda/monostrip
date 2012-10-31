@@ -53,7 +53,7 @@ public class Account extends DomainEntity {
     private String mobile;
     private String telephone;
     private Department department;
-    private boolean disabled;
+    private Boolean disabled;
     
     @Basic
     @Column(name = "F_USERNAME", length = 30)
@@ -177,10 +177,10 @@ public class Account extends DomainEntity {
     
     @Basic
     @Column(name = "F_DISABLED")
-    public boolean isDisabled() {
+    public Boolean getDisabled() {
         return disabled;
     }
-    public void setDisabled(boolean disabled) {
+    public void setDisabled(Boolean disabled) {
         this.disabled = disabled;
     }
     

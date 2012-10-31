@@ -1,4 +1,5 @@
 {Application} = require 'stick'
+_ = require 'underscore'
 
 {getLogger} = require 'ringo/logging'
 {objects, type, paths} = require 'coala/util'

@@ -43,8 +43,15 @@ exports.createValidator = ->
                 rules[name].number= true
                 messages[name].number = messageSource.getMessage 'com.zyeeda.framework.validator.constraints.Number.message', null, Locale.default
             annos = field.annotations
-            upperCaseName = 'get' + name.substring(0, 1).toUpperCase() + name.substring 1, name.length
-            m = entityClass.getMethod upperCaseName
+            upperCaseName = name.substring(0, 1).toUpperCase() + name.substring 1, name.length
+            try
+                m = entityClass.getMethod 'get' + upperCaseName
+            catch e
+                try
+                    m = entityClass.getMethod 'is' + upperCaseName
+                catch ex
+                    continue
+                    throw new Error "property #{name} is not found"
             annos2 = m.annotations
             newAnnos = annos.concat annos2
             for a in newAnnos
@@ -75,7 +82,7 @@ exports.createValidator = ->
                         message = message.replace '{min}', map.get('min')
                         message = message.replace '{max}', map.get('max')
                         messages[name].range = message
-                    else if a instanceof org.hibernate.validator.constraints.Length
+                    else if a instanceof org.hibernate.validator.constraints.Length or a instanceof javax.validation.constraints.Size
                         rules[name].rangelength = [map.get('min'), map.get('max')]
                         message = message.replace '{min}', map.get('min')
                         message = message.replace '{max}', map.get('max')
