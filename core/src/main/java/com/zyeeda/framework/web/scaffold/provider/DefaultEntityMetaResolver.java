@@ -26,7 +26,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import com.zyeeda.framework.commons.annotation.scaffold.Scaffold;
-import com.zyeeda.framework.commons.base.data.TreeNode;
 import com.zyeeda.framework.web.scaffold.EntityMeta;
 import com.zyeeda.framework.web.scaffold.EntityMetaResolver;
 import com.zyeeda.framework.web.scaffold.FieldMeta;

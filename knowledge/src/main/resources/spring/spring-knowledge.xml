@@ -14,7 +14,7 @@
 
     <drools:grid-node id="node1" />
     
-    <import resource="spring-knowledge-kbase.xml" />
+    <import resource="classpath:spring/spring-knowledge-kbase.xml" />
 	
 	<bean id="knowledgeService" class="com.zyeeda.framework.knowledge.support.DefaultKnowledgeService"
         p:kbase-ref="kbase"
