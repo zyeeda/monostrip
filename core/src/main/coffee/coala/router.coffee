@@ -182,7 +182,7 @@ defaultHandlers =
             result.pageCount = Math.ceil count/pageSize
 
             delete paginationInfo.fetchCount
-            _.extend config, paginationInfo
+            objects.extend config, paginationInfo
 
         orderInfo = coala.extractOrderInfo request.params
         if orderInfo?.length isnt 0
@@ -334,4 +334,3 @@ callHook = (hookType, action, options, meta, request, entity) ->
             hook.call null, entity, request, meta
         catch e
             internalServerError e
-
