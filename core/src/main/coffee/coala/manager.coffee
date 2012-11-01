@@ -140,10 +140,10 @@ exports.createManager = (entityClass, name) ->
             criteria.list()
 
     findBySql: (example, option = {}, sqlPath) ->
-        findByStatement example, option, sqlPath, 'sql'
+        findByStatement example, option, sqlPath, 'sql', em
 
     findByHql: (example, option = {}, hqlPath) ->
-        findByStatement example, option, hqlPath, 'hql'
+        findByStatement example, option, hqlPath, 'hql', em
 
     findByMethod: (example, option = {}, jsPath) ->
         if option.fetchCount is true
@@ -181,7 +181,7 @@ exports.createManager = (entityClass, name) ->
         while it.hasNext()
             _next = it.next()
             obj = {}
-            for f in option.configs.fields
+            for f in option.fields
                 obj[f.name] = _next[f.position]
             results.push obj
         results
@@ -251,14 +251,14 @@ fillPageInfo = (query,pageInfo) ->
         return true
     false
 
-findByStatement = (example, option = {}, path, type) ->
+findByStatement = (example, option = {}, path, type, em) ->
     sql = ''
     if option.fetchCount is true
         sql = fs.read path + '.count'
     else
         sql = fs.read path
     sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
-    fields = option.configs.fields
+    fields = option.fields
     orderBy = ''
     result = joinWhere fields, option.restricts
     where = result.where
@@ -275,8 +275,8 @@ findByStatement = (example, option = {}, path, type) ->
     if type == 'sql'
         query = em.createNativeQuery sql
     else
-        if option.configs.resultClass? and !option.fetchCount
-            query = em.createQuery sql, Class.forName option.configs.resultClass
+        if option.resultClass? and !option.fetchCount
+            query = em.createQuery sql, Class.forName option.resultClass
         else
             query = em.createQuery sql
     params = query.parameters
@@ -301,7 +301,7 @@ findByStatement = (example, option = {}, path, type) ->
         pageInfo = getPageInfo option
         fillPageInfo query, pageInfo
         list = query.resultList
-        return list if option.configs.resultClass
+        return list if option.resultClass
         results = []
         it = list.iterator()
         while it.hasNext()

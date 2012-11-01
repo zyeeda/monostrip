@@ -192,9 +192,10 @@ defaultHandlers =
         restrictInfo = coala.extractRestrictInfo request.params
         if restrictInfo?.length isnt 0
             config.restricts = restrictInfo
-            if options.configs?
-                options.configs.fields = setFieldsDefaultValue options.configs.fields
-                config.configs = options.configs
+        style = options.style
+        if style? and options[style]?
+            options[style].colModel = setFieldsDefaultValue options[style].colModel
+            config.fields= options[style].colModel
 
         ###
         configs = coala.extractPaginationInfo request.params
