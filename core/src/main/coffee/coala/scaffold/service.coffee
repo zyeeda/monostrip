@@ -72,13 +72,13 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             dsPath = coala.appPath + path
             dsFiles = ['.ds.hql', '.ds.sql', '.ds.sp', '.ds.js']
             if fs.exists dsPath + dsFiles[0]
-                manager.findByHql example, options, dsPath + dsFiles[0]
+                manager.findByHql entity, options, dsPath + dsFiles[0]
             else if fs.exists dsPath + dsFiles[1]
-                manager.findBySql example, options, dsPath + dsFiles[1]
+                manager.findBySql entity, options, dsPath + dsFiles[1]
             else if fs.exists dsPath + dsFiles[2]
-                manager.findByProcedure example, options, dsPath + dsFiles[2]
+                manager.findByProcedure entity, options, dsPath + dsFiles[2]
             else if fs.exists dsPath + dsFiles[3]
-                manager.findByMethod example, options, path + dsFiles[3]
+                manager.findByMethod entity, options, path + dsFiles[3]
             else
                 if options.restricts
                     manager.findByEntity entity, options
