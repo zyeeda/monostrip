@@ -5,11 +5,13 @@
 {Class, Boolean, String, Integer, Double} = java.lang
 {ArrayList, Date} = java.util
 {Example, Order, Projections, MatchMode, Restrictions} = org.hibernate.criterion
-{DatetimeUtils} = com.zyeeda.framework.utils
 
 {coala} = require 'coala/config'
 {type, objects} = require 'coala/util'
 fs = require 'fs'
+
+dateFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd'
+timeFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd HH:mm:ss'
 
 context = Context.getInstance(module)
 # parameter name is the name of EntityManagerFactory which is configed in spring context
@@ -160,9 +162,9 @@ exports.createManager = (entityClass, name) ->
         for restrict, i in option.restricts
             if restrict.type then _type = restrict.type.toUpperCase() else _type = ''
             if 'DATE' == _type
-                _value = DatetimeUtils.parseDate restrict.value
+                _value = dateFormat.parse restrict.value
             else if 'TIME' == _type
-                _value = DatetimeUtils.parseDatetime restrict.value
+                _value = timeFormat.parse restrict.value
             else if 'BOOLEAN' == _type
                 _value = new Boolean if restrict.value == '1' then true else false
             else
@@ -287,9 +289,9 @@ findByStatement = (example, option = {}, path, type, em) ->
             if _next.name == restrict.name
                 if restrict.type then _type = restrict.type.toUpperCase() else _type = ''
                 if 'DATE' == _type
-                    _value = DatetimeUtils.parseDate restrict.value
+                    _value = dateFormat.parse restrict.value
                 else if 'TIME' == _type
-                    _value = DatetimeUtils.parseDatetime restrict.value
+                    _value = timeFormat.parse restrict.value
                 else if 'BOOLEAN' == _type
                     _value = new Boolean if restrict.value == '1' then true else false
                 else
@@ -385,8 +387,8 @@ fillRestrict = (criteria, restrictions, entityClass) ->
             _operator = restrict.operator
             if _type.equals(Date)
                 _tempVal = restrict.value.split ','
-                _value = DatetimeUtils.parseDate(_tempVal[0])
-                if _tempVal[1] then _other = DatetimeUtils.parseDate(_tempVal[1]) else _other = _value
+                _value = dateFormat.parse(_tempVal[0])
+                if _tempVal[1] then _other = dateFormat.parse(_tempVal[1]) else _other = _value
                 _operator = _operator || 'between'
             else if _type.equals(Boolean) or _type.toString().equals 'boolean'
                 _value = new Boolean if restrict.value == '1' then true else false
