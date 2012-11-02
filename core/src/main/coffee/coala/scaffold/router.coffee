@@ -42,10 +42,11 @@ mountExtraRoutes = (router, meta, options) ->
         json options[name]
     )
     router.get('configuration/feature', (request) ->
-        return json options.feature if options.feature
+        feature = options.feature or {}
+        feature.style = options.style or 'grid'
+        feature.enableFrontendExtension = !!options.enableFrontendExtension
 
-        json
-            type: options.style
+        json feature
     )
     router.get('configuration/fields', (request) ->
         if options.configs and options.configs.fields
