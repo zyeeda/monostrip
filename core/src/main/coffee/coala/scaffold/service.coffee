@@ -41,6 +41,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
 
     startProcess = mark('beans', 'runtimeService').on (runtimeService, entity, manager) ->
         processId = scaffold.boundProcessId
+        if type(processId) is 'function'
+            processId = processId entity
         variables =
             ENTITY: entity.id
             ENTITYCLASS: entityMeta.entityClass.getName()

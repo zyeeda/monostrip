@@ -24,7 +24,8 @@ defaultConfigure =
         add: {label: '添加', icon: 'icon-plus'},
         edit: {label: '编辑', icon: 'icon-edit'},
         del: {label: '删除', icon: 'icon-minus'},
-        show: {label: '查看', icon: 'icon-eye-open'}
+        show: {label: '查看', icon: 'icon-eye-open'},
+        refresh: {label: '刷新', icon: 'icon-refresh'}
 
     extractPaginationInfo: (params) ->
         pageSize = params['_pageSize']
