@@ -9,7 +9,7 @@
 	<bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration"
 		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"
 		p:databaseSchemaUpdate="true" p:jobExecutorActivate="false" p:history="full"
-		p:deploymentResources="classpath*:test-task-*.bpmn" />
+		p:deploymentResources="classpath:bpmn/test-task-*.bpmn" />
 
 	<bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean"
 		p:processEngineConfiguration-ref="processEngineConfiguration" />
