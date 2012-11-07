@@ -46,7 +46,7 @@ obj =
     mark: (name, attributes...) ->
         log.debug "Using #{name} marker, already used #{obj.keys}. #{attributes}"
         log.debug "obj.keys.indexOf('#{name}') = #{obj.keys.indexOf(name)}"
-        throw new Error('one annotation once') if obj.keys.indexOf(name) isnt -1
+        throw new Error("one annotation once, keys: #{obj.keys}, name: #{name}") if obj.keys.indexOf(name) isnt -1
         throw new Error("annotation #{name} is not supported") unless name of handlers
         attr = _.flatten attributes
         obj.annos.push {attributes: attr, name: name}
