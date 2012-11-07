@@ -1,5 +1,6 @@
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
+{type} = require 'coala/util'
 {createRouter} = require 'coala/router'
 {coala} = require 'coala/config'
 {json} = require 'coala/response'
@@ -26,7 +27,8 @@ mountExtraRoutes = (router, meta, options) ->
             colModel = []
             colModel.push {name: name, index: name, label: value} for name, value of options.labels
             grid = colModel: colModel
-
+        else if grid and options.labels
+            grid.colModel = setLabelToColModel grid.colModel, options.labels
         json grid
     )
     router.get('configuration/picker', (request) ->
@@ -68,6 +70,22 @@ requireScaffoldConfig = exports.requireScaffoldConfig = (path) ->
         {}
 
     options
+
+setLabelToColModel = (colModel, labels) ->
+    newModel = []
+    for f, i in colModel
+        if type(f) is 'string'
+            f = name: f
+        unless f.label
+            if f.name.indexOf('.') isnt -1
+                _names = f.name.split '.'
+                f.label = labels[_names[0]][_names[1]]
+            else
+                f.label = labels[f.name]
+        f.alias = f.name unless f.alias
+        f.position = i unless f.position
+        newModel.push f
+    newModel
 
 for meta in metas
     do (meta, mountExtraRoutes) ->

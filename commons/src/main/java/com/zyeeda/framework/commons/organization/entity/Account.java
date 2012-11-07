@@ -166,7 +166,7 @@ public class Account extends DomainEntity {
         this.telephone = telephone;
     }
     
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "F_DEPARTMENT_ID")
     public Department getDepartment() {
         return department;
