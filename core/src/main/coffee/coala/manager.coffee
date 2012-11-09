@@ -372,9 +372,11 @@ fillRestrict = (criteria, restrictions, entityClass) ->
         if restrict.name and restrict.name.indexOf('.') isnt -1
             if restrict.value
                 _value = restrict.value
-                _operator = _operator || 'eq'
+                _operator = restrict.operator || 'eq'
             else
                 _operator = 'isNull'
+            _refName = restrict.name.split('.')[0]
+            criteria = criteria.createAlias _refName, _refName
         else
             _pname = restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)
             try
@@ -415,7 +417,14 @@ fillRestrict = (criteria, restrictions, entityClass) ->
             _value = new String(restrict.value).split ','
             criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value
         else if 'like' == _operator or 'ilike' == _operator
-            criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, MatchMode['ANYWHERE']
+            _matchMode = 'ANYWHERE'
+            if _value.indexOf('%') == 0 and _value.lastIndexOf('%') != _value.length -1
+                _value = _value.substring 1, _value.length
+                _matchMode = 'START'
+            else if _value.indexOf('%') == 0 and _value.lastIndexOf('%') == _value.length - 1
+                _value = _value.substring(0, _value.length - 1)
+                _matchMode = 'END'
+            criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, MatchMode[_matchMode]
         else
             if _value isnt undefined and _other isnt undefined
                 criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, _other
