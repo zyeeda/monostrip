@@ -39,19 +39,9 @@ public class Department extends DomainEntity implements TreeNode<Department> {
     private Department parent;
     private List<Department> children = new ArrayList<Department>();
     private List<Account> accounts = new ArrayList<Account>();
-    private Integer code;
 	private String path;
     
-	@Column(name = "F_CODE")
-    public Integer getCode() {
-		return code;
-	}
-
-	public void setCode(Integer code) {
-		this.code = code;
-	}
-
-    @Column(name = "F_PATH", length = 256)
+    @Column(name = "F_PATH", length = 3000)
 	public String getPath() {
 		return path;
 	}
@@ -59,9 +49,6 @@ public class Department extends DomainEntity implements TreeNode<Department> {
 	public void setPath(String path) {
 		this.path = path;
 	}
-
-
-
 
 	@Basic
     @Column(name = "F_NAME", length = 30)
