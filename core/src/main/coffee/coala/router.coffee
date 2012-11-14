@@ -193,8 +193,7 @@ defaultHandlers =
         if restrictInfo?.length isnt 0
             config.restricts = restrictInfo
         style = options.style
-        if style? and options[style]?
-            options[style].colModel = setFieldsDefaultValue options[style].colModel
+        if style? and options[style]? and options[style].colModel?
             config.fields= options[style].colModel
 
         ###
@@ -340,25 +339,3 @@ callHook = (hookType, action, options, meta, request, entity) ->
         catch e
             internalServerError e
 
-setFieldsDefaultValue = (fields) ->
-    isNullAlias = false
-    isNullPosition = false
-    if fields? and fields.length > 0
-        isNullAlias = true if not fields[0].alias
-        isNullPosition = true if not fields[0].position and fields[0].position != 0
-    else
-        return fields
-    if isNullAlias and isNullPosition
-        for f, i in fields
-            f.alias = f.name
-            f.position = i
-        return fields
-    else if !isNullAlias and isNullPosition
-        for f, i in fields
-            f.position = i
-        return fields
-    else if isNullAlias and !isNullPosition
-        for f, i in fields
-            f.alias = f.name
-        return fields
-    fields

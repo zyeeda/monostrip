@@ -95,4 +95,20 @@ exports.createValidator = ->
                         rules[name].min = map.get 'value'
                         message = message.replace '{value}', map.get('value')
                         messages[name].min = message
+                    else if a instanceof com.zyeeda.framework.validation.constraint.Matches
+                        rules[name].equalTo = a.target()
+                        messages[name].required = message
+
+            classAnnos = entityClass.annotations
+            for anno in classAnnos
+                if anno instanceof com.zyeeda.framework.validation.constraint.Matches
+                        messageExp = anno.message()
+                        messageKey = messageExp.substring(1, messageExp.length - 1)
+                        message = messageSource.getMessage messageKey, null, Locale.default
+                        name = anno.target()
+                        rules[name] = {} unless rules[name]
+                        messages[name] = {} unless messages[name]
+                        rules[name].equalTo = anno.source()
+                        messages[name].equalTo = message
+
         rules: rules, messages: messages
