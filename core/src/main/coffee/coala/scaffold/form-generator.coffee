@@ -57,6 +57,8 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
     validateGroup = if formName == 'add' then Add else Edit
     result.validator = createValidator().buildValidateRules result.fields, meta.entityClass, validateGroup
 
+    result.entityLabel = labels.entity if labels.entity
+
     result
 
 generateField = (config, meta, labels, groupName, group) ->
