@@ -37,11 +37,15 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
     for value in form.groups or []
         if type(value) is 'string'
             groups[value] = label: null, columns: 1, readOnly: false
+            key = value
         else
             groups[value.name] = value
+            key = value.name
+        groups[key].readOnly = true if formName is 'show'
 
     result = {}
     result.groups = groups
+
 
     result.fields = []
     if options.style is 'tree' or options.style is 'treeTable'
