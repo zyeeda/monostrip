@@ -312,7 +312,7 @@ validationGroupMapping =
 
 callValidators = (action, options, request, entity) ->
     context = createValidationContext()
-    formName = request.params['_formName_'] or 'defaults'
+    formName = request.params['__formName__'] or 'defaults'
 
     customValidator = options.validators?[action]?[formName]
     if customValidator? and type(customValidator) is 'function'
@@ -330,7 +330,7 @@ callValidators = (action, options, request, entity) ->
 
 callHook = (hookType, action, options, meta, request, entity) ->
     hookName = hookType + action
-    formName = request.params['_formName_'] or 'defaults'
+    formName = request.params['__formName__'] or 'defaults'
 
     hook = options.hooks?[hookName]?[formName]
     if hook? and type(hook) is 'function'
@@ -338,3 +338,4 @@ callHook = (hookType, action, options, meta, request, entity) ->
             hook.call null, entity, request, meta
         catch e
             internalServerError e
+

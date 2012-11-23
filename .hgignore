@@ -23,7 +23,7 @@ WEB-INF/classes
 WEB-INF/lib
 WEB-INF/app
 WEB-INF/modules/coala
-
+main/resources/coala/**.js
 src/main/webapp/scripts/main-dist.js
 
 
