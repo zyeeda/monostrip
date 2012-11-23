@@ -18,14 +18,14 @@ public class DomainEntity implements Serializable {
     
     @Id
     @GeneratedValue(generator="system-uuid")
-    @GenericGenerator(name="system-uuid", strategy = "uuid2")
+    @GenericGenerator(name="system-uuid", strategy = "com.zyeeda.framework.commons.generator.FallbackUUIDHexGenerator")
     @Column(name = "F_ID")
 	public String getId() {
 		return id;
 	}
     
     public void setId(String id) {
-		this.id = id;
+    	this.id = id;
 	}
     
 }

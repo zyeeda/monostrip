@@ -17,7 +17,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.hibernate.envers.Audited;
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -36,7 +36,7 @@ import com.zyeeda.framework.validation.group.Update;
         @Unique(groups = { Update.class }, namedQuery = "findDuplicateUsernameCountOnUpdate", bindingProperties = "username")
 })
 @Matches(source = "password", target = "password2", bindingProperties = "password")
-@Audited
+//@Audited
 public class Account extends DomainEntity {
 
     private static final long serialVersionUID = 8017378952695485417L;
@@ -54,6 +54,7 @@ public class Account extends DomainEntity {
     private String telephone;
     private Department department;
     private Boolean disabled;
+    private Boolean deleted;
     
     @Basic
     @Column(name = "F_USERNAME", length = 30)
@@ -168,6 +169,7 @@ public class Account extends DomainEntity {
     
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "F_DEPARTMENT_ID")
+    @ForeignKey(name="NONE")
     public Department getDepartment() {
         return department;
     }
@@ -183,5 +185,14 @@ public class Account extends DomainEntity {
     public void setDisabled(Boolean disabled) {
         this.disabled = disabled;
     }
+    
+    @Basic
+    @Column(name = "F_DELETED")
+	public Boolean getDeleted() {
+		return deleted;
+	}
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
+	}
     
 }

@@ -13,7 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
-import org.hibernate.envers.Audited;
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.zyeeda.framework.commons.annotation.scaffold.Scaffold;
@@ -26,7 +26,7 @@ import com.zyeeda.framework.validation.group.Update;
 @Entity
 @Table(name = "ZDA_DEPARTMENT")
 @Scaffold("/system/departments")
-@Audited
+//@Audited
 @Unique.List({
         @Unique(groups = Create.class, namedQuery = "findDuplicateDeptNameOnCreate", bindingProperties = "name"),
         @Unique(groups = Update.class, namedQuery = "findDuplicateDeptNameOnUpdate", bindingProperties = "name")
@@ -40,6 +40,7 @@ public class Department extends DomainEntity implements TreeNode<Department> {
     private List<Department> children = new ArrayList<Department>();
     private List<Account> accounts = new ArrayList<Account>();
 	private String path;
+	private Boolean deleted;
     
     @Column(name = "F_PATH", length = 3000)
 	public String getPath() {
@@ -64,6 +65,7 @@ public class Department extends DomainEntity implements TreeNode<Department> {
     @Override
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "F_PARENT_ID")
+    @ForeignKey(name="NONE")
     public Department getParent() {
         return this.parent;
     }
@@ -94,5 +96,14 @@ public class Department extends DomainEntity implements TreeNode<Department> {
     public void setAccounts(List<Account> accounts) {
         this.accounts = accounts;
     }
+    
+    @Basic
+    @Column(name = "F_DELETED")
+	public Boolean getDeleted() {
+		return deleted;
+	}
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
+	}
     
 }
