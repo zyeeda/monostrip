@@ -3,7 +3,6 @@ package com.zyeeda.framework.commons.organization.entity;
 import java.util.Date;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -167,9 +166,9 @@ public class Account extends DomainEntity {
         this.telephone = telephone;
     }
     
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "F_DEPARTMENT_ID")
-    @ForeignKey(name="NONE")
+    @ForeignKey( name = "none" )
     public Department getDepartment() {
         return department;
     }

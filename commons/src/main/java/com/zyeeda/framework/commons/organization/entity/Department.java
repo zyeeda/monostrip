@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -63,9 +62,9 @@ public class Department extends DomainEntity implements TreeNode<Department> {
     }
 
     @Override
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "F_PARENT_ID")
-    @ForeignKey(name="NONE")
+    @ForeignKey( name = "none" )
     public Department getParent() {
         return this.parent;
     }
@@ -76,7 +75,7 @@ public class Department extends DomainEntity implements TreeNode<Department> {
     }
 
     @Override
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent")
     @OrderBy("name")
     public List<Department> getChildren() {
         return this.children;
@@ -87,7 +86,7 @@ public class Department extends DomainEntity implements TreeNode<Department> {
         this.children = children;
     }
 
-    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "department")
     @OrderBy("username")
     public List<Account> getAccounts() {
         return accounts;
