@@ -36,7 +36,7 @@ processDefinitionToVo = (process) ->
     vo[name] = process[name] for name in ps
     vo
 
-taskQuery = (createQuery, request) ->
+taskQuery = (createQuery, request, process, resolver) ->
     configs = coala.extractPaginationInfo request.params
     orders = coala.extractOrderInfo request.params
     result = {}
@@ -59,15 +59,27 @@ taskQuery = (createQuery, request) ->
         task = query.list()
 
     results = (taskToVo(task) for task in tasks.toArray())
+    filter = exclude: {}, include: {}
+    for o in results
+        o.entity = process.getTaskRelatedEntity(o.id)
+        entityClass = o.entity.getClass()
+        meta = resolver.resolveEntity entityClass
+        opts = requireScaffoldConfig meta.path
+        f = getJsonFilter opts, 'list'
+        objects.extend filter.exclude, f.exclude
+        objects.extend filter.include, f.include
+        o.process = process.repository.createProcessDefinitionQuery().processDefinitionId(o.processDefinitionId).singleResult()
+        o.process = processDefinitionToVo o.process
+
     configs || (configs = {})
     o = coala.generateListResult results, configs.currentPage, configs.maxResults, result.recordCount, result.pageCount
-    json o
+    json o, filter
 
-router.get '/', mark('process').on (process, request) ->
+router.get '/', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request) ->
     currentUser = 'tom'
     taskQuery ->
         process.task.createTaskQuery().taskInvolvedUser(currentUser)
-    , request
+    , request, process, resolver
 
 router.get '/reject/:taskId', mark('process').on (process, request, taskId) ->
     process.reject taskId
@@ -101,11 +113,16 @@ router.get '/:taskId', mark('process').mark('beans', EntityMetaResolver).on (pro
     json {entity: entity, process: processDefinitionToVo(processDefinition), task: taskToVo(task)}, getJsonFilter(options, 'get')
 
 router.get '/completed', mark('process').on (process, request) ->
+    result = process.findHistoricProcessByInvolvedUser 'tom'
+    json result,
+        exclude:
+            historicProcessFilter: ''
+    ###
     currentUser = 'tom'
     taskQuery ->
         process.history.createHistoricTaskInstanceQuery().taskAssignee(currentUser).finished()
-    , request
-
+    , request, process
+    ###
 router.get '/completed/:taskId', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request, taskId) ->
     task = process.history.createHistoricTaskInstanceQuery().taskId(taskId).singleResult()
     processDefinition = process.repository.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult()

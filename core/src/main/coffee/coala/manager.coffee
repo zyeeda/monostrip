@@ -462,6 +462,13 @@ if coala.development is true
         while i.hasNext()
             name = i.next()
             namedQueries[name] = queries.get(name).getQuery()
+
+        queries = config.getNamedSQLQueries()
+        i = queries.keySet().iterator()
+        while i.hasNext()
+            name = i.next()
+            namedQueries[name] = queries.get(name).getQuery()
+
         namedQueries
 
     createQuery = (em, name) ->
