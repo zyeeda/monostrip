@@ -40,19 +40,19 @@ obj =
     # parameter attributes will pass into the handler which is found by name
     ###
     mark: (name, attributes) ->
-        throw new Error('one annotation once') if obj.keys.indexOf(name) isnt -1
+        throw new Error('one annotation once') if @keys.indexOf(name) isnt -1
         throw new Error("annotation #{name} is not supported") unless name of handlers
-        obj.annos.push {attributes: attributes, name: name}
-        obj.keys.push name
-        obj
+        @annos.push {attributes: attributes, name: name}
+        @keys.push name
+        @
 
     ###
     # the end of the at chain, returns an function which wrapped the argument fn
     ###
     on: (fn, me) ->
-        result = (anno for anno in obj.annos)
-        obj.annos = []
-        obj.keys = []
+        result = (anno for anno in @annos)
+        @annos = []
+        @keys = []
 
         context = Context.getInstance(module)
         result.reduce ((memo, anno) ->
@@ -61,6 +61,8 @@ obj =
             (args...) ->
                 handler.apply(null,[context, attributes, memo, args])), fn.bind me
 
-exports.mark = obj.mark
+exports.mark = (args...) ->
+    o = objects.extend {}, obj
+    o.mark args...
 
-exports[name] = obj.mark.bind obj, name for name of handlers
+exports[name] = exports.mark.bind exports.mark, name for name of handlers
