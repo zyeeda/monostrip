@@ -29,7 +29,7 @@ loadExtraHandler = (moduleId) ->
         m = require moduleId
         throw new Error("marker extension module:#{moduleId} has no exports named handler") unless m.handler
 
-        unless type m.handler is 'function'
+        unless type(m.handler) is 'function'
             throw new Error("marker extension module:#{moduleId} has export a handler which is not a function")
 
         return m.handler
@@ -49,9 +49,9 @@ obj =
         throw new Error("one annotation once, keys: #{obj.keys}, name: #{name}") if obj.keys.indexOf(name) isnt -1
         throw new Error("annotation #{name} is not supported") unless name of handlers
         attr = _.flatten attributes
-        obj.annos.push {attributes: attr, name: name}
-        obj.keys.push name
-        obj
+        @annos.push {attributes: attr, name: name}
+        @keys.push name
+        @
 
     ###
     # the end of the at chain, returns an function which wrapped the argument fn
@@ -70,6 +70,8 @@ obj =
             ).bind null, context, attributes, memo
         ), fn.bind me
 
-exports.mark = obj.mark
+exports.mark = (args...) ->
+    o = _.extend {}, obj
+    o.mark args...
 
-exports[name] = obj.mark.bind obj, name for name of handlers
+exports[name] = exports.mark.bind exports, name for name of handlers

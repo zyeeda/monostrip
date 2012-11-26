@@ -76,6 +76,9 @@ exports.createService = ->
             manager = createManager entityClass
             manager.find entityId
 
+        findHistoricProcessByInvolvedUser: (userId) ->
+            manager = createManager()
+            manager.findHistoricProcessByInvolvedUser user: userId
 
         completeTask: (id, userId, entity = {}, args = {}) ->
             variables = objects.extend {}, entityToVariables(entity), args
