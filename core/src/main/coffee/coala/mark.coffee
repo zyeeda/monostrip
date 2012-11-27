@@ -33,8 +33,6 @@ loadExtraHandler = (moduleId) ->
         throw new Error("marker extension module:#{moduleId} is not found")
 
 obj =
-    annos: []
-    keys: []
     ###
     # parameter name is the annotation's name, it is used to find the annotation handler
     # parameter attributes will pass into the handler which is found by name
@@ -62,7 +60,7 @@ obj =
                 handler.apply(null,[context, attributes, memo, args])), fn.bind me
 
 exports.mark = (args...) ->
-    o = objects.extend {}, obj
+    o = objects.extend annos: [], keys: [], obj
     o.mark args...
 
 exports[name] = exports.mark.bind exports.mark, name for name of handlers
