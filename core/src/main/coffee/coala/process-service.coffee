@@ -8,6 +8,7 @@
 {ProcessStatusAware} = com.zyeeda.framework.entities.base
 {ClassUtils} = org.springframework.util
 {EntityMetaResolver} = com.zyeeda.framework.web.scaffold
+{HistoricProcess, HistoricTask} = com.zyeeda.framework.bpm.mapping
 
 context = Context.getInstance(module)
 
@@ -76,9 +77,69 @@ exports.createService = ->
             manager = createManager entityClass
             manager.find entityId
 
-        findHistoricProcessByInvolvedUser: (userId) ->
+        getHistoricProcessRelatedEntity: (processInstanceId) ->
+            vs = service.history.createHistoricDetailQuery().processInstanceId(processInstanceId).variableUpdates().list()
+            entityClass = null
+            enittyId = null
+            for v in vs.toArray()
+                entityClass = v.textValue if v.name is 'ENTITYCLASS'
+                entityId = v.textValue if v.name is 'ENTITY'
+            entityClass = ClassUtils.forName entityClass
+            manager = createManager entityClass
+            manager.find entityId
+
+        findHistoricProcessByInvolvedUser: (userId, status, options) ->
             manager = createManager()
-            manager.findHistoricProcessByInvolvedUser user: userId
+            manager.mixin
+                findHistoricProcessByInvolvedUser: (em, userId, status, params) ->
+                    builder = em.getCriteriaBuilder()
+                    sql = if params.count then builder.createQuery(java.lang.Long) else builder.createQuery(HistoricProcess)
+
+                    hp = sql.from HistoricProcess
+                    ht = sql.from HistoricTask
+                    if params.count
+                        sql.select builder.countDistinct hp
+                    else
+                        sql.distinct true
+                        sql.select hp
+
+                    ps = []
+                    ps[0] = builder.equal(hp.get('processInstanceId'), ht.get('processInstanceId'))
+                    ps[1] = ht.get('endTime').isNotNull()
+                    user = builder.parameter java.lang.String, 'user'
+                    ps[2] = builder.equal(ht.get('assignee'), user)
+                    if status is 'finished'
+                        ps[3] = hp.get('endTime').isNotNull()
+                    else if status is 'unfinished'
+                        ps[3] = hp.get('endTime').isNull()
+
+                    cause = builder.and.apply(builder, ps)
+                    sql.where(cause)
+
+                    if not params.count and params.order
+                        sql.orderBy builder[params.order] hp.get params.orderField
+
+                    query = em.createQuery sql
+                    query.setParameter 'user', userId
+                    if params.count
+                        query.getSingleResult()
+                    else
+                        if params.pagination?.maxResults
+                            query.setMaxResults(params.pagination.maxResults)
+                            query.setFirstResult(params.pagination.firstResult)
+                        query.getResultList()
+
+            result = {}
+            if options.pagination?.maxResults
+                pageSize = options.pagination.maxResults
+                options.count = true
+                count = manager.findHistoricProcessByInvolvedUser userId, status, options
+                result.recordCount = count
+                result.pageCount = Math.ceil count/pageSize
+                delete options.count
+
+            result.items = manager.findHistoricProcessByInvolvedUser userId, status, options
+            result
 
         completeTask: (id, userId, entity = {}, args = {}) ->
             variables = objects.extend {}, entityToVariables(entity), args

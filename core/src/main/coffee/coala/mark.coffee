@@ -37,16 +37,14 @@ loadExtraHandler = (moduleId) ->
         throw new Error("marker extension module:#{moduleId} is not found")
 
 obj =
-    annos: []
-    keys: []
     ###
     # parameter name is the annotation's name, it is used to find the annotation handler
     # parameter attributes will pass into the handler which is found by name
     ###
     mark: (name, attributes...) ->
-        log.debug "Using #{name} marker, already used #{obj.keys}. #{attributes}"
-        log.debug "obj.keys.indexOf('#{name}') = #{obj.keys.indexOf(name)}"
-        throw new Error("one annotation once, keys: #{obj.keys}, name: #{name}") if obj.keys.indexOf(name) isnt -1
+        log.debug "Using #{name} marker, already used #{@keys}. #{attributes}"
+        log.debug "obj.keys.indexOf('#{name}') = #{@keys.indexOf(name)}"
+        throw new Error("one annotation once, keys: #{@keys}, name: #{name}") if @keys.indexOf(name) isnt -1
         throw new Error("annotation #{name} is not supported") unless name of handlers
         attr = _.flatten attributes
         @annos.push {attributes: attr, name: name}
@@ -57,9 +55,9 @@ obj =
     # the end of the at chain, returns an function which wrapped the argument fn
     ###
     on: (fn, me) ->
-        result = (anno for anno in obj.annos)
-        obj.annos = []
-        obj.keys = []
+        result = (anno for anno in @annos)
+        @annos = []
+        @keys = []
 
         context = Context.getInstance(module)
         result.reduce ((memo, anno) ->
@@ -71,7 +69,7 @@ obj =
         ), fn.bind me
 
 exports.mark = (args...) ->
-    o = _.extend {}, obj
+    o = _.extend annos: [], keys: [], obj
     o.mark args...
 
 exports[name] = exports.mark.bind exports, name for name of handlers
