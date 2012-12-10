@@ -33,6 +33,9 @@ classToType = {}
 for name in "Boolean Number String Function Array Date RegExp Undefined Null".split(" ")
     classToType["[object " + name + "]"] = name.toLowerCase()
 
+classToType['[object JavaClass]'] = 'class'
+classToType['[object JavaPackage]'] = 'package'
+
 exports.type = (obj) ->
     strType = Object::toString.call(obj)
     classToType[strType] or "object"
