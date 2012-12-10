@@ -9,6 +9,7 @@
 {TaskService} = com.zyeeda.framework.bpm
 {EntityMetaResolver} = com.zyeeda.framework.web.scaffold
 {ClassUtils} = org.springframework.util
+{Authentication} = org.activiti.engine.impl.identity
 
 router = exports.router = createRouter()
 
@@ -120,19 +121,54 @@ processQuery = (process, request, resolver) ->
 
 router.get '/', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request) ->
     currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
     taskQuery ->
         process.task.createTaskQuery().taskInvolvedUser(currentUser)
     , request, process, resolver
 
-router.get '/reject/:taskId', mark('process').on (process, request, taskId) ->
+router.post '/batch/audit', mark('process').on (process, request) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
+    ids = request.params.ids
+    process.completeTask id, currentUser for id in ids
+    json ids
+
+router.post '/batch/reject', mark('process').on (process, request) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
+    ids = request.params.ids || []
+    comment = request.params.comment
+    if comment
+        process.addComment taskId, null, comment for taskId in ids
+
+    process.reject taskId for taskId in ids
+    json ids
+
+router.put '/reject/:taskId', mark('process').on (process, request, taskId) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
+    comment = request.params.comment
+    if comment
+        process.addComment taskId, null, comment
+
     process.reject taskId
     json taskId
 
 router.get '/revoke/:taskId', mark('process').on (process, request, taskId) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
     process.revoke taskId
     json taskId
 
 router.put '/:taskId', mark('process').on (process, request, taskId) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
     entity = process.getTaskRelatedEntity taskId
     params = {}
     for param, value of request.params
@@ -141,17 +177,22 @@ router.put '/:taskId', mark('process').on (process, request, taskId) ->
             params[name] = value
     router.resolveEntity entity, params
 
-    currentUser = 'tom'
     process.completeTask taskId, currentUser, entity
 
     json taskId
 
 router.get '/list/:processId', mark('process').on (process, request, processId) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
     taskQuery ->
         process.history.createHistoricTaskInstanceQuery().processInstanceId(processId)
     , request, process , null, true
 
 router.get '/:taskId', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request, taskId) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
     task = process.getTask taskId
     processDefinition = process.repository.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult()
     p = process.history.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult()
@@ -167,9 +208,15 @@ router.get '/:taskId', mark('process').mark('beans', EntityMetaResolver).on (pro
     json {entity: entity, process: pvo, task: taskToVo(task)}, getJsonFilter(options, 'get')
 
 router.get '/completed', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
     processQuery process, request, resolver
 
 router.get '/completed/:id', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request, id) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
     p = process.history.createHistoricProcessInstanceQuery().processInstanceId(id).singleResult()
     processDefinition = process.repository.createProcessDefinitionQuery().processDefinitionId(p.getProcessDefinitionId()).singleResult()
     entity = process.getHistoricProcessRelatedEntity id
@@ -183,6 +230,9 @@ router.get '/completed/:id', mark('process').mark('beans', EntityMetaResolver).o
     json {entity: entity, process: pvo}, getJsonFilter(options, 'get')
 
 router.get '/configuration/forms/:taskId', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request, taskId) ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+
     if taskId.charAt(0) is 'p'
         isHistoric = true
         taskId = taskId.substring(1)

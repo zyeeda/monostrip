@@ -15,12 +15,11 @@ timeFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd HH:mm:ss'
 
 context = Context.getInstance(module)
 # parameter name is the name of EntityManagerFactory which is configed in spring context
-getEntityManager = (name = false) ->
-    emf = if name then context.getBean name else context.getBeanByClass EntityManagerFactory
+getEntityManager = (name = 'entityManagerFactory') ->
+    emf = context.getBean name
     em = EntityManagerFactoryUtils.doGetTransactionalEntityManager emf, null
     throw new Error('can not find an EntityManager in current thread') unless em?
     em
-
 
 exports.createManager = (entityClass, name) ->
     em = getEntityManager name

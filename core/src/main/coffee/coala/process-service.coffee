@@ -13,6 +13,7 @@
 context = Context.getInstance(module)
 
 entityToVariables = (entity) ->
+    return {} if not entity
     resolver = context.getBeanByClass EntityMetaResolver
     clazz = entity.getClass()
     return {} if not clazz
@@ -141,7 +142,7 @@ exports.createService = ->
             result.items = manager.findHistoricProcessByInvolvedUser userId, status, options
             result
 
-        completeTask: (id, userId, entity = {}, args = {}) ->
+        completeTask: (id, userId, entity, args = {}) ->
             variables = objects.extend {}, entityToVariables(entity), args
             task = service.getTask id
             service.runtime.setVariables task.getExecutionId(), variables

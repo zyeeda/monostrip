@@ -7,6 +7,7 @@ createProcessService = require('coala/process-service').createService
 
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 {ProcessStatusAware} = com.zyeeda.framework.entities.base
+{Authentication} = org.activiti.engine.impl.identity
 entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
 
 exports.createService = (entityClass, entityMeta, scaffold) ->
@@ -40,13 +41,16 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                         fieldManager.merge value
 
     startProcess = mark('beans', 'runtimeService').on (runtimeService, entity, manager) ->
+        currentUser = 'tom'
+        Authentication.setAuthenticatedUserId currentUser
+
         processId = scaffold.boundProcessId
         if type(processId) is 'function'
             processId = processId entity
         variables =
             ENTITY: entity.id
             ENTITYCLASS: entityMeta.entityClass.getName()
-            SUBMITTER: 'current user id'
+            SUBMITTER: currentUser
         for property, value of entity
             variables[property] = value if value isnt undefined and type(value) isnt 'function' and value isnt null
 
