@@ -29,7 +29,7 @@ autoMount = (router)->
         try
             router.mount "/#{repo.getName()}", resource.getModuleName() if resource.exists()
         catch e
-            log.warn "can't mount #{resource.getModuleName()}, it had not export an router"
+            log.warn "can't mount #{resource.getModuleName()}, it had not export an router", e
 
 extendRouter = (router) ->
     router.attachDomain = attachDomain.bind router, router
