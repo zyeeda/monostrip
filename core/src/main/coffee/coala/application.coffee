@@ -19,7 +19,7 @@ processRoot = (router, repo, prefix) ->
             LOGGER.debug "Mount #{module} to #{url}."
             router.mount url, module
         catch e
-            LOGGER.error "Cannot mount module #{r.getModuleName()}."
+            LOGGER.error "Cannot mount module #{r.getModuleName()}.", e
     true
 
 processRepository = (router, repo, prefix) ->

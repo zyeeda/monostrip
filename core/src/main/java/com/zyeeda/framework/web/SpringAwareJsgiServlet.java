@@ -22,8 +22,10 @@ public class SpringAwareJsgiServlet extends JsgiServlet {
 
         this.servletCtx = config.getServletContext();
         this.springCtx = WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletCtx);
+        String production = config.getInitParameter("production");
         
         Context.instance.setContext(springCtx);
+        Context.instance.setProductionMode("true".equalsIgnoreCase(production));
     }
 
     public ApplicationContext getSpringContext() {
@@ -38,11 +40,20 @@ public class SpringAwareJsgiServlet extends JsgiServlet {
         
         private static Context instance = new Context();
         private ApplicationContext context = null;
+        private boolean productionMode = false;
         
         void setContext(ApplicationContext context) {
             this.context = context;
         }
         
+        public boolean isProductionMode() {
+            return productionMode;
+        }
+
+        public void setProductionMode(boolean productionMode) {
+            this.productionMode = productionMode;
+        }
+
         public ApplicationContext getSpringContext() {
             return context;
         }
