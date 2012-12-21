@@ -91,8 +91,6 @@ response.json(object)
     .add('filter3',['field4','field5'],'exclude').add('filter4','field6','e');
 ###
 exports.json = (object, config) ->
-    contentType = 'application/json'
-    contentType = "#{contentType}; charset=#{res.charset()}" if res.charset()
 
     result =
         _object: object,
@@ -103,7 +101,7 @@ exports.json = (object, config) ->
 
         status: 200,
         headers:
-            'Content-Type': contentType
+            'Content-Type': contentType 'application/json'
 
         add: (filter, fields, type) ->
             target = if type is 'exclude' then @_excluded else @_included
