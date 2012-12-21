@@ -1,4 +1,3 @@
-# {objects} = require 'coala/util'
 _ = require 'underscore'
 log = require('ringo/logging').getLogger module.id
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet

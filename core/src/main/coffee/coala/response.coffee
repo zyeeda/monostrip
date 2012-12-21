@@ -5,9 +5,10 @@ handlebars  = require 'handlebars'
 res = require 'ringo/jsgi/response'
 log = require('ringo/logging').getLogger module.id
 
-{objects, type} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
 {coala}         = require 'coala/config'
-{objectMapper}  = require 'coala/jackson'
+{objectMapper}  = require 'coala/util/jackson'
 
 {SimpleFilterProvider}      = com.fasterxml.jackson.databind.ser.impl
 {SimpleBeanPropertyFilter}  = com.zyeeda.framework.jackson
@@ -100,8 +101,7 @@ exports.json = (object, config) ->
         _isStream: false,
 
         status: 200,
-        headers:
-            'Content-Type': contentType 'application/json'
+        headers: contentType 'application/json'
 
         add: (filter, fields, type) ->
             target = if type is 'exclude' then @_excluded else @_included

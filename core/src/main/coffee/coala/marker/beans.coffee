@@ -4,7 +4,7 @@
 # ex. :
 # mark('beans', ['beanName', SomeService]).on(function(beanUnderNameBeanName, instanceOfSomeService){})
 
-{type} = require 'coala/util'
+{type} = require 'coala/util/type'
 
 exports.handler = (context, attributes, fn, args) ->
     beans = []

@@ -1,4 +1,4 @@
-{paths} = require 'coala/util'
+paths = require 'coala/util/paths'
 {json} = require 'coala/response'
 {coala} = require 'coala/config'
 

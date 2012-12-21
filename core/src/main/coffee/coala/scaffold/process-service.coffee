@@ -1,4 +1,5 @@
-{type, objects} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
 {createManager} = require 'coala/manager'
 
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet

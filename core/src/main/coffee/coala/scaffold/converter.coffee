@@ -3,7 +3,8 @@
 {ClassUtils} = org.springframework.util
 
 {coala} = require 'coala/config'
-{objects, type} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
 {createService} = require 'coala/service'
 
 parseDate = (pattern, desiredType, stringDate) ->

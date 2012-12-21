@@ -1,6 +1,6 @@
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
-{type} = require 'coala/util'
+{type} = require 'coala/util/type'
 {createRouter} = require 'coala/router'
 {coala} = require 'coala/config'
 {json} = require 'coala/response'

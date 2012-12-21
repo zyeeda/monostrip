@@ -7,7 +7,7 @@
 {Example, Order, Projections, MatchMode, Restrictions} = org.hibernate.criterion
 
 {coala} = require 'coala/config'
-{type, objects} = require 'coala/util'
+{type} = require 'coala/util/type'
 fs = require 'fs'
 
 dateFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd'

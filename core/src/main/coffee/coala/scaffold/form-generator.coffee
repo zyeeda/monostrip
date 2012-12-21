@@ -13,7 +13,8 @@ fields: [
     name: 'username', label: 'Username', colspan: 1, rowspan: 1, group: 'groupName', type: 'date|number|string|file|picker', pickerSource: 'string|key-value-pair'
 ]
 ###
-{type, objects} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 {createValidator} = require 'coala/validation/validator'
 {Add, Edit} = com.zyeeda.framework.validator.group

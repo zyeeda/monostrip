@@ -3,7 +3,7 @@
 {json} = require 'coala/response'
 {generateForms} = require 'coala/scaffold/form-generator'
 {requireScaffoldConfig} = require 'coala/scaffold/router'
-{objects} = require 'coala/util'
+objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 
 {TaskService} = com.zyeeda.framework.bpm

@@ -1,9 +1,9 @@
 {mark} = require 'coala/mark'
 {createService} = require 'coala/service'
-{type} = require 'coala/util'
+{type} = require 'coala/util/type'
 fs = require 'fs'
 {coala} = require 'coala/config'
-createProcessService = require('coala/process-service').createService
+createProcessService = require('coala/scaffold/process-service').createService
 
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 {ProcessStatusAware} = com.zyeeda.framework.entities.base

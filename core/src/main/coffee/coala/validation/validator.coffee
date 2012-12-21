@@ -1,5 +1,5 @@
 {mark} = require 'coala/mark'
-{objects} = require 'coala/util'
+objects = require 'coala/util/objects'
 {Date, Locale} = java.util
 {Integer, Boolean, Double, Float} = java.lang
 {Default} = javax.validation.groups

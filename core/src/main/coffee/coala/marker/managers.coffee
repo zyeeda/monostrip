@@ -7,7 +7,8 @@
 # mark('managers', [User, Organize, 'path-to-user-defined-manager'], function(userManager, organizeManager, custom){});
 
 {createService} = require 'coala/service'
-{type, paths} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 
 exports.handler = (context, attributes, fn, args) ->
