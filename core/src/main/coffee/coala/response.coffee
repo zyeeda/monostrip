@@ -54,14 +54,10 @@ exports.xml = (args...) ->
     result
 
 exports.template = (request, path, params) ->
-    req = request.env.servletRequest
-    ctx = req.getServletContext()
-    tplPath = ctx.getRealPath(path)
-    log.debug "template path = #{tplPath}"
-    content = fs.read tplPath
-    template = handlebars.compile content
-
-    exports.html template params
+    res = module.getRepository('/').getResource(path)
+    if res.exists()
+        template = handlebars.compile res.getContent('UTF-8')
+        exports.html template params
 
 ###
 generate json response, support three ways:
