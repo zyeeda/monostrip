@@ -55,11 +55,8 @@ exports.xml = (args...) ->
 
 exports.template = (request, path, params) ->
     req = request.env.servletRequest
-    pathTranslated = req.getPathTranslated()
-    pathInfo = req.getPathInfo()
-    index = pathTranslated.lastIndexOf pathInfo
-    root = pathTranslated.substring 0, index
-    tplPath = "#{root}/WEB-INF/templates/#{path}"
+    ctx = req.getServletContext()
+    tplPath = ctx.getRealPath(path)
     log.debug "template path = #{tplPath}"
     content = fs.read tplPath
     template = handlebars.compile content
