@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- $Id$ -->
+<!-- $Id: pom.xml,v 1aa7e0dcc35f 2012/11/14 02:11:35 guyong $ -->
 
 <!--
 Copyright 2012 Zyeeda Co. Ltd.
@@ -233,7 +233,7 @@ limitations under the License.
                     <bare>false</bare>
                     <modifiedOnly>false</modifiedOnly>
                     <allowedDelete>true</allowedDelete>
-                    <compilerUrl></compilerUrl>
+                    <compilerUrl>${basedir}/../coffee-script.js</compilerUrl>
                 </configuration>
                 <executions>
                     <execution>
