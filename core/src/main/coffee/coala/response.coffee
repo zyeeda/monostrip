@@ -53,11 +53,14 @@ exports.xml = (args...) ->
 
     result
 
-exports.template = (request, path, params) ->
-    res = module.getRepository('/').getResource(path)
+exports.template = (path, params) ->
+    repo = this.getRepository('./').getRootRepository()
+    res = repo.getResource(path)
     if res.exists()
         template = handlebars.compile res.getContent('UTF-8')
         exports.html template params
+    else
+        exports.notFound 'template:', path, ' is not exists'
 
 ###
 generate json response, support three ways:
