@@ -286,7 +286,7 @@ public class DefaultTaskService implements TaskService {
         }
         String signal = REJECT_SIGNAL_PREFIX + task.getTaskDefinitionKey();
         LOGGER.debug("reject signal event = {}", signal);
-        this.runtimeService.signalEventReceived(signal);
+        this.runtimeService.signalEventReceived(signal, task.getExecutionId());
     }
     
     public void revoke(String historicTaskId) {
@@ -296,7 +296,7 @@ public class DefaultTaskService implements TaskService {
         }
         String signal = REVOKE_SIGNAL_PREFIX + task.getTaskDefinitionKey();
         LOGGER.debug("revoke signal event = {}", signal);
-        this.runtimeService.signalEventReceived(signal);
+        this.runtimeService.signalEventReceived(signal,  task.getExecutionId());
     }
 
 }
