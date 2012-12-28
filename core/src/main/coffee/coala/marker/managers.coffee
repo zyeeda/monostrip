@@ -9,6 +9,7 @@
 {createService} = require 'coala/service'
 {type} = require 'coala/util/type'
 objects = require 'coala/util/objects'
+paths = require 'coala/util/paths'
 {coala} = require 'coala/config'
 
 exports.handler = (context, attributes, fn, args) ->
