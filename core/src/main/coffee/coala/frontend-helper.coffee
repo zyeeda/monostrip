@@ -1,5 +1,6 @@
-{paths} = require 'coala/util'
+paths = require 'coala/util/paths'
 {json} = require 'coala/response'
+{coala} = require 'coala/config'
 
 servletContext = null
 scriptFolder = '/scripts'
@@ -7,6 +8,9 @@ scriptFolder = '/scripts'
 router = exports.router = require('coala/router').createRouter()
 exports.setScriptFolder = (path) ->
     scriptFolder = path
+
+router.get '/development', ->
+    json coala.development
 
 router.get '/', (request) ->
     servletContext = request.env.servletRequest.getSession(true).getServletContext() if servletContext is null

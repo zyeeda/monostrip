@@ -7,7 +7,7 @@
 {Example, Order, Projections, MatchMode, Restrictions} = org.hibernate.criterion
 
 {coala} = require 'coala/config'
-{type, objects} = require 'coala/util'
+{type} = require 'coala/util/type'
 fs = require 'fs'
 
 dateFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd'
@@ -15,12 +15,12 @@ timeFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd HH:mm:ss'
 
 context = Context.getInstance(module)
 # parameter name is the name of EntityManagerFactory which is configed in spring context
-getEntityManager = (name = false) ->
-    emf = if name then context.getBean name else context.getBeanByClass EntityManagerFactory
+getEntityManager = (name) ->
+    name = 'entityManagerFactory' if not name
+    emf = context.getBean name
     em = EntityManagerFactoryUtils.doGetTransactionalEntityManager emf, null
     throw new Error('can not find an EntityManager in current thread') unless em?
     em
-
 
 exports.createManager = (entityClass, name) ->
     em = getEntityManager name

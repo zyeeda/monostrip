@@ -7,7 +7,8 @@
 # mark('managers', [User, Organize, 'path-to-user-defined-manager'], function(userManager, organizeManager, custom){});
 
 {createService} = require 'coala/service'
-{type, paths} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 
 exports.handler = (context, attributes, fn, args) ->
@@ -22,7 +23,12 @@ exports.handler = (context, attributes, fn, args) ->
             manager = require(name).createManager()
             managers.push manager
         else
-            managers.push service.createManager clazz
+            print Object.prototype.toString.call(clazz), 'clazz', type(clazz)
+            if type(clazz) is 'class'
+                managers.push service.createManager clazz
+            else if type(clazz) is 'object'
+                print 'clazzz', clazz.entity, clazz.emf
+                managers.push service.createManager clazz.entity, clazz.emf
 
     args = managers.concat args
     fn.apply null, args

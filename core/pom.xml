@@ -233,7 +233,7 @@ limitations under the License.
                     <bare>false</bare>
                     <modifiedOnly>false</modifiedOnly>
                     <allowedDelete>true</allowedDelete>
-                    <compilerUrl></compilerUrl>
+                    <compilerUrl>${basedir}/../coffee-script.js</compilerUrl>
                 </configuration>
                 <executions>
                     <execution>

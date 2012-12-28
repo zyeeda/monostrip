@@ -1,6 +1,6 @@
-# {objects} = require 'coala/util'
 _ = require 'underscore'
 log = require('ringo/logging').getLogger module.id
+{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
 projectLevelConfigure = try
     require 'config'
@@ -8,7 +8,7 @@ catch e
     {}
 
 defaultConfigure =
-    development: true
+    development: !Context.getInstance(module).isProductionMode()
     # orms: ['src/main/resources/META-INF/orms/orm.xml']
     orms: []
     scaffoldFolderName: '__scaffold__'

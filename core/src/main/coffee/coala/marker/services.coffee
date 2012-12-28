@@ -4,9 +4,7 @@
 # ex. :
 # mark('services', ['coala/service', 'someModule/service']).on(function(baseService, moduleService){});
 
-{type, paths} = require 'coala/util'
 {coala} = require 'coala/config'
-
 
 exports.handler = (context, attributes, fn, args) ->
     services = []

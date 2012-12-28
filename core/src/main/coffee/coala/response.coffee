@@ -5,9 +5,10 @@ handlebars  = require 'handlebars'
 res = require 'ringo/jsgi/response'
 log = require('ringo/logging').getLogger module.id
 
-{objects, type} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
 {coala}         = require 'coala/config'
-{objectMapper}  = require 'coala/jackson'
+{objectMapper}  = require 'coala/util/jackson'
 
 {SimpleFilterProvider}      = com.fasterxml.jackson.databind.ser.impl
 {SimpleBeanPropertyFilter}  = com.zyeeda.framework.jackson
@@ -52,18 +53,14 @@ exports.xml = (args...) ->
 
     result
 
-exports.template = (request, path, params) ->
-    req = request.env.servletRequest
-    pathTranslated = req.getPathTranslated()
-    pathInfo = req.getPathInfo()
-    index = pathTranslated.lastIndexOf pathInfo
-    root = pathTranslated.substring 0, index
-    tplPath = "#{root}/WEB-INF/templates/#{path}"
-    log.debug "template path = #{tplPath}"
-    content = fs.read tplPath
-    template = handlebars.compile content
-
-    exports.html template params
+exports.template = (path, params) ->
+    repo = this.getRepository('./').getRootRepository()
+    res = repo.getResource(path)
+    if res.exists()
+        template = handlebars.compile res.getContent('UTF-8')
+        exports.html template params
+    else
+        exports.notFound 'template:', path, ' is not exists'
 
 ###
 generate json response, support three ways:
@@ -91,8 +88,6 @@ response.json(object)
     .add('filter3',['field4','field5'],'exclude').add('filter4','field6','e');
 ###
 exports.json = (object, config) ->
-    contentType = 'application/json'
-    contentType = "#{contentType}; charset=#{res.charset()}" if res.charset()
 
     result =
         _object: object,
@@ -102,8 +97,7 @@ exports.json = (object, config) ->
         _isStream: false,
 
         status: 200,
-        headers:
-            'Content-Type': contentType
+        headers: contentType 'application/json'
 
         add: (filter, fields, type) ->
             target = if type is 'exclude' then @_excluded else @_included

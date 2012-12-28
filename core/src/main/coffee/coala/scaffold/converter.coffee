@@ -3,7 +3,8 @@
 {ClassUtils} = org.springframework.util
 
 {coala} = require 'coala/config'
-{objects, type} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
 {createService} = require 'coala/service'
 
 parseDate = (pattern, desiredType, stringDate) ->
@@ -40,6 +41,8 @@ defaultConverter = (value, fieldMeta) ->
         handleArray service, fieldMeta.type, fieldMeta.manyType, value
     else
         return value if fieldMeta.type is java.lang.String
+        return null if value is null or value.length is 0
+
         c = fieldMeta.type.getConstructor java.lang.String
         c.newInstance value
 

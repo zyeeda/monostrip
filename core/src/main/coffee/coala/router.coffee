@@ -2,7 +2,9 @@
 _ = require 'underscore'
 
 {getLogger} = require 'ringo/logging'
-{objects, type, paths} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
+paths = require 'coala/util/paths'
 {coala} = require 'coala/config'
 {json, html, notFound, internalServerError} = require 'coala/response'
 

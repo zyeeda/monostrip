@@ -3,12 +3,14 @@
 {json} = require 'coala/response'
 {generateForms} = require 'coala/scaffold/form-generator'
 {requireScaffoldConfig} = require 'coala/scaffold/router'
-{objects} = require 'coala/util'
+objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 
 {TaskService} = com.zyeeda.framework.bpm
 {EntityMetaResolver} = com.zyeeda.framework.web.scaffold
 {ClassUtils} = org.springframework.util
+{Authentication} = org.activiti.engine.impl.identity
+{EventSubscriptionQueryImpl} = org.activiti.engine.impl
 
 router = exports.router = createRouter()
 
@@ -24,7 +26,7 @@ taskOrderMap =
 taskToVo = (task) ->
     ps = [
         'id', 'name', 'description', 'priority', 'owner', 'assignee', 'processInstanceId', 'processDefinitionId', 'createTime', 'dueDate',
-        'startTime', 'endTime'
+        'startTime', 'endTime', 'executionId'
     ]
     vo = {}
     vo[name] = task[name] for name in ps
@@ -44,6 +46,11 @@ processDefinitionToVo = (process) ->
     vo = {}
     vo[name] = process[name] for name in ps
     vo
+
+getCurrentUser = ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+    currentUser
 
 taskQuery = (createQuery, request, process, resolver, noExtra) ->
     configs = coala.extractPaginationInfo request.params
@@ -79,6 +86,24 @@ taskQuery = (createQuery, request, process, resolver, noExtra) ->
             objects.extend filter.include, f.include
             o.process = process.repository.createProcessDefinitionQuery().processDefinitionId(o.processDefinitionId).singleResult()
             o.process = processDefinitionToVo o.process
+
+            eventQuery = new EventSubscriptionQueryImpl(process.runtime.commandExecutor)
+            events = eventQuery.executionId(o.executionId).list()
+            o.isRejectable = true for event in events.toArray() when event.eventName.indexOf('reject-') is 0
+    else
+        for o in results
+            continue if o.endTime isnt null
+            execution = process.runtime.createExecutionQuery().executionId(o.executionId).singleResult()
+            parentId = execution.parentId
+            continue if parentId is null
+
+            eventQuery = new EventSubscriptionQueryImpl(process.runtime.commandExecutor)
+            events = eventQuery.executionId(o.executionId).list()
+            isRevokable = true for event in events.toArray() when event.eventName.indexOf('revoke-') is 0
+            continue if not isRevokable
+
+            ts = process.history.createHistoricTaskInstanceQuery().processInstanceId(o.processInstanceId).executionId(parentId).list()
+            o.isRevokable = true for t in ts.toArray() when t.assignee is getCurrentUser()
 
     configs || (configs = {})
     o = coala.generateListResult results, configs.currentPage, configs.maxResults, result.recordCount, result.pageCount
@@ -119,20 +144,49 @@ processQuery = (process, request, resolver) ->
 
 
 router.get '/', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request) ->
-    currentUser = 'tom'
+    currentUser = getCurrentUser()
+
     taskQuery ->
         process.task.createTaskQuery().taskInvolvedUser(currentUser)
     , request, process, resolver
 
-router.get '/reject/:taskId', mark('process').on (process, request, taskId) ->
+router.post '/batch/audit', mark('process').on (process, request) ->
+    currentUser = getCurrentUser()
+
+    ids = request.params.ids
+    process.completeTask id, currentUser for id in ids
+    json ids
+
+router.post '/batch/reject', mark('process').on (process, request) ->
+    currentUser = getCurrentUser()
+
+    ids = request.params.ids || []
+    comment = request.params.comment
+    if comment
+        process.addComment taskId, null, comment for taskId in ids
+
+    process.reject taskId for taskId in ids
+    json ids
+
+router.put '/reject/:taskId', mark('process').on (process, request, taskId) ->
+    currentUser = getCurrentUser()
+
+    comment = request.params.comment
+    if comment
+        process.addComment taskId, null, comment
+
     process.reject taskId
     json taskId
 
 router.get '/revoke/:taskId', mark('process').on (process, request, taskId) ->
+    currentUser = getCurrentUser()
+
     process.revoke taskId
     json taskId
 
 router.put '/:taskId', mark('process').on (process, request, taskId) ->
+    currentUser = getCurrentUser()
+
     entity = process.getTaskRelatedEntity taskId
     params = {}
     for param, value of request.params
@@ -141,17 +195,20 @@ router.put '/:taskId', mark('process').on (process, request, taskId) ->
             params[name] = value
     router.resolveEntity entity, params
 
-    currentUser = 'tom'
     process.completeTask taskId, currentUser, entity
 
     json taskId
 
 router.get '/list/:processId', mark('process').on (process, request, processId) ->
+    currentUser = getCurrentUser()
+
     taskQuery ->
-        process.history.createHistoricTaskInstanceQuery().processInstanceId(processId)
+        process.history.createHistoricTaskInstanceQuery().processInstanceId(processId).orderByTaskId().desc()
     , request, process , null, true
 
 router.get '/:taskId', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request, taskId) ->
+    currentUser = getCurrentUser()
+
     task = process.getTask taskId
     processDefinition = process.repository.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult()
     p = process.history.createHistoricProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult()
@@ -164,12 +221,24 @@ router.get '/:taskId', mark('process').mark('beans', EntityMetaResolver).on (pro
     pdvo = processDefinitionToVo processDefinition
     delete pdvo.id
     objects.extend pvo, pdvo
-    json {entity: entity, process: pvo, task: taskToVo(task)}, getJsonFilter(options, 'get')
+
+    eventQuery = new EventSubscriptionQueryImpl(process.runtime.commandExecutor)
+    events = eventQuery.executionId(task.executionId).list()
+
+    task = taskToVo(task)
+    task.isRejectable = true for event in events.toArray() when event.eventName.indexOf('reject-') is 0
+
+
+    json {entity: entity, process: pvo, task: task}, getJsonFilter(options, 'get')
 
 router.get '/completed', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request) ->
+    currentUser = getCurrentUser()
+
     processQuery process, request, resolver
 
 router.get '/completed/:id', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request, id) ->
+    currentUser = getCurrentUser()
+
     p = process.history.createHistoricProcessInstanceQuery().processInstanceId(id).singleResult()
     processDefinition = process.repository.createProcessDefinitionQuery().processDefinitionId(p.getProcessDefinitionId()).singleResult()
     entity = process.getHistoricProcessRelatedEntity id
@@ -183,6 +252,8 @@ router.get '/completed/:id', mark('process').mark('beans', EntityMetaResolver).o
     json {entity: entity, process: pvo}, getJsonFilter(options, 'get')
 
 router.get '/configuration/forms/:taskId', mark('process').mark('beans', EntityMetaResolver).on (process, resolver, request, taskId) ->
+    currentUser = getCurrentUser()
+
     if taskId.charAt(0) is 'p'
         isHistoric = true
         taskId = taskId.substring(1)
@@ -272,6 +343,8 @@ router.get '/configuration/forms/:taskId', mark('process').mark('beans', EntityM
                     name: 'endTime', label: 'End Time'
                 ,
                     name: 'assignee', label: 'Assignee'
+                ,
+                    name: 'isRevokable', label: 'Revokable'
                 ]
         ]
     else

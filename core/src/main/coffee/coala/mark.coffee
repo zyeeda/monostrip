@@ -12,7 +12,7 @@
 ###
 {Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
 
-{objects, type} = require 'coala/util'
+{type} = require 'coala/util/type'
 _ = require 'underscore'
 log = require('ringo/logging').getLogger module.id
 

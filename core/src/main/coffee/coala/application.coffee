@@ -19,7 +19,7 @@ processRoot = (router, repo, prefix) ->
             LOGGER.debug "Mount #{module} to #{url}."
             router.mount url, module
         catch e
-            LOGGER.error "Cannot mount module #{r.getModuleName()}."
+            LOGGER.error "Cannot mount module #{r.getModuleName()}.", e
     true
 
 processRepository = (router, repo, prefix) ->
@@ -37,7 +37,7 @@ exports.create = (module, mountDefaultRouters = true) ->
         processRepository router, root, '/'
 
     if mountDefaultRouters
-        router.mount '/helper', 'coala/frontend-development-helper-router' if coala.development
+        router.mount '/helper', 'coala/frontend-helper' if coala.development
         router.mount '/scaffold', 'coala/scaffold/router'
         router.mount '/scaffold/tasks', 'coala/scaffold/task'
 

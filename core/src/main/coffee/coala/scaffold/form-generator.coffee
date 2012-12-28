@@ -1,10 +1,10 @@
 
 ###
 tabs: [
-    {title: 'tab title', groups: ['DEFAULT', 'Group1']}
+    {title: 'tab title', groups: ['defaults', 'Group1']}
 ]
 groups:
-    DEFAULT:
+    defaults:
         label: null
         columns: 1
     groupName: 'Group Label'
@@ -13,7 +13,8 @@ fields: [
     name: 'username', label: 'Username', colspan: 1, rowspan: 1, group: 'groupName', type: 'date|number|string|file|picker', pickerSource: 'string|key-value-pair'
 ]
 ###
-{type, objects} = require 'coala/util'
+{type} = require 'coala/util/type'
+objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 {createValidator} = require 'coala/validation/validator'
 {Add, Edit} = com.zyeeda.framework.validator.group
@@ -22,7 +23,7 @@ exports.generateForms = (meta, labels = {}, forms, groups, formName, options) ->
     return null if not groups
 
     if not forms or not forms.defaults
-        defaults = if groups['DEFAULT'] then groups: ['DEFAULT'] else groups: (groupName for groupName of groups)
+        defaults = if groups['defaults'] then groups: ['defaults'] else groups: (groupName for groupName of groups)
     else
         defaults = forms.defaults
     if not forms or not forms[formName]
@@ -50,9 +51,9 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
     result.fields = []
     if options.style is 'tree' or options.style is 'treeTable'
         result.fields.push
-            label: '父节点', name: 'parentName', value: 'parent.name', colspan: 2, rowspan: 1, group: 'DEFAULT', type: 'string', readOnly: true
+            label: '父节点', name: 'parentName', value: 'parent.name', colspan: 2, rowspan: 1, group: 'defaults', type: 'string', readOnly: true
         result.fields.push
-            name: 'parent', value: 'parent.id', colspan: 1, rowspan: 1, group: 'DEFAULT', type: 'hidden'
+            name: 'parent', value: 'parent.id', colspan: 1, rowspan: 1, group: 'defaults', type: 'hidden'
 
     for groupName, group of groups
         result.fields.push generateField(field, meta, labels, groupName, group) for field in fieldGroups[groupName] or []
@@ -70,7 +71,7 @@ generateField = (config, meta, labels, groupName, group) ->
     field = name: config if type(field) is 'string'
 
     defaults =
-        label: labels[field.name], colspan: 1, rowspan: 1, group: 'DEFAULT', readOnly: !!group.readOnly
+        label: labels[field.name], colspan: 1, rowspan: 1, group: 'defaults', readOnly: !!group.readOnly
 
     field = objects.extend defaults, field
     field.group = groupName
