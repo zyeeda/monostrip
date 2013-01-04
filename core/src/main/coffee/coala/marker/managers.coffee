@@ -25,10 +25,12 @@ exports.handler = (context, attributes, fn, args) ->
             managers.push manager
         else if type(clazz) is 'class'
             managers.push service.createManager clazz
-        else if type(clazz) is 'package'
-            throw new Error('package is not supported, please check your entity path:' + clazz)
         else if type(clazz) is 'object'
             managers.push service.createManager clazz.entity, clazz.emf
+        else if type(clazz) is 'package'
+            throw new Error('package is not supported, please check your entity path:' + clazz)
+        else
+            throw new Error('unknown manager:' + clazz)
 
     args = managers.concat args
     fn.apply null, args
