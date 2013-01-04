@@ -15,6 +15,14 @@ exports.handler = (context, attributes, fn, args) ->
         attr = if type(attributes) is 'array' then attributes else [attributes]
         managers = []
 
-        managers.push(if type(clazz) is 'string' then require(clazz).createManager() else service.createManager clazz) for clazz in attr
+        for clazz in attr
+            if type(clazz) is 'string'
+                managers.push require(clazz).createManager()
+            else if type(clazz) is 'class'
+                managers.push service.createManager clazz
+            else if type(clazz) is 'package'
+                throw new Error('package is not supported, please check your entity path:' + clazz)
+            else
+                throw new Error('unknown manager:' + clazz)
         args = managers.concat args
     fn.apply null, args
