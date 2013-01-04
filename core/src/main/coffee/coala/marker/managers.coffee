@@ -23,13 +23,12 @@ exports.handler = (context, attributes, fn, args) ->
             name = paths.join names[0], coala.managerFolderName, names[1]
             manager = require(name).createManager()
             managers.push manager
-        else
-            print Object.prototype.toString.call(clazz), 'clazz', type(clazz)
-            if type(clazz) is 'class'
-                managers.push service.createManager clazz
-            else if type(clazz) is 'object'
-                print 'clazzz', clazz.entity, clazz.emf
-                managers.push service.createManager clazz.entity, clazz.emf
+        else if type(clazz) is 'class'
+            managers.push service.createManager clazz
+        else if type(clazz) is 'package'
+            throw new Error('package is not supported, please check your entity path:' + clazz)
+        else if type(clazz) is 'object'
+            managers.push service.createManager clazz.entity, clazz.emf
 
     args = managers.concat args
     fn.apply null, args
