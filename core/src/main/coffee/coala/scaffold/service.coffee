@@ -75,13 +75,23 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             paths.push coala.scaffoldFolderName
             paths.push name
             path = paths.join '/'
-            dsPath = coala.appPath + path
+            dsPath = options.appPath  + '/' + path
             dsFiles = ['.ds.hql', '.ds.sql', '.ds.sp', '.ds.js']
             if fs.exists dsPath + dsFiles[0]
-                manager.findByHql entity, options, dsPath + dsFiles[0]
+                hql = fs.read dsPath + dsFiles[0]
+                hqls = hql.split '--count'
+                listHql = hqls[0].replace /\s{2,}|\t|\r|\n/g, ' '
+                countHql = hqls[1].replace /\s{2,}|\t|\r|\n/g, ' '
+                manager.findByHql entity, options, listHql, countHql
             else if fs.exists dsPath + dsFiles[1]
-                manager.findBySql entity, options, dsPath + dsFiles[1]
+                sql = fs.read dsPath + dsFiles[1]
+                sqls = sql.split '--count'
+                listSql = sqls[0].replace /\s{2,}|\t|\r|\n/g, ' '
+                countSql = sqls[1].replace /\s{2,}|\t|\r|\n/g, ' '
+                manager.findBySql entity, options, listSql, countSql
             else if fs.exists dsPath + dsFiles[2]
+                sql = fs.read dsPath + dsFiles[2]
+                sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
                 manager.findByProcedure entity, options, dsPath + dsFiles[2]
             else if fs.exists dsPath + dsFiles[3]
                 manager.findByMethod entity, options, path + dsFiles[3]

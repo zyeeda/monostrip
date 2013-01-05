@@ -141,11 +141,11 @@ exports.createManager = (entityClass, name) ->
                     criteria.addOrder Order[value] property for property, value of order
             criteria.list()
 
-    findBySql: (example, option = {}, sqlPath) ->
-        findByStatement example, option, sqlPath, 'sql', em
+    findBySql: (example, option = {}, listSql, countSql) ->
+        findByStatement example, option, listSql, countSql, 'sql', em
 
-    findByHql: (example, option = {}, hqlPath) ->
-        findByStatement example, option, hqlPath, 'hql', em
+    findByHql: (example, option = {}, listHql, countHql) ->
+        findByStatement example, option, listHql, countHql, 'hql', em
 
     findByMethod: (example, option = {}, jsPath) ->
         if option.fetchCount is true
@@ -155,9 +155,7 @@ exports.createManager = (entityClass, name) ->
             results = require(jsPath).results
             results.call results, example, option
 
-    findByProcedure: (example, option = {}, sqlPath) ->
-        sql = fs.read path
-        sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
+    findByProcedure: (example, option = {}, sql) ->
         query = em.createNativeQuery sql
         for restrict, i in option.restricts
             if restrict.type then _type = restrict.type.toUpperCase() else _type = ''
@@ -253,13 +251,11 @@ fillPageInfo = (query,pageInfo) ->
         return true
     false
 
-findByStatement = (example, option = {}, path, type, em) ->
-    sql = ''
+findByStatement = (example, option = {}, listSql, countSql, type, em) ->
     if option.fetchCount is true
-        sql = fs.read path + '.count'
+        sql = countSql
     else
-        sql = fs.read path
-    sql = sql.replace /\s{2,}|\t|\r|\n/g, ' '
+        sql = listSql
     fields = option.fields
     orderBy = ''
     result = joinWhere fields, option.restricts

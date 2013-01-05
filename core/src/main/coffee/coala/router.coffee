@@ -174,11 +174,23 @@ defaultHandlers =
         result = {}
         config = {}
 
+        appPath = request.env.servletRequest.getRealPath '/WEB-INF/app'
+        config.appPath = appPath
+
+        restrictInfo = coala.extractRestrictInfo request.params
+        if restrictInfo?.length isnt 0
+            config.restricts = restrictInfo
+        style = options.style
+        if style? and options[style]? and options[style].colModel?
+            config.fields= options[style].colModel
+
         paginationInfo = coala.extractPaginationInfo request.params
         if paginationInfo?
             paginationInfo.fetchCount = true
-
             pageSize = paginationInfo.maxResults
+            paginationInfo.appPath = config.appPath
+            paginationInfo.restricts = config.restricts
+            paginationInfo.fields = config.fields
             count = service.list entity, paginationInfo
 
             result.recordCount = count
@@ -190,14 +202,6 @@ defaultHandlers =
         orderInfo = coala.extractOrderInfo request.params
         if orderInfo?.length isnt 0
             config.orderBy = orderInfo
-
-        restrictInfo = coala.extractRestrictInfo request.params
-        if restrictInfo?.length isnt 0
-            config.restricts = restrictInfo
-        style = options.style
-        if style? and options[style]? and options[style].colModel?
-            config.fields= options[style].colModel
-
         ###
         configs = coala.extractPaginationInfo request.params
         orders = coala.extractOrderInfo request.params

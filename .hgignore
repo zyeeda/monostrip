@@ -12,6 +12,7 @@ syntax: glob
 *.orig
 *.tlog
 .DS_Store
+*.h2.db
 
 .DS_Store
 
