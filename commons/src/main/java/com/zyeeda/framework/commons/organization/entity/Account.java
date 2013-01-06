@@ -193,5 +193,10 @@ public class Account extends DomainEntity {
 	public void setDeleted(Boolean deleted) {
 		this.deleted = deleted;
 	}
+	
+	@Override
+	public String toString() {
+	    return this.username;
+	}
     
 }
