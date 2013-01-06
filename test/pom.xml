@@ -41,7 +41,7 @@ limitations under the License.
 
 
     <dependencies>
-    
+
         <!-- slf4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -98,7 +98,7 @@ limitations under the License.
             <artifactId>btm</artifactId>
             <version>2.1.1</version>
         </dependency>
-        
+
         <!-- ringojs -->
         <dependency>
             <groupId>org.ringojs</groupId>
@@ -131,7 +131,7 @@ limitations under the License.
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
         <!-- jruby -->
         <dependency>
             <artifactId>jffi</artifactId>
@@ -146,7 +146,7 @@ limitations under the License.
             <scope>runtime</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -156,10 +156,6 @@ limitations under the License.
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/testng/default-test-suite.xml</suiteXmlFile>
                     </suiteXmlFiles>
-                    <additionalClasspathElements>
-                        <additionalClasspathElement>src/test/javascript</additionalClasspathElement>
-                        <additionalClasspathElement>src/test/coffee</additionalClasspathElement>
-                  </additionalClasspathElements>
                 </configuration>
             </plugin>
             <plugin>
@@ -168,9 +164,9 @@ limitations under the License.
                 <version>1.1.2</version>
                 <configuration>
                     <srcDir>${basedir}/src/main/coffee</srcDir>
-                    <outputDir>${project.build.outputDirectory}</outputDir>
+                    <outputDir>${project.build.outputDirectory}/coala-test-modules</outputDir>
                     <bare>true</bare>
-                    <modifiedOnly>false</modifiedOnly>
+                    <modifiedOnly>true</modifiedOnly>
                     <allowedDelete>true</allowedDelete>
                     <compilerUrl>${basedir}/../coffee-script.js</compilerUrl>
                 </configuration>

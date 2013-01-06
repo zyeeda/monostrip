@@ -27,6 +27,6 @@ WEB-INF/modules/coala
 main/resources/coala/**.js
 main/coffee/coala/**.js
 src/main/webapp/scripts/main-dist.js
-
+test-output
 
 syntax: regexp

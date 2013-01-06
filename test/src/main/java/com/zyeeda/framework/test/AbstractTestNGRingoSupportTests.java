@@ -10,6 +10,7 @@ import org.ringojs.engine.RhinoEngine;
 import org.ringojs.engine.RingoConfiguration;
 import org.ringojs.repository.FileRepository;
 import org.ringojs.repository.Repository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -27,6 +28,7 @@ import bitronix.tm.resource.jdbc.PoolingDataSource;
 public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpringContextTests {
 
     private RhinoEngine engine = null;
+    private JdbcTemplate jdbc = null;
     
     protected String getDataSourceJndiName() {
         return "jdbc/defaultDS";
@@ -34,8 +36,7 @@ public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpri
     
     protected List<String> getRingoModules() {
         List<String> userModules = new ArrayList<String>();
-        userModules.add("javascript");
-        userModules.add("coffee");
+        userModules.add("tests");
         
         return userModules;
     }
@@ -44,7 +45,7 @@ public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpri
         List<String> systemModules = new ArrayList<String>();
         systemModules.add("modules");
         systemModules.add("packages");
-        
+        systemModules.add("coala-test-modules");
         return systemModules;
     }
     
@@ -57,11 +58,12 @@ public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpri
         config.setReloading(false);
     }
     
-    private ClassLoader getClassLoader() {
+    protected ClassLoader getClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null ) {
             cl = getClass().getClassLoader();
         }
+        System.out.println("ClassLoader Used:" + cl);
         return cl;
     }
     
@@ -79,6 +81,8 @@ public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpri
         
         pds.init();
         
+        jdbc = new JdbcTemplate(pds);
+        
         SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
         Object tm = TransactionManagerServices.getTransactionManager();
         builder.bind(getDataSourceJndiName(), pds);
@@ -91,9 +95,10 @@ public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpri
     protected void initRingoEngine() throws Exception {
         File testClassPathRoot = new File(getClassLoader().getResource(".").toURI());
         File classPathRoot = new File(testClassPathRoot, "../classes");
+        System.out.println(testClassPathRoot + "testClassPathRoot");
+        System.out.println(classPathRoot + "classpathroot");
         Repository home = new FileRepository(classPathRoot);
         Repository base = new FileRepository(testClassPathRoot);
-        
         RingoConfiguration rc = new RingoConfiguration(home, base, getRingoModules(), getRingoSystemModules());
         configRingo(rc);
         engine = new RhinoEngine(rc, null);
@@ -110,7 +115,7 @@ public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpri
         Context cx = engine.getContextFactory().enterContext();
         try {
             List<String> modules  = getRingoModules();
-            engine.invoke("coala/test/test-runner", "run", cx, engine, modules.toArray());
+            engine.invoke("coala/test/test-runner", "run", cx, engine, modules.toArray(), jdbc);
         } finally {
             Context.exit();
         }
