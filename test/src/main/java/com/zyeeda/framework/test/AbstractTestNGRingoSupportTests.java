@@ -1,7 +1,9 @@
 package com.zyeeda.framework.test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -56,6 +58,21 @@ public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpri
     protected void configRingo(RingoConfiguration config) {
         config.setDebug(isDebugEnabled());
         config.setReloading(false);
+        try {
+            boolean removed = false;
+            for (Iterator<Repository> it = config.getRepositories().iterator(); it.hasNext(); ) {
+                Repository repo = it.next();
+                if (!repo.exists() && "coala-test-modules".equals(repo.getName())) {
+                    removed = true;
+                    it.remove();
+                }
+            }
+            if (removed) {
+                config.addModuleRepository(config.resolveRepository(getClassLoader().getResource("coala-test-modules").getFile(), false));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     protected ClassLoader getClassLoader() {

@@ -28,7 +28,7 @@ public class CoalaTests extends AbstractTestNGRingoSupportTests {
 
     @Override
     protected boolean isDebugEnabled() {
-        return true;
+        return false;
     }
 
     @Override
