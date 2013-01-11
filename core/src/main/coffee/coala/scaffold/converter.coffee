@@ -8,6 +8,7 @@ objects = require 'coala/util/objects'
 {createService} = require 'coala/service'
 
 parseDate = (pattern, desiredType, stringDate) ->
+    return null if not stringDate
     format = new SimpleDateFormat pattern
     date = format.parse stringDate
     if desiredType is Calendar then format.getCalendar() else date
