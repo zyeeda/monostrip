@@ -10,7 +10,7 @@
 # execute sequence is c -> b ->a
 # arguments sequence is a, b, c
 ###
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 
 {type} = require 'coala/util/type'
 _ = require 'underscore'

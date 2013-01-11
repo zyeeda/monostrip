@@ -11,7 +11,7 @@ objects = require 'coala/util/objects'
 {objectMapper}  = require 'coala/util/jackson'
 
 {SimpleFilterProvider}      = com.fasterxml.jackson.databind.ser.impl
-{SimpleBeanPropertyFilter}  = com.zyeeda.framework.jackson
+{SimpleBeanPropertyFilter}  = com.zyeeda.coala.jackson
 
 charset = 'utf-8'
 

@@ -1,4 +1,4 @@
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 {EntityManager, EntityManagerFactory} = javax.persistence
 {EntityManagerFactoryUtils} = org.springframework.orm.jpa
 {Configuration} = org.hibernate.cfg

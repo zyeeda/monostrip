@@ -16,7 +16,7 @@
     
     <import resource="classpath:spring/spring-knowledge-kbase.xml" />
 	
-	<bean id="knowledgeService" class="com.zyeeda.framework.knowledge.support.DefaultKnowledgeService"
+	<bean id="knowledgeService" class="com.zyeeda.coala.knowledge.support.DefaultKnowledgeService"
         p:kbase-ref="kbase"
         p:entityManagerFactory-ref="entityManagerFactory"
         p:transactionManager-ref="transactionManager" />

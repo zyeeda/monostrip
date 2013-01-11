@@ -30,10 +30,10 @@ limitations under the License.
         <version>2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-framework</artifactId>
-    <version>2.0.0.B2-SNAPSHOT</version>
-    <name>Zyeeda :: Framework</name>
-    <url>http://www.zyeeda.com/products/zyeeda-framework</url>
+    <artifactId>zyeeda-coala</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <name>Zyeeda Coala Framework</name>
+    <url>http://www.zyeeda.com/products/zyeeda-coala</url>
     <packaging>pom</packaging>
 
     <repositories>
@@ -56,12 +56,16 @@ limitations under the License.
         <transaction.api.version>1.1</transaction.api.version>
         <spring.version>3.1.2.RELEASE</spring.version>
         <hibernate.jpa2.api.version>1.0.1.Final</hibernate.jpa2.api.version>
-        <hibernate.version>4.1.7.Final</hibernate.version>
-        <hibernate.validator.version>4.3.0.Final</hibernate.validator.version>
-        <hibernate.envers.version>4.1.7.Final</hibernate.envers.version>
+        <hibernate.version>4.1.9.Final</hibernate.version>
+        <hibernate.validator.version>4.3.1.Final</hibernate.validator.version>
+        <hibernate.envers.version>4.1.9.Final</hibernate.envers.version>
         <validation.api.version>1.0.0.GA</validation.api.version>
-        <beanutils.version>1.8.3</beanutils.version>
+        <commons.beanutils.version>1.8.3</commons.beanutils.version>
+        <commons.lang.version>2.6</commons.lang.version>
         <jackson.version>2.1.0</jackson.version>
+        <ringo.version>0.8.0</ringo.version>
+        <jffi.version>1.0.10</jffi.version>
+        <quartz.version>2.1.3</quartz.version>
     </properties>
 
     <dependencyManagement>
@@ -88,8 +92,8 @@ limitations under the License.
                 <version>${spring.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>commons-logging</artifactId>
                         <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -104,8 +108,8 @@ limitations under the License.
                 <version>${spring.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>commons-logging</artifactId>
                         <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -125,8 +129,8 @@ limitations under the License.
                 <version>${spring.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>commons-logging</artifactId>
                         <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -143,16 +147,16 @@ limitations under the License.
                 <version>${hibernate.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>xml-apis</artifactId>
                         <groupId>xml-apis</groupId>
+                        <artifactId>xml-apis</artifactId>
                     </exclusion>
                     <exclusion>
-                        <artifactId>jboss-transaction-api_1.1_spec</artifactId>
                         <groupId>org.jboss.spec.javax.transaction</groupId>
+                        <artifactId>jboss-transaction-api_1.1_spec</artifactId>
                     </exclusion>
                     <exclusion>
-                        <artifactId>javassist</artifactId>
                         <groupId>javassist</groupId>
+                        <artifactId>javassist</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -164,8 +168,8 @@ limitations under the License.
                 <version>${hibernate.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>slf4j-api</artifactId>
                         <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -189,16 +193,22 @@ limitations under the License.
                 <version>${hibernate.envers.version}</version>
             </dependency>
 
+            <!-- apache commons -->
             <dependency>
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
-                <version>${beanutils.version}</version>
+                <version>${commons.beanutils.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>commons-logging</artifactId>
                         <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons.lang.version}</version>
             </dependency>
 
             <!-- jackson -->
@@ -228,6 +238,47 @@ limitations under the License.
                 <version>${jackson.version}</version>
             </dependency>
 
+            <!-- ringojs -->
+            <dependency>
+                <groupId>org.ringojs</groupId>
+                <artifactId>ringojs</artifactId>
+                <version>${ringo.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-client</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz</artifactId>
+                <version>${quartz.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -250,8 +301,8 @@ limitations under the License.
         <module>commons</module>
         <module>knowledge</module>
         <module>bpm</module>
-        <module>core</module>
         <module>test</module>
+        <module>core</module>
     </modules>
 
 </project>

@@ -3,7 +3,7 @@
 {TransactionTemplate,DefaultTransactionDefinition,TransactionCallback} = org.springframework.transaction.support
 {type} = require 'coala/util/type'
 objects = require 'coala/util/objects'
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet;
+{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet;
 
 ###
 see org.springframework.transaction.TransactionDefinition

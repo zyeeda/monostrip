@@ -2,14 +2,14 @@
 objects = require 'coala/util/objects'
 {createManager} = require 'coala/manager'
 
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 {HashMap} = java.util
-{TaskService} = com.zyeeda.framework.bpm
+{TaskService} = com.zyeeda.coala.bpm
 {ProcessEngine} = org.activiti.engine
-{ProcessStatusAware} = com.zyeeda.framework.entities.base
+{ProcessStatusAware} = com.zyeeda.coala.entities.base
 {ClassUtils} = org.springframework.util
-{EntityMetaResolver} = com.zyeeda.framework.web.scaffold
-{HistoricProcess, HistoricTask} = com.zyeeda.framework.bpm.mapping
+{EntityMetaResolver} = com.zyeeda.coala.web.scaffold
+{HistoricProcess, HistoricTask} = com.zyeeda.coala.bpm.mapping
 
 context = Context.getInstance(module)
 

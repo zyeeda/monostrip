@@ -4,7 +4,7 @@
 <suite name="default-test-suite">
     <test name="service-test" enabled="true">
         <packages>
-            <package name="com.zyeeda.framework.tests" />
+            <package name="com.zyeeda.coala.tests" />
         </packages>
     </test>
 </suite>

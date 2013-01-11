@@ -6,8 +6,8 @@
 objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 
-{TaskService} = com.zyeeda.framework.bpm
-{EntityMetaResolver} = com.zyeeda.framework.web.scaffold
+{TaskService} = com.zyeeda.coala.bpm
+{EntityMetaResolver} = com.zyeeda.coala.web.scaffold
 {ClassUtils} = org.springframework.util
 {Authentication} = org.activiti.engine.impl.identity
 {EventSubscriptionQueryImpl} = org.activiti.engine.impl

@@ -1,4 +1,4 @@
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 
 {type} = require 'coala/util/type'
 {createRouter} = require 'coala/router'
@@ -7,7 +7,7 @@
 {generateForms} = require 'coala/scaffold/form-generator'
 
 log = require('ringo/logging').getLogger module.id
-entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
+entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
 router = exports.router = createRouter()
 

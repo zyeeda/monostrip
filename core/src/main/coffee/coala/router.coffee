@@ -13,12 +13,12 @@ paths = require 'coala/util/paths'
 {createValidator} = require 'coala/validation/validator'
 {createValidationContext} = require 'coala/validation/validation-context'
 
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
-{Create, Update} = com.zyeeda.framework.validation.group
+{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
+{Create, Update} = com.zyeeda.coala.validation.group
 
 log = getLogger module.id
 validator = new createValidator()
-entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
+entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
 ###
 processRoot = (router, repo, prefix) ->

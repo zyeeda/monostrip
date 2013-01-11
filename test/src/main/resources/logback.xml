@@ -2,7 +2,7 @@
 
 <configuration debug="true" >
 
-	<property name="applicationName" value="zyeeda-drivebox" />
+	<property name="applicationName" value="zyeeda-coala" />
     
     <contextName>${applicationName}</contextName>
     

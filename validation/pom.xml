@@ -26,12 +26,12 @@ limitations under the License.
 
     <parent>
         <groupId>com.zyeeda</groupId>
-        <artifactId>zyeeda-framework</artifactId>
-        <version>2.0.0.B2-SNAPSHOT</version>
+        <artifactId>zyeeda-coala</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-framework-validation</artifactId>
-    <name>Zyeeda :: Framework :: Validation</name>
+    <artifactId>zyeeda-coala-validation</artifactId>
+    <name>Zyeeda Coala Validation</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -39,12 +39,12 @@ limitations under the License.
     </properties>
 
     <dependencies>
-    
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
@@ -59,12 +59,12 @@ limitations under the License.
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
 		</dependency>
-		
+
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
-		
+
     </dependencies>
 
 </project>

@@ -5,7 +5,7 @@
 {ObjectMapper, SerializationFeature}    = com.fasterxml.jackson.databind
 {AfterburnerModule}                     = com.fasterxml.jackson.module.afterburner
 {JodaModule}                            = com.fasterxml.jackson.datatype.joda
-{CustomIntrospector}                    = com.zyeeda.framework.jackson
+{CustomIntrospector}                    = com.zyeeda.coala.jackson
 
 mapper = new ObjectMapper()
 mapper.registerModule new AfterburnerModule()

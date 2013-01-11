@@ -303,7 +303,7 @@ public class People extends DomainEntity {
     <!-- 定义 JSGI Filter -->
     <servlet>
         <servlet-name>jsgi</servlet-name>
-        <servlet-class>com.zyeeda.framework.web.SpringAwareJsgiServlet</servlet-class>
+        <servlet-class>com.zyeeda.coala.web.SpringAwareJsgiServlet</servlet-class>
         <init-param>
             <param-name>debug</param-name>
             <param-value>true</param-value>

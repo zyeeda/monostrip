@@ -5,7 +5,7 @@
 
 	<persistence-unit name="forTest" transaction-type="JTA">
 	    <jta-data-source>jdbc/defaultDS</jta-data-source>
-        <class>com.zyeeda.framework.tests.entities.Simple</class>
+        <class>com.zyeeda.coala.tests.entities.Simple</class>
 		<properties>
 		</properties>
 	</persistence-unit>

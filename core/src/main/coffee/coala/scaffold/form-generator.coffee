@@ -17,7 +17,7 @@ fields: [
 objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 {createValidator} = require 'coala/validation/validator'
-{Add, Edit} = com.zyeeda.framework.validator.group
+{Add, Edit} = com.zyeeda.coala.validator.group
 
 exports.generateForms = (meta, labels = {}, forms, groups, formName, options) ->
     return null if not groups

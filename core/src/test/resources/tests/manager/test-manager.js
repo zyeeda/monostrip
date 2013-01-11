@@ -7,7 +7,7 @@ mark = require('coala/mark').mark;
 
 ok = require('assert').ok;
 
-Simple = com.zyeeda.framework.tests.entities.Simple;
+Simple = com.zyeeda.coala.tests.entities.Simple;
 
 exports.beforeModule = function(context) {
   return context.jdbc.execute("insert into test_simple(F_ID, F_NAME) values('11', 'simple1')");

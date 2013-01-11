@@ -35,13 +35,13 @@ exports.createValidator = ->
             continue if not field
             if field.type == Date
                 rules[name].date = true
-                messages[name].date = messageSource.getMessage 'com.zyeeda.framework.validator.constraints.Date.message', null, Locale.default
+                messages[name].date = messageSource.getMessage 'com.zyeeda.coala.validator.constraints.Date.message', null, Locale.default
             else if field.type == Integer or 'int'.equals field.type
                 rules[name].digits = true
-                messages[name].digits = messageSource.getMessage 'com.zyeeda.framework.validator.constraints.Digits.message', null, Locale.default
+                messages[name].digits = messageSource.getMessage 'com.zyeeda.coala.validator.constraints.Digits.message', null, Locale.default
             else if field.type == Double or 'double'.equals field.type or field.type == Float or 'float'.equals field.type
                 rules[name].number= true
-                messages[name].number = messageSource.getMessage 'com.zyeeda.framework.validator.constraints.Number.message', null, Locale.default
+                messages[name].number = messageSource.getMessage 'com.zyeeda.coala.validator.constraints.Number.message', null, Locale.default
             annos = field.annotations
             upperCaseName = name.substring(0, 1).toUpperCase() + name.substring 1, name.length
             try
@@ -82,7 +82,7 @@ exports.createValidator = ->
                         message = message.replace '{min}', map.get('min')
                         message = message.replace '{max}', map.get('max')
                         messages[name].range = message
-                    else if a instanceof com.zyeeda.framework.validation.constraint.NullableSize
+                    else if a instanceof com.zyeeda.coala.validation.constraint.NullableSize
                         rules[name].rangelength = [map.get('min'), map.get('max')]
                         message = message.replace '{min}', map.get('min')
                         message = message.replace '{max}', map.get('max')
@@ -95,13 +95,13 @@ exports.createValidator = ->
                         rules[name].min = map.get 'value'
                         message = message.replace '{value}', map.get('value')
                         messages[name].min = message
-                    else if a instanceof com.zyeeda.framework.validation.constraint.Matches
+                    else if a instanceof com.zyeeda.coala.validation.constraint.Matches
                         rules[name].equalTo = a.target()
                         messages[name].required = message
 
             classAnnos = entityClass.annotations
             for anno in classAnnos
-                if anno instanceof com.zyeeda.framework.validation.constraint.Matches
+                if anno instanceof com.zyeeda.coala.validation.constraint.Matches
                         messageExp = anno.message()
                         messageKey = messageExp.substring(1, messageExp.length - 1)
                         message = messageSource.getMessage messageKey, null, Locale.default

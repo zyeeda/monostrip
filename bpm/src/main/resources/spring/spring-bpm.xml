@@ -27,7 +27,7 @@
 	<bean id="managementService" factory-bean="processEngine"
 		factory-method="getManagementService" />
 
-	<bean id="taskService" class="com.zyeeda.framework.bpm.support.DefaultTaskService"
+	<bean id="taskService" class="com.zyeeda.coala.bpm.support.DefaultTaskService"
 		p:processEngine-ref="processEngine" />
 
 </beans>

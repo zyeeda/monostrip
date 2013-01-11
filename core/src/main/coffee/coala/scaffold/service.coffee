@@ -5,10 +5,10 @@ fs = require 'fs'
 {coala} = require 'coala/config'
 createProcessService = require('coala/scaffold/process-service').createService
 
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
-{ProcessStatusAware} = com.zyeeda.framework.entities.base
+{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
+{ProcessStatusAware} = com.zyeeda.coala.entities.base
 {Authentication} = org.activiti.engine.impl.identity
-entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.framework.web.scaffold.EntityMetaResolver)
+entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
 exports.createService = (entityClass, entityMeta, scaffold) ->
     baseService = createService()

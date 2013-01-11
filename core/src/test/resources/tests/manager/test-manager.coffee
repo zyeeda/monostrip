@@ -2,7 +2,7 @@
 {mark} = require 'coala/mark'
 {ok} = require 'assert'
 
-{Simple} = com.zyeeda.framework.tests.entities
+{Simple} = com.zyeeda.coala.tests.entities
 
 exports.beforeModule = (context) ->
     context.jdbc.execute "insert into test_simple(F_ID, F_NAME) values('11', 'simple1')"

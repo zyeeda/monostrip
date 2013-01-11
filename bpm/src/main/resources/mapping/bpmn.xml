@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm classpath:///META-INF/schema/orm_2_0.xsd"
     version="2.0">
     
-    <entity class="com.zyeeda.framework.bpm.mapping.HistoricProcess" metadata-complete="true">
+    <entity class="com.zyeeda.coala.bpm.mapping.HistoricProcess" metadata-complete="true">
         <table name="ACT_HI_PROCINST"/>
         <attributes>
             <id name="id"><column name="ID_"/></id>
@@ -22,7 +22,7 @@
         </attributes>
     </entity>
     
-    <entity class="com.zyeeda.framework.bpm.mapping.HistoricTask" metadata-complete="true">
+    <entity class="com.zyeeda.coala.bpm.mapping.HistoricTask" metadata-complete="true">
         <table name="ACT_HI_TASKINST"/>
         <attributes>
             <id name="id"><column name="ID_"/></id>

@@ -1,6 +1,6 @@
 _ = require 'underscore'
 log = require('ringo/logging').getLogger module.id
-{Context} = com.zyeeda.framework.web.SpringAwareJsgiServlet
+{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 
 projectLevelConfigure = try
     require 'config'
