@@ -14,7 +14,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Email;
@@ -23,6 +22,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import com.zyeeda.framework.commons.annotation.scaffold.Scaffold;
 import com.zyeeda.framework.commons.base.entity.DomainEntity;
 import com.zyeeda.framework.validation.constraint.Matches;
+import com.zyeeda.framework.validation.constraint.NullableSize;
 import com.zyeeda.framework.validation.constraint.Unique;
 import com.zyeeda.framework.validation.group.Create;
 import com.zyeeda.framework.validation.group.Update;
@@ -58,7 +58,7 @@ public class Account extends DomainEntity {
     @Basic
     @Column(name = "F_USERNAME", length = 30)
     @NotBlank
-    @Size(min = 6)
+    @NullableSize(min = 6)
     public String getUsername() {
         return username;
     }
@@ -69,7 +69,7 @@ public class Account extends DomainEntity {
     @Basic
     @Column(name = "F_PASSWORD", length = 60)
     @NotNull
-    @Size(min = 6)
+    @NullableSize(min = 6)
     public String getPassword() {
         return password;
     }
@@ -80,7 +80,7 @@ public class Account extends DomainEntity {
 
     @Transient
     @NotNull
-    @Size(min = 6, max = 60)
+    @NullableSize(min = 6, max = 60)
     public String getPassword2() {
         return password2;
     }
@@ -137,7 +137,7 @@ public class Account extends DomainEntity {
     @Basic
     @Column(name = "F_EMAIL", length = 100)
     @NotBlank
-    @Size(min = 6)
+    @NullableSize(min = 6)
     @Email
     public String getEmail() {
         return email;
@@ -148,7 +148,7 @@ public class Account extends DomainEntity {
     
     @Basic
     @Column(name = "F_MOBILE", length = 100)
-    @Size(min = 6)
+    @NullableSize(min = 6)
     public String getMobile() {
         return mobile;
     }
@@ -158,7 +158,7 @@ public class Account extends DomainEntity {
     
     @Basic
     @Column(name = "F_TELEPHONE", length = 100)
-    @Size(min = 6)
+    @NullableSize(min = 6)
     public String getTelephone() {
         return telephone;
     }

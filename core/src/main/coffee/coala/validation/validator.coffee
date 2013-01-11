@@ -82,7 +82,7 @@ exports.createValidator = ->
                         message = message.replace '{min}', map.get('min')
                         message = message.replace '{max}', map.get('max')
                         messages[name].range = message
-                    else if a instanceof org.hibernate.validator.constraints.Length or a instanceof javax.validation.constraints.Size
+                    else if a instanceof com.zyeeda.framework.validation.constraint.NullableSize
                         rules[name].rangelength = [map.get('min'), map.get('max')]
                         message = message.replace '{min}', map.get('min')
                         message = message.replace '{max}', map.get('max')
