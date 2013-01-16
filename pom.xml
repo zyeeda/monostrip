@@ -62,6 +62,7 @@ limitations under the License.
         <validation.api.version>1.0.0.GA</validation.api.version>
         <commons.beanutils.version>1.8.3</commons.beanutils.version>
         <commons.lang.version>2.6</commons.lang.version>
+        <commons.collections.version>3.2.1</commons.collections.version>
         <jackson.version>2.1.0</jackson.version>
         <ringo.version>0.8.0</ringo.version>
         <jffi.version>1.0.10</jffi.version>
@@ -209,6 +210,11 @@ limitations under the License.
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons.lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${commons.collections.version}</version>
             </dependency>
 
             <!-- jackson -->

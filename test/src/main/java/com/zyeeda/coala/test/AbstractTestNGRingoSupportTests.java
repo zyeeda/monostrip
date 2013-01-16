@@ -26,7 +26,7 @@ import bitronix.tm.resource.jdbc.PoolingDataSource;
  * @author guyong
  *
  */
-@ContextConfiguration("classpath:spring-test-context.xml")
+@ContextConfiguration("classpath:spring/coala/test-application-context.xml")
 public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpringContextTests {
 
     private RhinoEngine engine = null;

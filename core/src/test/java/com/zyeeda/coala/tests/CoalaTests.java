@@ -14,7 +14,7 @@ import com.zyeeda.coala.web.SpringAwareJsgiServlet;
  * @author guyong
  *
  */
-@ContextConfiguration("classpath:spring-test-hibernate.xml")
+@ContextConfiguration("classpath:spring/test-hibernate.xml")
 public class CoalaTests extends AbstractTestNGRingoSupportTests {
 
     @BeforeClass
