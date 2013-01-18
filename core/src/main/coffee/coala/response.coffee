@@ -147,10 +147,16 @@ exports.json = (object, config) ->
                     return
 
     if config?
-        result.include k, v for k, v of config.include
-        result.exclude k, v for k, v of config.exclude
         result.status = config.status if config.status?
         result.headers = objects.extend result.headers, config.headers if config.headers?
+        delete config.status
+        delete config.headers
+
+        if config.include or config.exclude
+            result.include k, v for k, v of config.include
+            result.exclude k, v for k, v of config.exclude
+        else
+            (if k.charAt(0) is '!' then result.exclude k.substring(1), v else result.include k, v) for k, v of config
         # result.status = config.status or result.status
         # result.headers = objects.extend result.headers, config.headers or {}
         # result.dateFormat = config.dateFormat
@@ -236,4 +242,3 @@ exports.internalServerError = (args...) ->
     status: 500
     headers: contentType 'text/html'
     body: args
-
