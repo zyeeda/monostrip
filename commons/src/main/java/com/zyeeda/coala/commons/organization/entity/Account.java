@@ -1,21 +1,16 @@
-package com.zyeeda.coala.commons.organization.entity;
+/* $Id$ */
 
-import java.util.Date;
+package com.zyeeda.coala.commons.organization.entity;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -27,6 +22,12 @@ import com.zyeeda.coala.validation.constraint.Unique;
 import com.zyeeda.coala.validation.group.Create;
 import com.zyeeda.coala.validation.group.Update;
 
+/**
+ * 用户账户.
+ *
+ * @author $Author$
+ *
+ */
 @Entity
 @Table(name = "ZDA_ACCOUNT")
 @Scaffold("/system/accounts")
@@ -35,168 +36,181 @@ import com.zyeeda.coala.validation.group.Update;
         @Unique(groups = { Update.class }, namedQuery = "findDuplicateUsernameCountOnUpdate", bindingProperties = "username")
 })
 @Matches(source = "password", target = "password2", bindingProperties = "password")
-//@Audited
 public class Account extends DomainEntity {
 
+    /**
+     * 自动生成的序列化版本 UID.
+     */
     private static final long serialVersionUID = 8017378952695485417L;
-    
-    private String username;
+
+    /**
+     * 用户名.
+     */
+    private String userName;
+
+    /**
+     * 密码.
+     */
     private String password;
+
+    /**
+     * 密码（用于验证）.
+     */
     private String password2;
-    private String nickname;
-    private String firstName;
-    private String familyName;
-    private Gender gender;
-    private Date birthday;
+
+    /**
+     * 真实姓名.
+     */
+    private String realName;
+
+    /**
+     * Email.
+     */
     private String email;
+
+    /**
+     * 移动电话.
+     */
     private String mobile;
+
+    /**
+     * 电话.
+     */
     private String telephone;
+
+    /**
+     * 所属部门.
+     */
     private Department department;
+
+    /**
+     * 禁用标记.
+     */
     private Boolean disabled;
+
+    /**
+     * 删除标记.
+     */
     private Boolean deleted;
-    
+
     @Basic
     @Column(name = "F_USERNAME", length = 30)
     @NotBlank
     @NullableSize(min = 6)
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return this.userName;
     }
-    public void setUsername(String username) {
-        this.username = username;
+
+    public void setUserName(final String userName) {
+        this.userName = userName;
     }
-    
+
     @Basic
     @Column(name = "F_PASSWORD", length = 60)
     @NotNull
     @NullableSize(min = 6)
     public String getPassword() {
-        return password;
+        return this.password;
     }
-    public void setPassword(String password) {
+
+    /**
+     * 设置密码.
+     * 同时设置校验用密码.
+     *
+     * @param password 密码
+     */
+    public void setPassword(final String password) {
         this.password = password;
         this.setPassword2(password);
     }
 
     @Transient
     @NotNull
-    @NullableSize(min = 6, max = 60)
+    @NullableSize(min = 6)
     public String getPassword2() {
-        return password2;
+        return this.password2;
     }
-    public void setPassword2(String password2) {
+
+    public void setPassword2(final String password2) {
         this.password2 = password2;
     }
-    
+
     @Basic
-    @Column(name = "F_NICKNAME", length = 30)
+    @Column(name = "F_REALNAME", length = 30)
     @NotBlank
-    public String getNickname() {
-        return nickname;
+    @NullableSize(min = 2)
+    public String getRealName() {
+        return this.realName;
     }
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+
+    public void setRealName(final String realName) {
+        this.realName = realName;
     }
-    
-    @Basic
-    @Column(name = "F_FIRST_NAME", length = 30)
-    public String getFirstName() {
-        return firstName;
-    }
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-    
-    @Basic
-    @Column(name = "F_FAMILY_NAME", length = 30)
-    public String getFamilyName() {
-        return familyName;
-    }
-    public void setFamilyName(String familyName) {
-        this.familyName = familyName;
-    }
-    
-    @Enumerated(EnumType.STRING)
-    @Column(name = "F_GENDER", length = 10)
-    public Gender getGender() {
-        return gender;
-    }
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-    
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "F_BIRTHDAY")
-    public Date getBirthday() {
-        return birthday;
-    }
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-    
+
     @Basic
     @Column(name = "F_EMAIL", length = 100)
     @NotBlank
     @NullableSize(min = 6)
     @Email
     public String getEmail() {
-        return email;
+        return this.email;
     }
-    public void setEmail(String email) {
+
+    public void setEmail(final String email) {
         this.email = email;
     }
-    
+
     @Basic
-    @Column(name = "F_MOBILE", length = 100)
+    @Column(name = "F_MOBILE", length = 30)
     @NullableSize(min = 6)
     public String getMobile() {
-        return mobile;
+        return this.mobile;
     }
-    public void setMobile(String mobile) {
+
+    public void setMobile(final String mobile) {
         this.mobile = mobile;
     }
-    
+
     @Basic
-    @Column(name = "F_TELEPHONE", length = 100)
+    @Column(name = "F_TELEPHONE", length = 30)
     @NullableSize(min = 6)
     public String getTelephone() {
-        return telephone;
+        return this.telephone;
     }
-    public void setTelephone(String telephone) {
+
+    public void setTelephone(final String telephone) {
         this.telephone = telephone;
     }
-    
+
     @ManyToOne
     @JoinColumn(name = "F_DEPARTMENT_ID")
-    @ForeignKey( name = "none" )
     public Department getDepartment() {
-        return department;
+        return this.department;
     }
-    public void setDepartment(Department department) {
+
+    public void setDepartment(final Department department) {
         this.department = department;
     }
-    
+
     @Basic
     @Column(name = "F_DISABLED")
     public Boolean getDisabled() {
-        return disabled;
+        return this.disabled;
     }
-    public void setDisabled(Boolean disabled) {
+
+    public void setDisabled(final Boolean disabled) {
         this.disabled = disabled;
     }
-    
+
     @Basic
     @Column(name = "F_DELETED")
-	public Boolean getDeleted() {
-		return deleted;
-	}
-	public void setDeleted(Boolean deleted) {
-		this.deleted = deleted;
-	}
-	
-	@Override
-	public String toString() {
-	    return this.username;
-	}
-    
+    public Boolean getDeleted() {
+        return this.deleted;
+    }
+
+    public void setDeleted(final Boolean deleted) {
+        this.deleted = deleted;
+    }
+
 }
+

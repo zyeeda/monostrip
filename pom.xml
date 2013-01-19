@@ -309,6 +309,7 @@ limitations under the License.
         <module>bpm</module>
         <module>test</module>
         <module>core</module>
+        <module>revision</module>
     </modules>
 
 </project>

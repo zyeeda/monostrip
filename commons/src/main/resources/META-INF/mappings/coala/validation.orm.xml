@@ -6,7 +6,7 @@
     
     <named-query name="findDuplicateUsernameCountOnCreate">
         <query>
-            select count(u) from Account u where u.username = :username
+            select count(u) from Account u where u.userName = :username
         </query>
     </named-query>
     
@@ -17,7 +17,7 @@
             from
                 Account u 
             where
-                u.username = :username and u.id &lt;&gt; :id
+                u.userName = :username and u.id &lt;&gt; :id
         </query>
     </named-query>
     
