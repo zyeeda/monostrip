@@ -46,7 +46,7 @@ public class Account extends DomainEntity {
     /**
      * 用户名.
      */
-    private String userName;
+    private String username;
 
     /**
      * 密码.
@@ -97,12 +97,12 @@ public class Account extends DomainEntity {
     @Column(name = "F_USERNAME", length = 30)
     @NotBlank
     @NullableSize(min = 6)
-    public String getUserName() {
-        return this.userName;
+    public String getUsername() {
+        return this.username;
     }
 
-    public void setUserName(final String userName) {
-        this.userName = userName;
+    public void setUsername(final String username) {
+        this.username = username;
     }
 
     @Basic
