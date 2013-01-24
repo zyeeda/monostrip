@@ -76,14 +76,14 @@ public abstract class SimpleBeanPropertyFilter implements BeanPropertyFilter {
             return include ? properties.contains(name) : !properties.contains(name);
         }
         
-        LOGGER.debug(
+        LOGGER.trace(
                 "According to bean '{}', will property '{}' be {} list {}?",
                 bean, name, (include ? "INCLUDED IN" : "EXCLUDED FROM"), properties);
         
         for (String prop : properties) {
             if (prop.startsWith(name)) {
                 if (prop.length() == name.length()) {
-                    LOGGER.debug("{} property '{}' directly.", (include ? "Include" : "Exclude"), name);
+                    LOGGER.trace("{} property '{}' directly.", (include ? "Include" : "Exclude"), name);
                     return include;
                 }
                 
@@ -93,16 +93,16 @@ public abstract class SimpleBeanPropertyFilter implements BeanPropertyFilter {
                     c = counter;
                 }
                 String s = name + "(" + c + ")";
-                LOGGER.debug("counter = {}", s);
+                LOGGER.trace("counter = {}", s);
                 
                 if (prop.equals(s)) {
                     if (c == 0) {
-                        LOGGER.debug("{} property '{}'(0).", (include ? "Include" : "Exclude"), name);
+                        LOGGER.trace("{} property '{}'(0).", (include ? "Include" : "Exclude"), name);
                         return include;
                     }
                     
                     this.state.remove(name);
-                    LOGGER.debug(
+                    LOGGER.trace(
                             "Exclude property '{}', since counter reaches.",
                             name);
                     return false;
@@ -113,20 +113,20 @@ public abstract class SimpleBeanPropertyFilter implements BeanPropertyFilter {
                     } catch (Exception e) {
                         LOGGER.error(e.getMessage(), e);
                     }
-                    LOGGER.debug("related bean = '{}'", related);
+                    LOGGER.trace("related bean = '{}'", related);
                     if (related == null) {
                         this.state.remove(name);
                     } else {
                         this.state.put(name, ++c);
                     }
                     
-                    LOGGER.debug("Include property '{}'.", name);
+                    LOGGER.trace("Include property '{}'.", name);
                     return true;
                 }
             }
         }
         
-        LOGGER.debug("{} property '{}', since it's not in the list.", include ? "Exclude" : "Include", name);
+        LOGGER.trace("{} property '{}', since it's not in the list.", include ? "Exclude" : "Include", name);
         return !include;
     }
 
