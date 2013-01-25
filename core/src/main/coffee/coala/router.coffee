@@ -247,18 +247,22 @@ defaultHandlers =
         json entity, objects.extend getJsonFilter(options, 'create'), { status: 201 }
 
     update: (options, service, entityMeta, request, id) ->
-        entity = service.get id
-        return notFound() if entity is null
+        result = true
+        updateIt = (entity) ->
+            mergeEntityAndParameter options, request.params, entityMeta, 'update', entity
 
-        mergeEntityAndParameter options, request.params, entityMeta, 'update', entity
+            violations = callValidators 'update', options, request, entity
+            if violations.length > 0
+                result = json violations: violations
+                return false
 
-        violations = callValidators 'update', options, request, entity
-        return json violations: violations if violations.length > 0
+            result = callHook 'before', 'Update', options, entityMeta, request, entity
+            if result isnt undefined
+                return false
+            result = true
 
-        result = callHook 'before', 'Update', options, entityMeta, request, entity
-        return result if result isnt undefined
-
-        service.update entity
+        entity = service.update id, updateIt
+        return result if result isnt true
 
         result = callHook 'after', 'Update', options, entityMeta, request, entity
         return result if result isnt undefined
@@ -344,4 +348,3 @@ callHook = (hookType, action, options, meta, request, entity) ->
             hook.call null, entity, request, meta
         catch e
             internalServerError e
-

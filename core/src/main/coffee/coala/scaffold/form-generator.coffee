@@ -1,23 +1,11 @@
-
-###
-tabs: [
-    {title: 'tab title', groups: ['defaults', 'Group1']}
-]
-groups:
-    defaults:
-        label: null
-        columns: 1
-    groupName: 'Group Label'
-fields: [
-    'username'
-    name: 'username', label: 'Username', colspan: 1, rowspan: 1, group: 'groupName', type: 'date|number|string|file|picker', pickerSource: 'string|key-value-pair'
-]
-###
 {type} = require 'coala/util/type'
 objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 {createValidator} = require 'coala/validation/validator'
+
 {Add, Edit} = com.zyeeda.coala.validator.group
+{TreeNode} = com.zyeeda.coala.commons.base.data
+{ClassUtils} = org.springframework.util
 
 exports.generateForms = (meta, labels = {}, forms, groups, formName, options) ->
     return null if not groups
@@ -34,33 +22,37 @@ exports.generateForms = (meta, labels = {}, forms, groups, formName, options) ->
     generateForm form, meta, labels, groups, formName, options
 
 generateForm = (form, meta, labels, fieldGroups, formName, options) ->
-    groups = {}
+    groups = []
     for value in form.groups or []
-        if type(value) is 'string'
-            groups[value] = label: null, columns: 1, readOnly: false
-            key = value
-        else
-            groups[value.name] = value
-            key = value.name
-        groups[key].readOnly = true if formName is 'show'
+        g = if type(value) is 'string' then name: value else value
+        g.readOnly = true if formName is 'show'
+        groups.push g
 
     result = {}
     result.groups = groups
 
 
-    result.fields = []
-    if options.style is 'tree' or options.style is 'treeTable'
-        result.fields.push
-            label: '父节点', name: 'parentName', value: 'parent.name', colspan: 2, rowspan: 1, group: 'defaults', type: 'string', readOnly: true
-        result.fields.push
-            name: 'parent', value: 'parent.id', colspan: 1, rowspan: 1, group: 'defaults', type: 'hidden'
+    fg = result.fieldGroups = {}
+    allFields = []
+    for group in groups
+        fields = []
+        fields.push generateField(field, meta, labels, group.name, group) for field in fieldGroups[group.name] or []
+        allFields = allFields.concat fields
+        fg[group.name] = fields
 
-    for groupName, group of groups
-        result.fields.push generateField(field, meta, labels, groupName, group) for field in fieldGroups[groupName] or []
+    if options.style is 'tree' or options.style is 'treeTable'
+        fg['TREE_GROUP'] = [
+            label: '父节点', name: 'parentName', value: 'parent.name', readOnly: true, type: 'text'
+        ,
+            name: 'parent', value: 'parent.id', type: 'hidden'
+        ]
+        result.groups.unshift 'TREE_GROUP'
+
     result.tabs = form.tabs
 
     validateGroup = if formName == 'add' then Add else Edit
-    result.validator = createValidator().buildValidateRules result.fields, meta.entityClass, validateGroup
+
+    result.validation = createValidator().buildValidateRules allFields, meta.entityClass, validateGroup
 
     result.entityLabel = labels.entity if labels.entity
 
@@ -71,10 +63,9 @@ generateField = (config, meta, labels, groupName, group) ->
     field = name: config if type(field) is 'string'
 
     defaults =
-        label: labels[field.name], colspan: 1, rowspan: 1, group: 'defaults', readOnly: !!group.readOnly
+        label: labels[field.name]
 
     field = objects.extend defaults, field
-    field.group = groupName
     defineFieldType field, meta.getField(field.name), meta
 
     field
@@ -82,20 +73,22 @@ generateField = (config, meta, labels, groupName, group) ->
 defineFieldType = (field, fieldMeta, entityMeta) ->
     if field.type is 'many-picker'
         if (fieldMeta.isManyToManyTarget() or fieldMeta.isOneToMany())
-            field.pickerSource = fieldMeta.getPath()
+            field.source = fieldMeta.getPath()
             return
 
     return if field.type
+    return field.type = 'text' if not fieldMeta
+
     if fieldMeta.getType() is java.lang.Boolean
-        field.type = 'picker'
-        field.pickerSource = coala.booleanFieldPickerSource
+        field.type = 'dropdown'
+        field.source = coala.booleanFieldPickerSource
         return
     if fieldMeta.getType() is java.util.Date
-        field.type = 'date'
+        field.type = 'datepicker'
         return
     if fieldMeta.isEntity()
-        field.type = 'picker'
-        field.pickerSource = fieldMeta.getPath()
+        field.type = if ClassUtils.isAssignable(TreeNode, fieldMeta.getType()) then 'tree-picker' else 'grid-picker'
+        field.source = fieldMeta.getPath()
         return
 
-    field.type = 'string'
+    field.type = 'text'

@@ -114,15 +114,17 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 startProcess entity, manager
             entity
 
-        update: mark('tx').on (entity) ->
+        update: mark('tx').on (id, fn) ->
             manager = baseService.createManager service.entityClass
+            entity = manager.find id
 
             pre = {}
             for fieldMeta in entityMeta.getFields()
                 if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget()
                     pre[fieldMeta.name] = entity[fieldMeta.name].toArray()
 
-            manager.flush()
+            return null if fn(entity, service) is false
+            manager.merge entity
             manySideUpdate entity, pre
             entity
 
