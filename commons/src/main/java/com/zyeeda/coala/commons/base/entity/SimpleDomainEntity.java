@@ -2,9 +2,10 @@ package com.zyeeda.coala.commons.base.entity;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotBlank;
+
+import com.zyeeda.coala.validation.constraint.NullableSize;
 
 
 @javax.persistence.MappedSuperclass
@@ -18,7 +19,7 @@ public class SimpleDomainEntity extends DomainEntity {
     @Basic
     @Column(name = "F_NAME", length = 30)
     @NotBlank
-    @Size(min = 6)
+    @NullableSize(min = 6, max = 30)
     public String getName() {
         return this.name;
     }

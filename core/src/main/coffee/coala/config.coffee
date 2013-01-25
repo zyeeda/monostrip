@@ -18,6 +18,7 @@ defaultConfigure =
     servicePathSeperator: ':'
     defaultPageSize: 10
     dateFormat: 'yyyy-MM-dd'
+    dateTimeFormat: 'yyyy-MM-dd hh:mm:ss'
 
     booleanFieldPickerSource: [{id: true, text: '是'}, {id: false, text: '否'}]
     defaultOperators:

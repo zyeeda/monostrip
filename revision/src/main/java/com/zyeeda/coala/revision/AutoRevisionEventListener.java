@@ -46,7 +46,7 @@ public class AutoRevisionEventListener {
             Subject subject = SecurityUtils.getSubject();
             if (subject.isAuthenticated()) {
                 Account account = (Account) subject.getPrincipal();
-                LOGGER.debug("Authenticated subject name = {}", account.getUserName());
+                LOGGER.debug("Authenticated subject name = {}", account.getUsername());
                 rev.setCreator(account.getId());
                 rev.setCreatorName(account.getRealName());
                 rev.setLastModifier(account.getId());
@@ -73,7 +73,7 @@ public class AutoRevisionEventListener {
             Subject subject = SecurityUtils.getSubject();
             if (subject.isAuthenticated()) {
                 Account account = (Account) subject.getPrincipal();
-                LOGGER.debug("Authenticated subject name = {}", account.getUserName());
+                LOGGER.debug("Authenticated subject name = {}", account.getUsername());
                 rev.setLastModifier(account.getId());
                 rev.setLastModifierName(account.getRealName());
             }
