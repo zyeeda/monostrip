@@ -1,6 +1,7 @@
 _ = require 'underscore'
 log = require('ringo/logging').getLogger module.id
 {Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
+{FrontendSettingsCollector} = com.zyeeda.coala.web
 
 projectLevelConfigure = try
     require 'config'
@@ -72,3 +73,30 @@ defaultConfigure =
 exports.coala = _.extend defaultConfigure, projectLevelConfigure.coala
 
 log.debug "environment variable #{name}:#{value}" for name, value of exports.coala
+
+
+# frontend settings
+
+Object.defineProperty exports, 'frontendSettings',
+    get: ->
+        result = {}
+        obj = projectLevelConfigure.frontendSettings
+        return result if not obj
+
+        ctx = Context.getInstance(module)
+        context = ctx.getSpringContext().getBeanFactory()
+        map = FrontendSettingsCollector.getSettings()
+
+        for key, value of obj
+            if _.isString value
+                result[key] = try
+                    map.get(value) or context.resolveEmbeddedValue('${' + value + '}')
+                catch e
+                    ''
+            else if _.isFunction value
+                v = value ctx
+                if _.isString v
+                    result[key] = v
+                else if _.isObject v
+                    result[key + '.' + kk] = vv for kk, vv of v
+        result

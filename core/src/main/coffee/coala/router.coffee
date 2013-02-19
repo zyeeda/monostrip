@@ -123,17 +123,17 @@ attachDomain = (router, path, clazz, options = {}) ->
     service = getService options, entityMeta
     handlers = objects.extend {}, defaultHandlers, options.handlers or {}
 
+    if type(options.doWithRouter) is 'function'
+        r = createMockRouter()
+        options.doWithRouter r
+        mountMockRouter router, path, r
+
     router.get listUrl, handlers.list.bind handlers, options, service, entityMeta unless excludes.list
     router.get getUrl, handlers.get.bind handlers, options, service, entityMeta unless excludes.get
     router.post createUrl, handlers.create.bind handlers, options, service, entityMeta unless excludes.create
     router.put updateUrl, handlers.update.bind handlers, options, service, entityMeta unless excludes.update
     router.del removeUrl, handlers.remove.bind handlers, options, service, entityMeta unless excludes.remove
     router.post batchRemoveUrl, handlers.batchRemove.bind handlers, options, service, entityMeta unless excludes.batchRemove
-
-    if type(options.doWithRouter) is 'function'
-        r = createMockRouter()
-        options.doWithRouter r
-        mountMockRouter router, path, r
 
     router
 

@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import org.mozilla.javascript.Context;
 import org.ringojs.engine.RhinoEngine;
-import org.ringojs.engine.RingoConfiguration;
+import org.ringojs.engine.RingoConfig;
 import org.ringojs.repository.FileRepository;
 import org.ringojs.repository.Repository;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -55,7 +55,7 @@ public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpri
         return false;
     }
     
-    protected void configRingo(RingoConfiguration config) {
+    protected void configRingo(RingoConfig config) {
         config.setDebug(isDebugEnabled());
         config.setReloading(false);
         try {
@@ -116,7 +116,9 @@ public abstract class AbstractTestNGRingoSupportTests extends AbstractTestNGSpri
         System.out.println(classPathRoot + "classpathroot");
         Repository home = new FileRepository(classPathRoot);
         Repository base = new FileRepository(testClassPathRoot);
-        RingoConfiguration rc = new RingoConfiguration(home, base, getRingoModules(), getRingoSystemModules());
+        String[] ringoModules = getRingoModules().toArray(new String[0]);
+        String[] ringoSystemModules = getRingoSystemModules().toArray(new String[0]);
+        RingoConfig rc = new RingoConfig(home, base, ringoModules, ringoSystemModules);
         configRingo(rc);
         engine = new RhinoEngine(rc, null);
     }
