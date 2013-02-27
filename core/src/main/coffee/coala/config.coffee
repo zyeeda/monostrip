@@ -23,11 +23,16 @@ defaultConfigure =
 
     booleanFieldPickerSource: [{id: true, text: '是'}, {id: false, text: '否'}]
     defaultOperators:
-        add: {label: '添加', icon: 'icon-plus'},
-        edit: {label: '编辑', icon: 'icon-edit'},
-        del: {label: '删除', icon: 'icon-minus'},
-        show: {label: '查看', icon: 'icon-eye-open'},
-        refresh: {label: '刷新', icon: 'icon-refresh'}
+        add:
+            label: '添加', icon: 'icon-plus', group: 'op', style: 'btn-primary'
+        edit:
+            label: '编辑', icon: 'icon-edit', group: 'op'
+        del:
+            label: '删除', icon: 'icon-minus', group: 'op', style: 'btn-danger'
+        show:
+            label: '查看', icon: 'icon-eye-open', group: 'view'
+        refresh:
+            label: '刷新', icon: 'icon-refresh', group: 'view'
 
     extractPaginationInfo: (params) ->
         pageSize = params['_pageSize']
