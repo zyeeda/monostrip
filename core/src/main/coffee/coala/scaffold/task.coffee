@@ -74,7 +74,7 @@ taskQuery = (createQuery, request, process, resolver, noExtra) ->
         task = query.list()
 
     results = (taskToVo(task) for task in tasks.toArray())
-    filter = exclude: {}, include: {}
+    filter = {}
     if noExtra isnt true
         for o in results
             o.entity = process.getTaskRelatedEntity(o.id)
@@ -82,8 +82,7 @@ taskQuery = (createQuery, request, process, resolver, noExtra) ->
             meta = resolver.resolveEntity entityClass
             opts = requireScaffoldConfig meta.path
             f = getJsonFilter opts, 'list'
-            objects.extend filter.exclude, f.exclude
-            objects.extend filter.include, f.include
+            objects.extend filter, f
             o.process = process.repository.createProcessDefinitionQuery().processDefinitionId(o.processDefinitionId).singleResult()
             o.process = processDefinitionToVo o.process
 
@@ -124,15 +123,14 @@ processQuery = (process, request, resolver) ->
     result = process.findHistoricProcessByInvolvedUser 'tom', status, params
     items = (processToVo(p) for p in result.items.toArray())
     result.items = items
-    filter = include: {}, exclude: {}
+    filter = {}
     for o in result.items
         o.entity = process.getHistoricProcessRelatedEntity(o.processInstanceId)
         entityClass = o.entity.getClass()
         meta = resolver.resolveEntity entityClass
         opts = requireScaffoldConfig meta.path
         f = getJsonFilter opts, 'list'
-        objects.extend filter.exclude, f.exclude
-        objects.extend filter.include, f.include
+        objects.extend filter, f
 
         p = process.repository.createProcessDefinitionQuery().processDefinitionId(o.processDefinitionId).singleResult()
         p = processDefinitionToVo p
@@ -289,20 +287,21 @@ router.get '/configuration/forms/:taskId', mark('process').mark('beans', EntityM
         form.tabs.push processTab
         form.tabs.push taskTab
     else
-        groupNames = (name for name, value of form.groups)
+        groupNames = (name for name, value of form.fieldGroups)
         form.tabs = [{
             title: 'Form',
             groups: groupNames
         }, processTab, taskTab]
 
-    form.groups['process-info'] =
-        label: null
-        columns: 1
-    form.groups['task-info'] =
-        label: null
-        columns: 1
 
-    field.name = 'entity.' + field.name for field in form.fields
+    for name, value in form.fieldGroups
+        for field in value
+            field.name = 'entity.' + field.name for field in form.fields
+    form.fieldGroups['process-info'] = []
+    form.fieldGroups['task-info'] = []
+
+    form.groups.push name: 'process-info'
+    form.groups.push name: 'task-info'
     newField = (name, label) ->
         name: name
         label: label
@@ -313,51 +312,45 @@ router.get '/configuration/forms/:taskId', mark('process').mark('beans', EntityM
 
     newProcessField = (name, label) ->
         o = newField 'process.' + name, label
-        o.group = 'process-info'
+        form.fieldGroups['process-info'].push o
         o
 
     newTaskField = (name, label) ->
         o = newField 'task.' + name, label
-        o.group = 'task-info'
+        form.fieldGroups['task-info'].push o
         o
 
-    fields = [
-        newProcessField 'name', 'Process Name'
-        newProcessField 'version', 'Version'
-        newProcessField 'startUserId', 'Submitter'
-        newProcessField 'startTime', 'Start Time'
-    ]
+    newProcessField 'name', 'Process Name'
+    newProcessField 'version', 'Version'
+    newProcessField 'startUserId', 'Submitter'
+    newProcessField 'startTime', 'Start Time'
+
     if isHistoric
-        fields = fields.concat [
-            newProcessField 'endTime', 'End Time'
-            newProcessField 'durationInMillis', 'Duration'
-            group: 'task-info', type: 'feature', path: 'coala/tasks/grid', options:
-                model: 'tasks/list/' + taskId
-                colModel: [
-                    name: 'id', label: 'ID'
-                ,
-                    name: 'name', label: 'Task Name'
-                ,
-                    name: 'startTime', label: 'Start Time'
-                ,
-                    name: 'endTime', label: 'End Time'
-                ,
-                    name: 'assignee', label: 'Assignee'
-                ,
-                    name: 'isRevokable', label: 'Revokable'
-                ]
-        ]
+        newProcessField 'endTime', 'End Time'
+        newProcessField 'durationInMillis', 'Duration'
+
+        form.fieldGroups['task-info'].push type: 'feature', path: 'coala/tasks/grid', options:
+            model: 'tasks/list/' + taskId
+            colModel: [
+                name: 'id', label: 'ID'
+            ,
+                name: 'name', label: 'Task Name'
+            ,
+                name: 'startTime', label: 'Start Time'
+            ,
+                name: 'endTime', label: 'End Time'
+            ,
+                name: 'assignee', label: 'Assignee'
+            ,
+                name: 'isRevokable', label: 'Revokable'
+            ]
     else
-        fields = fields.concat [
-            newTaskField 'name', 'Task Name'
-            newTaskField 'createTime', 'Create Time'
-            newTaskField 'dueDate', 'Due Date'
-            newTaskField 'owner', 'Owner'
-            newTaskField 'description', 'Description'
-        ]
+        newTaskField 'name', 'Task Name'
+        newTaskField 'createTime', 'Create Time'
+        newTaskField 'dueDate', 'Due Date'
+        newTaskField 'owner', 'Owner'
+        newTaskField 'description', 'Description'
 
-    fields.push newField 'task.dueDate', 'Due Date'
-
-    form.fields = form.fields.concat fields
+    newTaskField 'task.dueDate', 'Due Date'
 
     json form
