@@ -40,13 +40,13 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
         allFields = allFields.concat fields
         fg[group.name] = fields
 
-    if options.style is 'tree' or options.style is 'treeTable'
-        fg['TREE_GROUP'] = [
-            label: '父节点', name: 'parentName', value: 'parent.name', readOnly: true, type: 'text'
-        ,
-            name: 'parent', value: 'parent.id', type: 'hidden'
-        ]
-        result.groups.unshift 'TREE_GROUP'
+    # if options.style is 'tree' or options.style is 'treeTable'
+    #     fg['TREE_GROUP'] = [
+    #         label: '父节点', name: 'parentName', value: 'parent.name', readOnly: true, type: 'text'
+    #     ,
+    #         name: 'parent', value: 'parent.id', type: 'hidden'
+    #     ]
+    #     result.groups.unshift 'TREE_GROUP'
 
     result.tabs = form.tabs
 

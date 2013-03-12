@@ -127,6 +127,7 @@ exports.createManager = (entityClass, name) ->
                     criteria.addOrder Order[value] property for property, value of order
             criteria.list()
 
+    #Query by json condition
     findByEntity: (example, option = {}) ->
         criteria = em.getDelegate().createCriteria(entityClass)
         if option.restricts

@@ -27,8 +27,8 @@ exports.createValidator = ->
             name = f; annos = []
             if f instanceof Object
                 name = f.name
-                rules[name] = objects.extend {}, f.rules if f.rules
-                messages[name] = objects.extend {}, f.messages if f.messages
+                rules[name] = objects.extend {}, f.validations.rules if f.validations and f.validations.rules
+                messages[name] = objects.extend {}, f.validations.messages if f.validations and f.validations.messages
             rules[name] = {} unless rules[name]
             messages[name] = {} unless messages[name]
             field = FieldUtils.getField entityClass, name, true

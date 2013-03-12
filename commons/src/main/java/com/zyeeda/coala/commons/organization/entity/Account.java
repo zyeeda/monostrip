@@ -96,7 +96,7 @@ public class Account extends DomainEntity {
     @Basic
     @Column(name = "F_USERNAME", length = 30)
     @NotBlank
-    @NullableSize(min = 6)
+    @NullableSize(min = 2, max = 30)
     public String getUsername() {
         return this.username;
     }
@@ -108,7 +108,7 @@ public class Account extends DomainEntity {
     @Basic
     @Column(name = "F_PASSWORD", length = 60)
     @NotNull
-    @NullableSize(min = 6)
+    @NullableSize(min = 6, max = 60)
     public String getPassword() {
         return this.password;
     }
@@ -126,7 +126,7 @@ public class Account extends DomainEntity {
 
     @Transient
     @NotNull
-    @NullableSize(min = 6)
+    @NullableSize(min = 6, max = 60)
     public String getPassword2() {
         return this.password2;
     }
@@ -138,7 +138,7 @@ public class Account extends DomainEntity {
     @Basic
     @Column(name = "F_REALNAME", length = 30)
     @NotBlank
-    @NullableSize(min = 2)
+    @NullableSize(min = 2, max = 30)
     public String getRealName() {
         return this.realName;
     }
@@ -150,7 +150,7 @@ public class Account extends DomainEntity {
     @Basic
     @Column(name = "F_EMAIL", length = 100)
     @NotBlank
-    @NullableSize(min = 6)
+    @NullableSize(min = 6, max = 100)
     @Email
     public String getEmail() {
         return this.email;
@@ -162,7 +162,7 @@ public class Account extends DomainEntity {
 
     @Basic
     @Column(name = "F_MOBILE", length = 30)
-    @NullableSize(min = 6)
+    @NullableSize(min = 6, max = 30)
     public String getMobile() {
         return this.mobile;
     }
@@ -173,7 +173,7 @@ public class Account extends DomainEntity {
 
     @Basic
     @Column(name = "F_TELEPHONE", length = 30)
-    @NullableSize(min = 6)
+    @NullableSize(min = 6, max = 30)
     public String getTelephone() {
         return this.telephone;
     }
