@@ -29,8 +29,9 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
         groups.push g
 
     result = {}
+    result.labelOnTop = form.labelOnTop
+    result.size = form.size
     result.groups = groups
-
 
     fg = result.fieldGroups = {}
     allFields = []
@@ -50,7 +51,7 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
 
     result.tabs = form.tabs
 
-    validateGroup = if formName == 'add' then Add else Edit
+    validateGroup = if formName is 'add' then Add else Edit
 
     result.validation = createValidator().buildValidateRules allFields, meta.entityClass, validateGroup
 
