@@ -35,22 +35,22 @@ import com.zyeeda.coala.web.scaffold.FieldMeta;
  *
  */
 public class DefaultEntityMetaResolver implements EntityMetaResolver {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEntityMetaResolver.class);
-    
+
     private Map<Class<?>, EntityMeta> classCache = null;
     private Map<String, List<EntityMeta>> packageCache = null;
-    
+
     private PathMatchingResourcePatternResolver resolver = null;
     private SimpleMetadataReaderFactory factory = null;
-    
+
     public DefaultEntityMetaResolver() {
         classCache = new HashMap<Class<?>, EntityMeta>(100);
         packageCache = new HashMap<String, List<EntityMeta>>();
         resolver = new PathMatchingResourcePatternResolver();
         factory = new SimpleMetadataReaderFactory();
     }
-    
+
     @Override
     public synchronized EntityMeta[] resolveEntities(String... packages) {
         List<EntityMeta> result = new ArrayList<EntityMeta>();
@@ -64,9 +64,9 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
         if( packageCache.containsKey(pkg) ) {
             return packageCache.get(pkg);
         }
-        
+
         List<EntityMeta> result = new ArrayList<EntityMeta>();
-        
+
         String patten = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + ClassUtils.convertClassNameToResourcePath(pkg) + "/*.class";
         try {
             Resource[]  resources = resolver.getResources(patten);
@@ -79,49 +79,49 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
         } catch (Exception e) {
             //ignore all exceptions
         }
-        
+
         packageCache.put(pkg, result);
         return result;
     }
-    
+
     @Override
     public synchronized EntityMeta resolveEntity(Class<?> clazz) {
         if( classCache.containsKey(clazz) ) {
             return classCache.get(clazz);
         }
-        
+
         final EntityMeta meta = new EntityMeta();
         meta.setEntityClass(clazz);
-        
+
         ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
-            
+
             @Override
             public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
                 FieldMeta fieldMeta = generateFieldMeta(field);
-                if (field != null) {
+                if (fieldMeta != null) {
                     meta.addField(fieldMeta);
                 }
             }
-            
+
         }, new ReflectionUtils.FieldFilter() {
-            
+
             @Override
             public boolean matches(Field field) {
                 int modifiers = field.getModifiers();
                 if( Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers) ){
                     return false;
                 }
-                
+
                 Class<?> type = field.getType();
                 if( Map.class.isAssignableFrom(type) ) {
                     return false;
                 }
-                
+
                 return true;
             }
-            
+
         });
-        
+
         classCache.put(clazz, meta);
         return meta;
     }
@@ -137,7 +137,7 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                 path = scaffold.value();
             }
         }
-        
+
         if( Collection.class.isAssignableFrom(type)) {
             Class<?> parameterizedType = getParameterizedType(field);
             Scaffold scaffold = parameterizedType.getAnnotation(Scaffold.class);
@@ -154,10 +154,10 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
         } else {
             return new FieldMeta(name, type, isEntity, path);
         }
-        
+
         return null;
     }
-    
+
     @Override
     public synchronized EntityMeta[] resolveScaffoldEntities(String... packages) {
         final List<EntityMeta> result = new ArrayList<EntityMeta>();
@@ -194,7 +194,7 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
 
     private boolean isManyToManyOwner(Field field) {
         boolean result = field.getAnnotation(ManyToMany.class) != null && field.getAnnotation(JoinTable.class) != null;
-        
+
         if( !result ) {
             String name = field.getName();
             String getter = "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
@@ -205,10 +205,10 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                 // ignore
             }
         }
-        
+
         return result;
     }
-    
+
     private String isManyToManyTarget(Field field) {
         ManyToMany many = field.getAnnotation(ManyToMany.class);
         if (many == null) {
@@ -221,14 +221,14 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                 // ignore
             }
         }
-        
+
         if (many == null || many.mappedBy() == null) {
             return null;
         }
-        
+
         return many.mappedBy();
     }
-    
+
     private String isOneToMany(Field field) {
         OneToMany many = field.getAnnotation(OneToMany.class);
         if (many == null) {
@@ -241,19 +241,19 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                 // ignore
             }
         }
-        
+
         return many == null ? null : many.mappedBy();
     }
-    
+
     private Class<?> getParameterizedType(Field field) {
         try {
-            
+
             ParameterizedType t = (ParameterizedType)field.getGenericType();
             return (Class<?>)t.getActualTypeArguments()[0];
-            
+
         } catch (Exception e) {
             return null;
         }
-        
+
     }
 }

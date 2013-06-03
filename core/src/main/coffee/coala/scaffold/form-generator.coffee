@@ -72,7 +72,8 @@ generateField = (config, meta, labels, groupName, group) ->
     field
 
 defineFieldType = (field, fieldMeta, entityMeta) ->
-    if field.type is 'many-picker'
+    if field.type is 'multi-picker' or field.type is 'multi-tree-picker'
+        field.type = 'multi-tree-picker' if ClassUtils.isAssignable(TreeNode, fieldMeta.getType())
         if (fieldMeta.isManyToManyTarget() or fieldMeta.isOneToMany())
             field.source = fieldMeta.getPath()
             return
