@@ -99,9 +99,5 @@ Object.defineProperty exports, 'frontendSettings',
                 catch e
                     ''
             else if _.isFunction value
-                v = value ctx
-                if _.isString v
-                    result[key] = v
-                else if _.isObject v
-                    result[key + '.' + kk] = vv for kk, vv of v
+                result[key] = value ctx
         result
