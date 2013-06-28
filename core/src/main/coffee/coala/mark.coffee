@@ -16,25 +16,15 @@
 _ = require 'underscore'
 log = require('ringo/logging').getLogger module.id
 
-handlers =
-    tx: require('coala/marker/tx').handler
-    beans: require('coala/marker/beans').handler
-    services: require('coala/marker/services').handler
-    managers: require('coala/marker/managers').handler
-    process: require('coala/marker/process').handler
-    knowledge: require('coala/marker/knowledge').handler
-
-loadExtraHandler = (moduleId) ->
-    try
-        m = require moduleId
-        throw new Error("marker extension module:#{moduleId} has no exports named handler") unless m.handler
-
-        unless type(m.handler) is 'function'
-            throw new Error("marker extension module:#{moduleId} has export a handler which is not a function")
-
-        return m.handler
-    catch e
-        throw new Error("marker extension module:#{moduleId} is not found")
+handlers = {}
+###
+tx: require('coala/marker/tx').handler
+beans: require('coala/marker/beans').handler
+services: require('coala/marker/services').handler
+managers: require('coala/marker/managers').handler
+process: require('coala/marker/process').handler
+knowledge: require('coala/marker/knowledge').handler
+###
 
 obj =
     ###
@@ -42,8 +32,6 @@ obj =
     # parameter attributes will pass into the handler which is found by name
     ###
     mark: (name, attributes...) ->
-        log.debug "Using #{name} marker, already used #{@keys}. #{attributes}"
-        log.debug "obj.keys.indexOf('#{name}') = #{@keys.indexOf(name)}"
         throw new Error("one annotation once, keys: #{@keys}, name: #{name}") if @keys.indexOf(name) isnt -1
         attr = _.flatten attributes
         @annos.push {attributes: attr, name: name}
@@ -60,15 +48,21 @@ obj =
 
         context = Context.getInstance(module)
         result.reduce ((memo, anno) ->
-            handler = handlers[anno.name] or loadExtraHandler anno.name
-            attributes = anno.attributes
-            ((ctx, att, me, args...) ->
+            ((ctx, anno, me, args...) ->
+                handler = handlers[anno.name]
+                att = anno.attributes
+                log.debug "invoke handler: #{anno.name}: #{handler}"
+                throw new Error("no handler is named #{anno.name}") unless handler
+                throw new Error("handler #{anno.name} is not a function") unless _.isFunction handler
                 handler.apply(null,[ctx, att, me, args])
-            ).bind null, context, attributes, memo
+            ).bind null, context, anno, memo
         ), fn.bind me
 
 exports.mark = (args...) ->
     o = _.extend annos: [], keys: [], obj
     o.mark args...
+exports.registerHandler = (name, fn) ->
+    log.debug "register handler #{name}"
+    handlers[name] = fn
 
 exports[name] = exports.mark.bind exports, name for name of handlers

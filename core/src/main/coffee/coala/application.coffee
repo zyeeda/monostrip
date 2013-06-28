@@ -1,9 +1,9 @@
-
 {Application} = require 'stick'
 
 {getLogger} = require 'ringo/logging'
 
 {coala} = require 'coala/config'
+{registerHandler} = require 'coala/mark'
 
 LOGGER = getLogger module.id
 
@@ -29,6 +29,13 @@ processRepository = (router, repo, prefix) ->
     true
 
 exports.create = (module, mountDefaultRouters = true) ->
+    registerHandler "tx", require('coala/marker/tx').handler
+    registerHandler "beans", require('coala/marker/beans').handler
+    registerHandler "services", require('coala/marker/services').handler
+    registerHandler "managers", require('coala/marker/managers').handler
+    registerHandler "process", require('coala/marker/process').handler
+    registerHandler "knowledge", require('coala/marker/knowledge').handler
+
     router = new Application()
     router.configure 'mount'
 
