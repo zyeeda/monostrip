@@ -12,7 +12,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.zyeeda.coala.commons.annotation.scaffold.Scaffold;
@@ -22,6 +21,12 @@ import com.zyeeda.coala.validation.constraint.Unique;
 import com.zyeeda.coala.validation.group.Create;
 import com.zyeeda.coala.validation.group.Update;
 
+/**
+ * 部门.
+ *
+ * @author $Author$
+ *
+ */
 @Entity
 @Table(name = "ZDA_DEPARTMENT")
 @Scaffold("/system/departments")
@@ -32,77 +37,103 @@ import com.zyeeda.coala.validation.group.Update;
 })
 public class Department extends DomainEntity implements TreeNode<Department> {
 
+    /**
+     * 自动生成的序列化版本 UID.
+     */
     private static final long serialVersionUID = -3470409560313841985L;
-    
+
+    /**
+     * 部门名称.
+     */
     private String name;
+
+    /**
+     * 上级部门.
+     */
     private Department parent;
+
+    /**
+     * 下级部门.
+     */
     private List<Department> children = new ArrayList<Department>();
+
+    /**
+     * 部门下账户.
+     */
     private List<Account> accounts = new ArrayList<Account>();
-	private String path;
-	private Boolean deleted;
-    
-    @Column(name = "F_PATH", length = 3000)
-	public String getPath() {
-		return path;
-	}
 
-	public void setPath(String path) {
-		this.path = path;
-	}
+    /**
+     * 部门级别路径.
+     */
+    private String path;
 
-	@Basic
+    /**
+     * 删除标记.
+     */
+    private Boolean deleted;
+
+    @Basic
     @Column(name = "F_NAME", length = 30)
     @NotBlank
     public String getName() {
-        return name;
+        return this.name;
     }
-    
-    public void setName(String name) {
+
+    public void setName(final String name) {
         this.name = name;
     }
 
-    @Override
     @ManyToOne
     @JoinColumn(name = "F_PARENT_ID")
-    @ForeignKey( name = "none" )
+    @Override
     public Department getParent() {
         return this.parent;
     }
-    
-    @Override
-    public void setParent(Department parent) {
-        this.parent = parent; 
-    }
 
     @Override
+    public void setParent(final Department parent) {
+        this.parent = parent;
+    }
+
     @OneToMany(mappedBy = "parent")
     @OrderBy("name")
+    @Override
     public List<Department> getChildren() {
         return this.children;
     }
-    
+
     @Override
-    public void setChildren(List<Department> children) {
+    public void setChildren(final List<Department> children) {
         this.children = children;
     }
 
     @OneToMany(mappedBy = "department")
     @OrderBy("username")
     public List<Account> getAccounts() {
-        return accounts;
+        return this.accounts;
     }
 
-    public void setAccounts(List<Account> accounts) {
+    public void setAccounts(final List<Account> accounts) {
         this.accounts = accounts;
     }
-    
+
+    @Column(name = "F_PATH", length = 3000)
+    public String getPath() {
+        return this.path;
+    }
+
+    public void setPath(final String path) {
+        this.path = path;
+    }
+
     @Basic
     @Column(name = "F_DELETED")
-	public Boolean getDeleted() {
-		return deleted;
-	}
-	public void setDeleted(Boolean deleted) {
-		this.deleted = deleted;
-	}
-    
+    public Boolean getDeleted() {
+        return this.deleted;
+    }
+
+    public void setDeleted(final Boolean deleted) {
+        this.deleted = deleted;
+    }
+
 }
