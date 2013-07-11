@@ -2,6 +2,8 @@ package com.zyeeda.coala.commons.resource.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -36,9 +38,14 @@ public class MenuItem extends DomainEntity {
     private String description;
 
     /**
-     * Feature 路径.
+     * 路径.
      */
-    private String featurePath;
+    private String path;
+    
+    /**
+     * 路径类型.
+     */
+    private Type pathType;
 
     /**
      * Icon class.
@@ -73,13 +80,23 @@ public class MenuItem extends DomainEntity {
         this.description = description;
     }
 
-    @Column(name = "F_FEATURE_PATH", length = 200)
-    public String getFeaturePath() {
-        return this.featurePath;
+    @Column(name = "F_PATH", length = 200)
+    public String getPath() {
+        return this.path;
     }
 
-    public void setFeaturePath(final String featurePath) {
-        this.featurePath = featurePath;
+    public void setPath(final String path) {
+        this.path = path;
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "F_PATH_TYPE", length = 20)
+    public Type getPathType() {
+        return this.pathType;
+    }
+
+    public void setPathType(final Type pathType) {
+        this.pathType = pathType;
     }
 
     @Column(name = "F_ICON", length = 100)
@@ -108,6 +125,11 @@ public class MenuItem extends DomainEntity {
 
     public void setParent(final MenuItem parent) {
         this.parent = parent;
+    }
+    
+    public enum Type {
+        FEATURE,
+        URL
     }
 
 }
