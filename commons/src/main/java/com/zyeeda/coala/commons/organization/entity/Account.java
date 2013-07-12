@@ -23,7 +23,7 @@ import com.zyeeda.coala.validation.group.Create;
 import com.zyeeda.coala.validation.group.Update;
 
 /**
- * 用户账户.
+ * 账户.
  *
  * @author $Author$
  *
@@ -32,8 +32,8 @@ import com.zyeeda.coala.validation.group.Update;
 @Table(name = "ZDA_ACCOUNT")
 @Scaffold("/system/accounts")
 @Unique.List({
-        @Unique(groups = { Create.class }, namedQuery = "findDuplicateUsernameCountOnCreate", bindingProperties = "username"),
-        @Unique(groups = { Update.class }, namedQuery = "findDuplicateUsernameCountOnUpdate", bindingProperties = "username")
+        @Unique(groups = { Create.class }, namedQuery = "findDuplicateUsernameCountOnCreate", bindingProperties = "userName"),
+        @Unique(groups = { Update.class }, namedQuery = "findDuplicateUsernameCountOnUpdate", bindingProperties = "userName")
 })
 @Matches(source = "password", target = "password2", bindingProperties = "password")
 public class Account extends DomainEntity {
@@ -44,9 +44,9 @@ public class Account extends DomainEntity {
     private static final long serialVersionUID = 8017378952695485417L;
 
     /**
-     * 用户名.
+     * 账户名.
      */
-    private String username;
+    private String accountName;
 
     /**
      * 密码.
@@ -94,15 +94,15 @@ public class Account extends DomainEntity {
     private Boolean deleted;
 
     @Basic
-    @Column(name = "F_USERNAME", length = 30)
+    @Column(name = "F_ACCOUNT_NAME", length = 30)
     @NotBlank
     @NullableSize(min = 2, max = 30)
-    public String getUsername() {
-        return this.username;
+    public String getAccountName() {
+        return this.accountName;
     }
 
-    public void setUsername(final String username) {
-        this.username = username;
+    public void setAccountName(final String accountName) {
+        this.accountName = accountName;
     }
 
     @Basic
@@ -213,4 +213,3 @@ public class Account extends DomainEntity {
     }
 
 }
-
