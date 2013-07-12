@@ -24,11 +24,11 @@ mountExtraRoutes = (router, meta, options) ->
     router.get('configuration/grid', (request) ->
         grid = options['grid']
         if not grid and options.labels
-            colModel = []
-            colModel.push {name: name, index: name, label: value} for name, value of options.labels
-            grid = colModel: colModel
+            columns = []
+            columns.push {name: name, header: value} for name, value of options.labels
+            grid = columns: columns
         else if grid and options.labels
-            grid.colModel = setLabelToColModel grid.colModel, options.labels
+            grid.columns = setLabelToColModel grid.columns, options.labels
         json grid
     )
     router.get('configuration/picker', (request) ->
@@ -79,11 +79,9 @@ setLabelToColModel = (colModel, labels) ->
         unless f.label
             if f.name.indexOf('.') isnt -1
                 _names = f.name.split '.'
-                f.label = labels[_names[0]][_names[1]]
+                f.header = labels[_names[0]][_names[1]]
             else
-                f.label = labels[f.name]
-        f.alias = f.name unless f.alias
-        f.position = i unless f.position
+                f.header = labels[f.name]
         newModel.push f
     newModel
 

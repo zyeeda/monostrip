@@ -36,20 +36,17 @@ defaultConfigure =
 
     extractPaginationInfo: (params) ->
         pageSize = params['_pageSize']
-        currentPage = params['_page']
-        return null if not currentPage
+        first = params['_first']
+        return null if not first
         delete params['_pageSize']
-        delete params['_page']
+        delete params['_first']
 
-        firstResult: (currentPage - 1) * pageSize
+        firstResult: first
         maxResults: pageSize
-        currentPage: currentPage
 
     generateListResult: (results, currentPage, pageSize, recordCount, pageCount) ->
         results: results
-        page: currentPage
         recordCount: recordCount
-        pageCount: pageCount
 
     extractOrderInfo: (params) ->
         orders = params['_order']
