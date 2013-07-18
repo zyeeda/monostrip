@@ -76,7 +76,7 @@ setLabelToColModel = (colModel, labels) ->
     for f, i in colModel
         if type(f) is 'string'
             f = name: f
-        unless f.label
+        unless f.header
             if f.name.indexOf('.') isnt -1
                 _names = f.name.split '.'
                 f.header = labels[_names[0]][_names[1]]
