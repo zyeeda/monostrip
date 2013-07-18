@@ -41,7 +41,7 @@ public class MenuItem extends DomainEntity {
      * 路径.
      */
     private String path;
-    
+
     /**
      * 路径类型.
      */
@@ -126,9 +126,22 @@ public class MenuItem extends DomainEntity {
     public void setParent(final MenuItem parent) {
         this.parent = parent;
     }
-    
+
+    /**
+     * 菜单项的路径类型.
+     *
+     * @author $Author$
+     *
+     */
     public enum Type {
+        /**
+         * Feature 路径.
+         */
         FEATURE,
+
+        /**
+         * URL 路径.
+         */
         URL
     }
 
