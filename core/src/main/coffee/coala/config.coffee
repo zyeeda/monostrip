@@ -65,11 +65,12 @@ defaultConfigure =
 
         result
 
-    extractRestrictInfo: (params) ->
-        restricts = params['_filters']
-        return null if not restricts
+    extractFilterInfo: (params) ->
+        obj = params['_filters']
         delete params['_filters']
-        JSON.parse restricts
+        filters = []
+        filters[key] = value for key, value of obj
+        if not filters or filters.length is 0 then null else filters
 
 # exports.coala = objects.extend defaultConfigure, projectLevelConfigure.coala
 exports.coala = _.extend defaultConfigure, projectLevelConfigure.coala

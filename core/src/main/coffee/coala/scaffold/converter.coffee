@@ -18,6 +18,17 @@ innerConverters =
         parseDate.apply null, [coala.dateFormat, Date, value]
     'java.util.Calendar': (value, fieldMeta) ->
         parseDate.apply null, [coala.dateFormat, Calendar, value]
+    'java.lang.Integer': (value, fieldMeta) ->
+        new java.lang.Integer(value)
+    'java.lang.Long': (value, fieldMeta) ->
+        new java.lang.Long(value)
+    'java.lang.Float': (value, fieldMeta) ->
+        new java.lang.Float(value)
+    'java.lang.Double': (value, fieldMeta) ->
+        new java.lang.Double(value)
+    'java.lang.Boolean': (value, fieldMeta) ->
+        new java.lang.Boolean(value)
+
 
 handleArray = (service, fieldType, targetType, value) ->
     value = if type(value) is 'string' then [value] else value
@@ -29,16 +40,19 @@ handleArray = (service, fieldType, targetType, value) ->
     list
 
 defaultConverter = (value, fieldMeta) ->
-    service = createService()
 
     if fieldMeta.isEntity()
+        service = createService()
         manager = service.createManager fieldMeta.type
         manager.find value
     else if fieldMeta.isManyToManyOwner()
+        service = createService()
         handleArray service, fieldMeta.type, fieldMeta.manyToManyTargetType, value
     else if fieldMeta.isManyToManyTarget()
+        service = createService()
         handleArray service, fieldMeta.type, fieldMeta.manyToManyOwnerType, value
     else if fieldMeta.isOneToMany()
+        service = createService()
         handleArray service, fieldMeta.type, fieldMeta.manyType, value
     else
         return value if fieldMeta.type is java.lang.String
