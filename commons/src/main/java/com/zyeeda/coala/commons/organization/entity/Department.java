@@ -108,7 +108,7 @@ public class Department extends DomainEntity implements TreeNode<Department> {
     }
 
     @OneToMany(mappedBy = "department")
-    @OrderBy("username")
+    @OrderBy("accountName")
     public List<Account> getAccounts() {
         return this.accounts;
     }
