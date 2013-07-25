@@ -177,9 +177,9 @@ defaultHandlers =
         appPath = request.env.servletRequest.getRealPath '/WEB-INF/app'
         config.appPath = appPath
 
-        restrictInfo = coala.extractRestrictInfo request.params
-        if restrictInfo?.length isnt 0
-            config.restricts = restrictInfo
+        filters = coala.extractFilterInfo request.params
+        config.filters = filters if filters
+
         style = options.style
         if style? and options[style]? and options[style].colModel?
             config.fields= options[style].colModel
@@ -191,6 +191,7 @@ defaultHandlers =
             paginationInfo.appPath = config.appPath
             paginationInfo.restricts = config.restricts
             paginationInfo.fields = config.fields
+            paginationInfo.filters = filters if filters
             count = service.list entity, paginationInfo
 
             result.recordCount = count

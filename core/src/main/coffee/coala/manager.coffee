@@ -5,9 +5,12 @@
 {Class, Boolean, String, Integer, Double} = java.lang
 {ArrayList, Date} = java.util
 {Example, Order, Projections, MatchMode, Restrictions} = org.hibernate.criterion
+{ReflectionUtils} = org.springframework.util
+{FieldMeta} = com.zyeeda.coala.web.scaffold
 
 {coala} = require 'coala/config'
 {type} = require 'coala/util/type'
+{createConverter} = require 'coala/scaffold/converter'
 fs = require 'fs'
 
 dateFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd'
@@ -127,66 +130,16 @@ exports.createManager = (entityClass, name) ->
                     criteria.addOrder Order[value] property for property, value of order
             criteria.list()
 
-    #Query by json condition
-    findByEntity: (example, option = {}) ->
-        criteria = em.getDelegate().createCriteria(entityClass)
-        if option.restricts
-            criteria = fillRestrict criteria, option.restricts, entityClass
-        if option.fetchCount is true
-            criteria.setProjection Projections.rowCount()
-            criteria.list().get(0)
-        else
+    findByEntity: (option = {}) ->
+        filters = option.filters or []
+        orders = option.orderBy
+        {sql, params} = generateSql entityClass, option.fetchCount, filters, orders
+        query = em.createQuery sql
+        if not option.fetchCount
             pageInfo = getPageInfo option
-            fillPageInfo criteria, pageInfo
-            if option.orderBy
-                for order in option.orderBy
-                    criteria.addOrder Order[value] property for property, value of order
-            criteria.list()
-
-    findBySql: (example, option = {}, listSql, countSql) ->
-        findByStatement example, option, listSql, countSql, 'sql', em
-
-    findByHql: (example, option = {}, listHql, countHql) ->
-        findByStatement example, option, listHql, countHql, 'hql', em
-
-    findByMethod: (example, option = {}, jsPath) ->
-        if option.fetchCount is true
-            recordCount = require(jsPath).recordCount
-            recordCount.call recordCount, example, option
-        else
-            results = require(jsPath).results
-            results.call results, example, option
-
-    findByProcedure: (example, option = {}, sql) ->
-        query = em.createNativeQuery sql
-        for restrict, i in option.restricts
-            if restrict.type then _type = restrict.type.toUpperCase() else _type = ''
-            if 'DATE' == _type
-                _value = dateFormat.parse restrict.value
-            else if 'TIME' == _type
-                _value = timeFormat.parse restrict.value
-            else if 'BOOLEAN' == _type
-                _value = new Boolean if restrict.value == '1' then true else false
-            else
-                _value = restrict.value
-            query.setParameter i + 1, _value
-        _len = option.restricts.length
-        pageInfo = getPageInfo option
-        query.setParameter _len + 1, option.fetchCount
-        query.setParameter _len + 2, pageInfo.firstResult
-        query.setParameter _len + 3, pageInfo.maxResults
-        list = query.resultList
-        if option.fetchCount is true
-            return list.size()
-        results = []
-        it = list.iterator()
-        while it.hasNext()
-            _next = it.next()
-            obj = {}
-            for f in option.fields
-                obj[f.name] = _next[f.position]
-            results.push obj
-        results
+            fillPageInfo query, pageInfo
+        query.setParameter key, value for key, value of params
+        if option.fetchCount then query.getSingleResult() else query.getResultList()
 
     __noSuchMethod__: (name, args) ->
         params = args[0] or {}
@@ -211,28 +164,6 @@ exports.createManager = (entityClass, name) ->
             if singleResult then query.getSingleResult() else query.getResultList()
 
 
-    ###
-    __noSuchMethod__: (name,args) ->
-        throw new Error 'can only support one argument call' if args?.length > 1
-        option = args[0]
-
-        pageInfo = getPageInfo option
-
-        query = createQuery em, name, option
-        fillPageInfo query,pageInfo
-
-        singleResult = 'singleResult' of option and option.singleResult
-        delete option['singleResult'] if singleResult
-
-        for paramName, value of option
-            query.setParameter paramName, value if paramName isnt 'firstResult' and paramName isnt 'maxResults'
-
-        if name.substring(0, 4) is 'find'
-            if singleResult then query.getSingleResult() else query.getResultList()
-        else
-            query.executeUpdate()
-    ###
-
 getPageInfo = (object) ->
     result =
         firstResult: 0
@@ -252,185 +183,6 @@ fillPageInfo = (query,pageInfo) ->
         query.setMaxResults pageInfo.maxResults
         return true
     false
-
-findByStatement = (example, option = {}, listSql, countSql, type, em) ->
-    if option.fetchCount is true
-        sql = countSql
-    else
-        sql = listSql
-    fields = option.fields
-    orderBy = ''
-    result = joinWhere fields, option.restricts
-    where = result.where
-    restricts = result.restricts
-    if where then sql = sql.replace '{{where}}', 'where' + where else sql = sql.replace '{{where}}', 'where 0 = 0'
-    if option.orderBy
-        for order in option.orderBy
-            for property, value of order
-                for f in fields
-                    if f.name == property
-                        orderBy += ' ' + f.alias + ' ' + value + ','
-    orderBy = orderBy.substr 0, orderBy.length - 1
-    if orderBy then sql = sql.replace '{{orderBy}}', 'order by' + orderBy else sql = sql.replace '{{orderBy}}', ''
-    if type == 'sql'
-        query = em.createNativeQuery sql
-    else
-        if option.resultClass? and !option.fetchCount
-            query = em.createQuery sql, Class.forName option.resultClass
-        else
-            query = em.createQuery sql
-    params = query.parameters
-    it = params.iterator()
-    while it.hasNext()
-        _next = it.next()
-        for restrict in restricts
-            if _next.name == restrict.name
-                if restrict.type then _type = restrict.type.toUpperCase() else _type = ''
-                if 'DATE' == _type
-                    _value = dateFormat.parse restrict.value
-                else if 'TIME' == _type
-                    _value = timeFormat.parse restrict.value
-                else if 'BOOLEAN' == _type
-                    _value = new Boolean if restrict.value == '1' then true else false
-                else
-                    _value = restrict.value
-                query.setParameter _next.name, _value
-    if option.fetchCount is true
-        query.resultList.get(0)
-    else
-        pageInfo = getPageInfo option
-        fillPageInfo query, pageInfo
-        list = query.resultList
-        return list if option.resultClass
-        results = []
-        it = list.iterator()
-        while it.hasNext()
-            _next = it.next()
-            obj = {}
-            for f in fields
-                obj[f.name] = _next[f.position]
-            results.push obj
-        results
-
-joinWhere = (fields, restricts) ->
-    return where: where, restricts: restricts unless restricts
-    operators =
-        'EQ': '='
-        'NE': '<>'
-        'GT': '>'
-        'LT': '<'
-        'GE': '>='
-        'LE': '<='
-    where = ''
-    _restricts = []
-    for restrict in restricts
-        _restrict = {}
-        for f in fields
-            if f.name == restrict.name
-                if restrict.operator then _operator = restrict.operator.toUpperCase() else _operator = 'LIKE'
-                _restrict =
-                    name: restrict.name
-                    operator: _operator
-                _restrict.type = f.type if f.type
-                if _operator == 'LIKE'
-                    where += ' ' + f.alias + ' like :' + f.name + ' and'
-                    _restrict.value = '%' + restrict.value + '%'
-                else if _operator == 'BETWEEN'
-                    _value = restrict.value.split ','
-                    _restrict.value = _value[0]
-                    newRestrict =
-                        name: 'end_' + restrict.name
-                        value: _value[1]
-                    newRestrict.type = f.type if f.type
-                    _restricts.push newRestrict
-                    where += ' ' + f.alias + ' between :' + f.name + ' and :' + 'end_' + f.name + ' and'
-                else if _operator == 'IN'
-                    _value = restrict.value.split ','
-                    _restrict.value = _value.pop(0)
-                    inStr = ':' + f.name
-                    for r, i in _value
-                        newRestrict =
-                            name: 'in_' + i + '_' + restrict.name
-                            value: r
-                        newRestrict.type = f.type if f.type
-                        _restricts.push newRestrict
-                        inStr += ', :in_' + i + '_' + f.name
-                    where += ' ' + f.alias + ' in (' + inStr + ') and'
-                else
-                    _restrict.value = restrict.value
-                    where += ' ' + f.alias + ' ' + operators[_operator] + ' :' + f.name + ' and'
-                _restricts.push _restrict
-    where = where.substr 0, where.length - 4
-    where: where
-    restricts: _restricts
-
-fillRestrict = (criteria, restrictions, entityClass) ->
-    for restrict in restrictions
-        _value = undefined; _other = undefined
-        if restrict.name and restrict.name.indexOf('.') isnt -1
-            if restrict.value
-                _value = restrict.value
-                _operator = restrict.operator || 'eq'
-            else
-                _operator = 'isNull'
-            _refName = restrict.name.split('.')[0]
-            criteria = criteria.createAlias _refName, _refName
-        else
-            _pname = restrict.name.charAt(0).toUpperCase() + restrict.name.substring(1)
-            try
-                _type = entityClass.getMethod('get' + _pname).returnType
-            catch e
-                try
-                    _type = entityClass.getMethod('is' + _pname).returnType
-                catch ex
-                    throw new Error "property #{restrict.name} is not found"
-            _operator = restrict.operator
-            if _type.equals(Date)
-                _tempVal = restrict.value.split ','
-                _value = dateFormat.parse(_tempVal[0])
-                if _tempVal[1] then _other = dateFormat.parse(_tempVal[1]) else _other = _value
-                _operator = _operator || 'between'
-            else if _type.equals(Boolean) or _type.toString().equals 'boolean'
-                _value = new Boolean if restrict.value == '1' then true else false
-                _operator = _operator || 'eq'
-            else if _type.equals(Integer) or _type.equals(Double) or _type.toString().equals('int') or _type.toString().equals('double')
-                _tempVal =  restrict.value.split ','
-                _value = _tempVal[0]
-                _other = _tempVal[1]
-                _operator = _operator || 'between'
-            else
-                _value = restrict.value if restrict.value
-                _other = restrict.other if restrict.other
-                _operator = _operator || 'like'
-
-        if 'or' == _operator
-            junc = Restrictions.disjunction()
-            criteria = criteria.add fillRestrict junc, _value
-        else if 'and' == _operator
-            junc = Restrictions.conjunction()
-            criteria = criteria.add fillRestrict junc, _value
-        else if 'not' == _operator
-            criteria = fillRestrict criteria, _value
-        else if 'in' == _operator
-            _value = new String(restrict.value).split ','
-            criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value
-        else if 'like' == _operator or 'ilike' == _operator
-            _matchMode = 'ANYWHERE'
-            if _value.indexOf('%') == 0 and _value.lastIndexOf('%') != _value.length -1
-                _value = _value.substring 1, _value.length
-                _matchMode = 'START'
-            else if _value.indexOf('%') == 0 and _value.lastIndexOf('%') == _value.length - 1
-                _value = _value.substring(0, _value.length - 1)
-                _matchMode = 'END'
-            criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, MatchMode[_matchMode]
-        else
-            if _value isnt undefined and _other isnt undefined
-                criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value, _other
-            else if _value isnt undefined
-                criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name, _value
-            else
-                criteria = criteria.add Restrictions[_operator].call Restrictions, restrict.name
-    criteria
 
 if coala.development is true
     fs = require 'fs'
@@ -480,3 +232,94 @@ else
 
 firstIfOnlyOne = (array) ->
     if array.length is 1 then array[0] else array
+
+generateSql = (entityClass, isCount, filters, orders) ->
+    converter = createConverter()
+    ctx =
+        id: 0, prefix: 't', params: {}
+        check: (name) ->
+            c = entityClass
+            for n in name.split '.'
+                c = ReflectionUtils.findField c, n
+                throw new Error "field: #{name} is not defined in class #{entityClass}" if not c
+                c = c.type
+            c
+        convert: (name, value) ->
+            type = @check name
+            converter.convert value, new FieldMeta('', type, false, null)
+        flat: (name) ->
+            flat = name.replace /\./g, '_'
+            flat += '_' + (ctx.id++)
+
+    sql = if isCount then 'select count(t) ' else ''
+    sql += "from #{entityClass.name} t "
+    if filters.length isnt 0
+        conditions = operators.process.apply operators, [ctx, 'and'].concat filters
+        sql += 'where ' + conditions
+    os = []
+    if orders and not isCount
+        for order in orders
+            os.push "#{key} #{value}" for key, value of order when ctx.check key
+        sql += ' order by ' + os.join(',') if os.length > 0
+    sql: sql
+    params: ctx.params
+
+operators =
+    process: (ctx, op = 'eq', args...) ->
+        op = op.toLowerCase()
+        @[op].apply @, [ctx].concat args
+
+    two: (op, ctx, name, value, options) ->
+        flat = ctx.flat name
+        ctx.params[flat] = ctx.convert name, value
+        "#{ctx.prefix}.#{name} #{op} :#{flat}"
+    eq: (args...) -> @two.apply @, ['='].concat args
+    ne: (args...) -> @two.apply @, ['!='].concat args
+    gt: (args...) -> @two.apply @, ['>'].concat args
+    lt: (args...) -> @two.apply @, ['<'].concat args
+    ge: (args...) -> @two.apply @, ['>='].concat args
+    le: (args...) -> @two.apply @, ['<='].concat args
+
+    twop: (op, ctx, first, second, options) ->
+        ctx.check first
+        ctx.check second
+        flat1 = ctx.flat first
+        flat2 = ctx.flat second
+        "#{ctx.prefix}.#{first} #{op} #{ctx.prefix}.#{second}"
+    eqp: (args...) -> @twop.apply @, ['='].concat args
+    nep: (args...) -> @twop.apply @, ['!='].concat args
+    gtp: (args...) -> @twop.apply @, ['>'].concat args
+    ltp: (args...) -> @twop.apply @, ['<'].concat args
+    gep: (args...) -> @twop.apply @, ['>='].concat args
+    lep: (args...) -> @twop.apply @, ['<='].concat args
+
+    like: (ctx, name, value = '', options = {}) ->
+        v = if options.mode then (if options.mode is 'start' then value + '%' else '%' + value) else '%' + value + '%'
+        @two.apply @, ['like', ctx, name, v, options]
+    ilike: (ctx, name, value = '', options = {}) ->
+        v = if options.mode then (if options.mode is 'start' then value + '%' else '%' + value) else '%' + value + '%'
+        v = v.toLowerCase()
+        type = ctx.check name
+        flat = ctx.flat name
+        ctx.params[flat] = v
+        "lower(#{ctx.prefix}.#{name}) like :#{flat}"
+    between: (ctx, name, start, end) ->
+        flat = ctx.flat name
+        ctx.params[flat + '_start'] = ctx.convert name, start
+        ctx.params[flat + '_end'] = ctx.convert name, end
+        "#{ctx.prefix}.#{name} between :#{flat}_start and :#{flat}_end"
+    null: (ctx, name, options) ->
+        ctx.check name
+        flat = ctx.flat name
+        "#{ctx.prefix}.#{name} is null"
+    notnull: (ctx, name, options) ->
+        ctx.check name
+        flat = ctx.flat name
+        "#{ctx.prefix}.#{name} is not null"
+
+    and: (ctx, args...) ->
+        terms = (@process.apply @, [ctx].concat item for item in args)
+        '(' + terms.join(' and ') + ')'
+    or: (ctx, args...) ->
+        terms = (@process.apply @, [ctx].concat item for item in args)
+        '(' + terms.join(' or ') + ')'
