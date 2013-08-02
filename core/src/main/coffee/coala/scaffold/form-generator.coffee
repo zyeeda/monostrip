@@ -1,9 +1,9 @@
 {type} = require 'coala/util/type'
 objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
-{createValidator} = require 'coala/validation/validator'
+{buildValidateRules} = require 'coala/validation/validator'
 
-{Add, Edit} = com.zyeeda.coala.validator.group
+{Create, Update} = com.zyeeda.coala.validator.group
 {TreeNode} = com.zyeeda.coala.commons.base.data
 {ClassUtils} = org.springframework.util
 
@@ -51,9 +51,9 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
 
     result.tabs = form.tabs
 
-    validateGroup = if formName is 'add' then Add else Edit
+    validateGroup = if formName is 'add' then Create else Update
 
-    result.validation = createValidator().buildValidateRules allFields, meta.entityClass, validateGroup
+    result.validation = buildValidateRules allFields, meta.entityClass, validateGroup
 
     result.entityLabel = labels.entity if labels.entity
 

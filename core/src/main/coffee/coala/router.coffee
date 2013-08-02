@@ -17,7 +17,6 @@ paths = require 'coala/util/paths'
 {Create, Update} = com.zyeeda.coala.validation.group
 
 log = getLogger module.id
-validator = new createValidator()
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
 ###
@@ -234,8 +233,8 @@ defaultHandlers =
         entity = createEntity entityMeta.entityClass
         mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
 
-        violations = callValidators 'create', options, request, entity
-        return json violations: violations if violations.length > 0
+        result = callValidation 'create', options, request, entity
+        return result if result isnt true
 
         result = callHook 'before', 'Create', options, entityMeta, request, entity
         return result if result isnt undefined
@@ -252,14 +251,11 @@ defaultHandlers =
         updateIt = (entity) ->
             mergeEntityAndParameter options, request.params, entityMeta, 'update', entity
 
-            violations = callValidators 'update', options, request, entity
-            if violations.length > 0
-                result = json violations: violations
-                return false
+            result = callValidation 'update', options, request, entity
+            return false if result isnt true
 
             result = callHook 'before', 'Update', options, entityMeta, request, entity
-            if result isnt undefined
-                return false
+            return false if result isnt undefined
             result = true
 
         entity = service.update id, updateIt
@@ -274,8 +270,8 @@ defaultHandlers =
         entity = service.get id
         return notFound() if entity is null
 
-        violations = callValidators 'remove', options, request, entity
-        return json violations: violations if violations.length > 0
+        result = callValidation 'remove', options, request, entity
+        return result if result isnt true
 
         result = callHook 'before', 'Remove', options, entityMeta, request, entity
         return result if result isnt undefined
@@ -293,8 +289,8 @@ defaultHandlers =
 
         entities = (service.get id for id in ids)
 
-        violations = callValidators 'batchRemove', options, request, entities
-        return json violations: violations if violations.length > 0
+        result = callValidation 'batchRemove', options, request, entities
+        return result if result isnt true
 
         result = callHook 'before', 'BatchRemove', options, entityMeta, request, entities
         return result if result isnt undefined
@@ -321,7 +317,7 @@ validationGroupMapping =
     create: Create
     update: Update
 
-callValidators = (action, options, request, entity) ->
+callValidation = (action, options, request, entity) ->
     context = createValidationContext()
     formName = request.params['__formName__'] or 'defaults'
 
@@ -332,12 +328,15 @@ callValidators = (action, options, request, entity) ->
     log.debug "context.isBeanValidationSkipped = #{context.isBeanValidationSkipped}"
 
     if not context.isBeanValidationSkipped and (action is 'create' or action is 'update')
+        validator = new createValidator()
         validator.validate context, entity, validationGroupMapping[action]
 
     log.debug "context.hasViolations() = #{context.hasViolations()}"
     log.debug "context.violations.length = #{context.violations.length}"
 
-    context.collectViolations()
+    violations = context.collectViolations()
+    return json violations: violations, {status: 422} if violations.length > 0
+    true
 
 callHook = (hookType, action, options, meta, request, entity) ->
     hookName = hookType + action
