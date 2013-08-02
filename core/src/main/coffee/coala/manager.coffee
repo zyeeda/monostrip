@@ -305,9 +305,18 @@ operators =
         "lower(#{ctx.prefix}.#{name}) like :#{flat}"
     between: (ctx, name, start, end) ->
         flat = ctx.flat name
-        ctx.params[flat + '_start'] = ctx.convert name, start
-        ctx.params[flat + '_end'] = ctx.convert name, end
-        "#{ctx.prefix}.#{name} between :#{flat}_start and :#{flat}_end"
+        if start and end
+            ctx.params[flat + '_start'] = ctx.convert name, start
+            ctx.params[flat + '_end'] = ctx.convert name, end
+            "#{ctx.prefix}.#{name} between :#{flat}_start and :#{flat}_end"
+        else if start and not end
+            ctx.params[flat + '_start'] = ctx.convert name, start
+            "#{ctx.prefix}.#{name} >= :#{flat}_start"
+        else if not start and end
+            ctx.params[flat + '_end'] = ctx.convert name, end
+            "#{ctx.prefix}.#{name} <= :#{flat}_end"
+        else
+            '1=1'
     null: (ctx, name, options) ->
         ctx.check name
         flat = ctx.flat name
