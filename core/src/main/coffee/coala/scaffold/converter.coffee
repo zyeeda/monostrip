@@ -5,7 +5,8 @@
 {coala} = require 'coala/config'
 {type} = require 'coala/util/type'
 objects = require 'coala/util/objects'
-{createService} = require 'coala/service'
+
+serviceHost = require 'coala/service'
 
 parseDate = (pattern, desiredType, stringDate) ->
     return null if not stringDate
@@ -42,17 +43,17 @@ handleArray = (service, fieldType, targetType, value) ->
 defaultConverter = (value, fieldMeta) ->
 
     if fieldMeta.isEntity()
-        service = createService()
+        service = serviceHost.createService()
         manager = service.createManager fieldMeta.type
         manager.find value
     else if fieldMeta.isManyToManyOwner()
-        service = createService()
+        service = serviceHost.createService()
         handleArray service, fieldMeta.type, fieldMeta.manyToManyTargetType, value
     else if fieldMeta.isManyToManyTarget()
-        service = createService()
+        service = serviceHost.createService()
         handleArray service, fieldMeta.type, fieldMeta.manyToManyOwnerType, value
     else if fieldMeta.isOneToMany()
-        service = createService()
+        service = serviceHost.createService()
         handleArray service, fieldMeta.type, fieldMeta.manyType, value
     else
         return value if fieldMeta.type is java.lang.String
