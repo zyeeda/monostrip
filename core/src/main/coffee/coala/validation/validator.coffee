@@ -55,6 +55,7 @@ exports.buildValidateRules = (fields, entityClass, group) ->
                 if groups.length == 0 or ArrayUtils.contains groups, group
                     if a instanceof javax.validation.constraints.NotNull or a instanceof org.hibernate.validator.constraints.NotBlank
                         rules[name].required = true
+                        f.required = true
                     else if a instanceof java.validator.constraints.Digits
                         rules[name].digits = true
                     else if a instanceof org.hibernate.validator.constraints.Email

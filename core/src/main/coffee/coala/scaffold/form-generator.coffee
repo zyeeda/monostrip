@@ -55,7 +55,7 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
 
     result.validation = buildValidateRules allFields, meta.entityClass, validateGroup
 
-    result.entityLabel = labels.entity if labels.entity
+    result.entityLabel = options.entityLabel if options.entityLabel
 
     result
 
