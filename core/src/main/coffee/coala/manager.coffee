@@ -224,8 +224,7 @@ if coala.development is true
     createQuery = (em, name) ->
         loadOrms() if modified()
         query = namedQueries[name]
-        throw new Error("no query with name:#{name}") unless query?
-        em.createQuery query
+        if query then em.createQuery query else em.createNamedQuery name
 else
     createQuery = (em, name) ->
         em.createNamedQuery name

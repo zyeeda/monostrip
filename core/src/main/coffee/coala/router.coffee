@@ -6,6 +6,7 @@ _ = require 'underscore'
 objects = require 'coala/util/objects'
 paths = require 'coala/util/paths'
 {coala} = require 'coala/config'
+{mark} = require 'coala/mark'
 {json, html, notFound, internalServerError} = require 'coala/response'
 
 {createService} = require 'coala/scaffold/service'
@@ -120,7 +121,7 @@ attachDomain = (router, path, clazz, options = {}) ->
     excludes[name] = true for name in options.exclude or []
 
     service = getService options, entityMeta
-    handlers = objects.extend {}, defaultHandlers, options.handlers or {}
+    handlers = objects.extend {}, defaultHandlers(path, options), options.handlers or {}
 
     if type(options.doWithRouter) is 'function'
         r = createMockRouter()
@@ -165,143 +166,152 @@ getJsonFilter = exports.getJsonFilter = (options, type) ->
     return {} unless options.filters
     options.filters[type] or options.filters.defaults or {}
 
-defaultHandlers =
-    list: (options, service, entityMeta, request) ->
-        entity = createEntity entityMeta.entityClass
-        mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
+defaultHandlers = (path, options) ->
+    o =
+        list: (options, service, entityMeta, request) ->
+            entity = createEntity entityMeta.entityClass
+            mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
 
-        result = {}
-        config = {}
+            result = {}
+            config = {}
 
-        appPath = request.env.servletRequest.getRealPath '/WEB-INF/app'
-        config.appPath = appPath
+            appPath = request.env.servletRequest.getRealPath '/WEB-INF/app'
+            config.appPath = appPath
 
-        filters = coala.extractFilterInfo request.params
-        config.filters = filters if filters
+            filters = coala.extractFilterInfo request.params
+            config.filters = filters if filters
 
-        style = options.style
-        if style? and options[style]? and options[style].colModel?
-            config.fields= options[style].colModel
+            style = options.style
+            if style? and options[style]? and options[style].colModel?
+                config.fields= options[style].colModel
 
-        paginationInfo = coala.extractPaginationInfo request.params
-        if paginationInfo?
-            paginationInfo.fetchCount = true
-            pageSize = paginationInfo.maxResults
-            paginationInfo.appPath = config.appPath
-            paginationInfo.restricts = config.restricts
-            paginationInfo.fields = config.fields
-            paginationInfo.filters = filters if filters
-            count = service.list entity, paginationInfo
+            paginationInfo = coala.extractPaginationInfo request.params
+            if paginationInfo?
+                paginationInfo.fetchCount = true
+                pageSize = paginationInfo.maxResults
+                paginationInfo.appPath = config.appPath
+                paginationInfo.restricts = config.restricts
+                paginationInfo.fields = config.fields
+                paginationInfo.filters = filters if filters
+                count = service.list entity, paginationInfo
 
-            result.recordCount = count
-            result.pageCount = Math.ceil count/pageSize
+                result.recordCount = count
+                result.pageCount = Math.ceil count/pageSize
 
-            delete paginationInfo.fetchCount
-            objects.extend config, paginationInfo
+                delete paginationInfo.fetchCount
+                objects.extend config, paginationInfo
 
-        orderInfo = coala.extractOrderInfo request.params
-        if orderInfo?.length isnt 0
-            config.orderBy = orderInfo
-        ###
-        configs = coala.extractPaginationInfo request.params
-        orders = coala.extractOrderInfo request.params
-        if configs?
-            configs.fetchCount = true
-            pageSize = configs.maxResults
-            count = service.list entity, configs
-            result.recordCount = count
-            result.pageCount = Math.ceil count/pageSize
-            delete configs.fetchCount
+            orderInfo = coala.extractOrderInfo request.params
+            if orderInfo?.length isnt 0
+                config.orderBy = orderInfo
+            ###
+            configs = coala.extractPaginationInfo request.params
+            orders = coala.extractOrderInfo request.params
+            if configs?
+                configs.fetchCount = true
+                pageSize = configs.maxResults
+                count = service.list entity, configs
+                result.recordCount = count
+                result.pageCount = Math.ceil count/pageSize
+                delete configs.fetchCount
 
-        if orders?.length isnt 0
-            configs = configs or {}
-            configs.orderBy = orders
+            if orders?.length isnt 0
+                configs = configs or {}
+                configs.orderBy = orders
 
-        ###
-        result.results = service.list entity, config
+            ###
+            result.results = service.list entity, config
 
-        o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
-        json o, getJsonFilter(options, 'list')
+            o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
+            json o, getJsonFilter(options, 'list')
 
-    get: (options, service, entityMeta, request, id) ->
-        entity = service.get id
-        return notFound() if entity is null
+        get: (options, service, entityMeta, request, id) ->
+            entity = service.get id
+            return notFound() if entity is null
 
-        json entity, getJsonFilter(options, 'get')
+            json entity, getJsonFilter(options, 'get')
 
-    create: (options, service, entityMeta, request) ->
-        entity = createEntity entityMeta.entityClass
-        mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
+        create: (options, service, entityMeta, request) ->
+            entity = createEntity entityMeta.entityClass
+            mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
 
-        result = callValidation 'create', options, request, entity
-        return result if result isnt true
+            result = callValidation 'create', options, request, entity
+            return result if result isnt true
 
-        result = callHook 'before', 'Create', options, entityMeta, request, entity
-        return result if result isnt undefined
+            result = callHook 'before', 'Create', options, entityMeta, request, entity
+            return result if result isnt undefined
 
-        entity = service.create(entity)
+            entity = service.create(entity)
 
-        result = callHook 'after', 'Create', options, entityMeta, request, entity
-        return result if result isnt undefined
+            result = callHook 'after', 'Create', options, entityMeta, request, entity
+            return result if result isnt undefined
 
-        json entity, objects.extend getJsonFilter(options, 'create'), { status: 201 }
+            json entity, objects.extend getJsonFilter(options, 'create'), { status: 201 }
 
-    update: (options, service, entityMeta, request, id) ->
-        result = true
-        updateIt = (entity) ->
-            mergeEntityAndParameter options, request.params, entityMeta, 'update', entity
-
-            result = callValidation 'update', options, request, entity
-            return false if result isnt true
-
-            result = callHook 'before', 'Update', options, entityMeta, request, entity
-            return false if result isnt undefined
+        update: (options, service, entityMeta, request, id) ->
             result = true
+            updateIt = (entity) ->
+                mergeEntityAndParameter options, request.params, entityMeta, 'update', entity
 
-        entity = service.update id, updateIt
-        return result if result isnt true
+                result = callValidation 'update', options, request, entity
+                return false if result isnt true
 
-        result = callHook 'after', 'Update', options, entityMeta, request, entity
-        return result if result isnt undefined
+                result = callHook 'before', 'Update', options, entityMeta, request, entity
+                return false if result isnt undefined
+                result = true
 
-        json entity, getJsonFilter(options, 'update')
+            entity = service.update id, updateIt
+            return result if result isnt true
 
-    remove: (options, service, entityMeta, request, id) ->
-        entity = service.get id
-        return notFound() if entity is null
+            result = callHook 'after', 'Update', options, entityMeta, request, entity
+            return result if result isnt undefined
 
-        result = callValidation 'remove', options, request, entity
-        return result if result isnt true
+            json entity, getJsonFilter(options, 'update')
 
-        result = callHook 'before', 'Remove', options, entityMeta, request, entity
-        return result if result isnt undefined
+        remove: (options, service, entityMeta, request, id) ->
+            entity = service.get id
+            return notFound() if entity is null
 
-        service.remove entity
+            result = callValidation 'remove', options, request, entity
+            return result if result isnt true
 
-        result = callHook 'after', 'Remove', options, entityMeta, request, entity
-        return result if result isnt undefined
+            result = callHook 'before', 'Remove', options, entityMeta, request, entity
+            return result if result isnt undefined
 
-        json id
+            service.remove entity
 
-    batchRemove: (options, service, entityMeta, request) ->
-        ids = request.params.ids
-        ids = if type(ids) is 'string' then [ids] else ids
+            result = callHook 'after', 'Remove', options, entityMeta, request, entity
+            return result if result isnt undefined
 
-        entities = (service.get id for id in ids)
+            json id
 
-        result = callValidation 'batchRemove', options, request, entities
-        return result if result isnt true
+        batchRemove: (options, service, entityMeta, request) ->
+            ids = request.params.ids
+            ids = if type(ids) is 'string' then [ids] else ids
 
-        result = callHook 'before', 'BatchRemove', options, entityMeta, request, entities
-        return result if result isnt undefined
+            entities = (service.get id for id in ids)
 
-        service.remove.apply service, entities
+            result = callValidation 'batchRemove', options, request, entities
+            return result if result isnt true
 
-        result = callHook 'after', 'BatchRemove', options, entityMeta, request, entities
-        return result if result isnt undefined
+            result = callHook 'before', 'BatchRemove', options, entityMeta, request, entities
+            return result if result isnt undefined
 
-        r = (entity.id for entity in entities)
-        json r
+            service.remove.apply service, entities
+
+            result = callHook 'after', 'BatchRemove', options, entityMeta, request, entities
+            return result if result isnt undefined
+
+            r = (entity.id for entity in entities)
+            json r
+
+    return o if options.disableAuthc is true
+
+    map = list: 'show', get: 'show', create: 'add', update: 'edit', remove: 'del', batchRemove: 'del'
+    p = path.replace(/^\//, '').replace(/\/$/, '')
+    for key, value of map
+        o[key] = mark('perms', "#{p}:#{value}").on o[key]
+    o
 
 # the reason why put the entity in the end of argument list is that,
 # when update, the arguments before entity are all bound

@@ -35,6 +35,13 @@ exports.create = (module, mountDefaultRouters = true) ->
     registerHandler "managers", require('coala/marker/managers').handler
     registerHandler "process", require('coala/marker/process').handler
     registerHandler "knowledge", require('coala/marker/knowledge').handler
+    registerHandler "roles", require('coala/marker/permission').handlers.roles
+    registerHandler "perms", require('coala/marker/permission').handlers.perms
+    registerHandler "RequireGuests", require('coala/marker/permission').handlers.RequireGuests
+    registerHandler "RequiresUser", require('coala/marker/permission').handlers.RequiresUser
+    registerHandler "RequiresAuth", require('coala/marker/permission').handlers.RequiresAuth
+    registerHandler "RequiresPerms", require('coala/marker/permission').handlers.perms
+    registerHandler "RequiresRoles", require('coala/marker/permission').handlers.roles
 
     router = new Application()
     router.configure 'mount'
