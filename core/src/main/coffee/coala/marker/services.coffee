@@ -11,8 +11,8 @@ exports.handler = (context, attributes, fn, args) ->
     services = []
     for m in attributes
         names = m.split coala.servicePathSeperator
-        throw new Error("illegal service path: #{m}, module:serviceName") if names.length isnt 2
-        name = paths.join names[0], coala.serviceFolderName, names[1]
+        name = names[0].replace(/(^\/)|(\/$)/g, '') + '.feature/service'
+        name += "-#{names[1]}" if names.length > 1
         services.push require(name).createService()
     args = services.concat args
     fn.apply null, args

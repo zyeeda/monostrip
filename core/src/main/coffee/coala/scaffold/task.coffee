@@ -91,6 +91,7 @@ taskQuery = (createQuery, request, process, resolver, noExtra) ->
             o.isRejectable = true for event in events.toArray() when event.eventName.indexOf('reject-') is 0
     else
         for o in results
+            o.isRevokable = false
             continue if o.endTime isnt null
             execution = process.runtime.createExecutionQuery().executionId(o.executionId).singleResult()
             parentId = execution.parentId
@@ -293,15 +294,14 @@ router.get '/configuration/forms/:taskId', mark('process').mark('beans', EntityM
             groups: groupNames
         }, processTab, taskTab]
 
+    for name, value of form.fieldGroups
+        field.name = 'entity.' + field.name for field in value
 
-    for name, value in form.fieldGroups
-        for field in value
-            field.name = 'entity.' + field.name for field in form.fields
     form.fieldGroups['process-info'] = []
     form.fieldGroups['task-info'] = []
 
-    form.groups.push name: 'process-info'
-    form.groups.push name: 'task-info'
+    form.groups.push name: 'process-info', readOnly: true
+    form.groups.push name: 'task-info', readOnly: true
     newField = (name, label) ->
         name: name
         label: label
@@ -326,23 +326,25 @@ router.get '/configuration/forms/:taskId', mark('process').mark('beans', EntityM
     newProcessField 'startTime', 'Start Time'
 
     if isHistoric
+        g.readOnly = true for g in form.groups
+
         newProcessField 'endTime', 'End Time'
         newProcessField 'durationInMillis', 'Duration'
 
-        form.fieldGroups['task-info'].push type: 'feature', path: 'coala/tasks/grid', options:
+        form.fieldGroups['task-info'].push type: 'feature', path: 'coala:task-grid', options:
             model: 'tasks/list/' + taskId
-            colModel: [
-                name: 'id', label: 'ID'
+            columns: [
+                name: 'id', header: 'ID'
             ,
-                name: 'name', label: 'Task Name'
+                name: 'name', header: 'Task Name'
             ,
-                name: 'startTime', label: 'Start Time'
+                name: 'startTime', header: 'Start Time'
             ,
-                name: 'endTime', label: 'End Time'
+                name: 'endTime', header: 'End Time'
             ,
-                name: 'assignee', label: 'Assignee'
+                name: 'assignee', header: 'Assignee'
             ,
-                name: 'isRevokable', label: 'Revokable'
+                name: 'isRevokable', header: 'Revokable'
             ]
     else
         newTaskField 'name', 'Task Name'

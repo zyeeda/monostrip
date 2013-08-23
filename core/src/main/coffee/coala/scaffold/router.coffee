@@ -59,13 +59,9 @@ mountExtraRoutes = (router, meta, options) ->
 
 requireScaffoldConfig = exports.requireScaffoldConfig = (path) ->
     path = path.replace /(^\/)|(\/$)/g, ''
-    [paths..., name] = path.split '/'
-    paths.push coala.scaffoldFolderName
-    paths.push name
-    path = paths.join '/'
-
+    p = path + '.feature/scaffold'
     options = try
-        require path
+        require p
     catch e
         {}
 

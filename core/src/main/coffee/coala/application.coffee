@@ -6,7 +6,7 @@
 {registerHandler} = require 'coala/mark'
 
 LOGGER = getLogger module.id
-
+###
 processRoot = (router, repo, prefix) ->
     routersRepo = repo.getChildRepository coala.routerFoldername
     LOGGER.debug "routersRepo.exists = #{routersRepo.exists()}"
@@ -27,6 +27,30 @@ processRepository = (router, repo, prefix) ->
     for r in repo.getRepositories()
         processRepository router, r, prefix + r.getName() + '/'
     true
+###
+
+processRoot = (router, repo, prefix) ->
+    routers = repo.getResources false
+    for r in routers
+        name = r.baseName
+        matches = name.match /^router\-?(\w+)?$/
+        if matches
+            p = if matches[1] then prefix + '/' + matches[1] else prefix
+            module = r.moduleName
+            try
+                router.mount p, module
+                LOGGER.debug "found router:#{r}, mount it to #{p}"
+            catch e
+                LOGGER.error "Cannot mount module #{r.getModuleName()}.", e
+
+processRepository = (router, repo, prefix) ->
+    for r in repo.getRepositories()
+        name = r.name
+        idx = name.indexOf '.feature'
+        if idx is name.length - 8
+            processRoot router, r, prefix + name.substring(0, idx)
+        else
+            processRepository router, r, prefix + r.getName() + '/'
 
 exports.create = (module, mountDefaultRouters = true) ->
     registerHandler "tx", require('coala/marker/tx').handler

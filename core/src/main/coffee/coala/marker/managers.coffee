@@ -19,8 +19,8 @@ exports.handler = (context, attributes, fn, args) ->
     for clazz in attributes
         if type(clazz) is 'string'
             names = clazz.split coala.servicePathSeperator
-            throw new Error("illegal manager path: #{m}, module:managerName") if names.length isnt 2
-            name = paths.join names[0], coala.managerFolderName, names[1]
+            name = names[0].replace(/(^\/)|(\/$)/g, '') + '.feature/manager'
+            name += "-#{names[1]}" if names.length > 1
             manager = require(name).createManager()
             managers.push manager
         else if type(clazz) is 'class'
