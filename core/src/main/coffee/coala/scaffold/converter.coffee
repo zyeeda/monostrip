@@ -19,16 +19,6 @@ innerConverters =
         parseDate.apply null, [coala.dateFormat, Date, value]
     'java.util.Calendar': (value, fieldMeta) ->
         parseDate.apply null, [coala.dateFormat, Calendar, value]
-    'java.lang.Integer': (value, fieldMeta) ->
-        new java.lang.Integer(value)
-    'java.lang.Long': (value, fieldMeta) ->
-        new java.lang.Long(value)
-    'java.lang.Float': (value, fieldMeta) ->
-        new java.lang.Float(value)
-    'java.lang.Double': (value, fieldMeta) ->
-        new java.lang.Double(value)
-    'java.lang.Boolean': (value, fieldMeta) ->
-        new java.lang.Boolean(value)
 
 
 handleArray = (service, fieldType, targetType, value) ->

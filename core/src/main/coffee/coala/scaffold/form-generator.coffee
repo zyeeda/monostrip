@@ -24,7 +24,7 @@ exports.generateForms = (meta, labels = {}, forms, groups, formName, options) ->
 generateForm = (form, meta, labels, fieldGroups, formName, options) ->
     groups = []
     for value in form.groups or []
-        g = if type(value) is 'string' then name: value else value
+        g = if type(value) is 'string' then name: value else objects.extend {}, value
         g.readOnly = true if formName is 'show'
         groups.push g
 

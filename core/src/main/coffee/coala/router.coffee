@@ -305,7 +305,7 @@ defaultHandlers = (path, options) ->
             r = (entity.id for entity in entities)
             json r
 
-    return o if options.disableAuthc is true
+    return o if options.disableAuthc is true or coala.disableAuthc is true
 
     map = list: 'show', get: 'show', create: 'add', update: 'edit', remove: 'del', batchRemove: 'del'
     p = path.replace(/^\//, '').replace(/\/$/, '')

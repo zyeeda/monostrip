@@ -35,9 +35,9 @@ mountExtraRoutes = (router, meta, options) ->
         picker = options['picker']
         if not picker and options.labels
             colModel = []
-            colModel.push {name: name, index: name, label: value} for name, value of options.labels
+            colModel.push {name: name, header: value} for name, value of options.labels
             picker = grid:
-                colModel: colModel
+                columns: colModel
         json picker
     )
     router.get('configuration/:name', (request, name) ->
