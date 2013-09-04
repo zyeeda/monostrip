@@ -27,7 +27,7 @@ limitations under the License.
     <parent>
         <groupId>com.zyeeda</groupId>
         <artifactId>zyeeda-project</artifactId>
-        <version>2-SNAPSHOT</version>
+        <version>2</version>
     </parent>
 
     <artifactId>zyeeda-coala</artifactId>
