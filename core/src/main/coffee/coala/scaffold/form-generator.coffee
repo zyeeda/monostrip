@@ -53,7 +53,7 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
 
     validateGroup = if formName is 'add' then Create else Update
 
-    result.validation = buildValidateRules allFields, meta.entityClass, validateGroup
+    result.validation = buildValidateRules allFields, meta.entityClass, validateGroup if formName isnt 'filter'
 
     result.entityLabel = options.entityLabel if options.entityLabel
 

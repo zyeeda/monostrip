@@ -47,6 +47,7 @@ mountExtraRoutes = (router, meta, options) ->
         feature = options.feature or {}
         feature.style = options.style or 'grid'
         feature.enableFrontendExtension = !!options.enableFrontendExtension
+        feature.haveFilter = !!options.haveFilter
 
         json feature
     )
