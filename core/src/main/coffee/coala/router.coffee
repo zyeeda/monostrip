@@ -123,10 +123,15 @@ attachDomain = (router, path, clazz, options = {}) ->
     service = getService options, entityMeta
     handlers = objects.extend {}, defaultHandlers(path, options), options.handlers or {}
 
+    defaultPickerRouter = ->
+        router.get paths.join(path, '/picker'), handlers.list.bind handlers, options, service, entityMeta unless excludes.list
+
     if type(options.doWithRouter) is 'function'
         r = createMockRouter()
         options.doWithRouter r
-        mountMockRouter router, path, r
+        defaultPickerRouter() unless mountMockRouter router, path, r
+    else
+        defaultPickerRouter()
 
     router.get listUrl, handlers.list.bind handlers, options, service, entityMeta unless excludes.list
     router.get getUrl, handlers.get.bind handlers, options, service, entityMeta unless excludes.get
@@ -154,6 +159,8 @@ mountMockRouter = (target, path, router) ->
     for name in ['get', 'post', 'put', 'del']
         do (name) ->
             target[name].call target, paths.join(path, url), fn for url, fn of router[name + 's']
+
+    !!router.gets['/picker']
 
 createEntity = (clazz) ->
     c = clazz.getConstructor()
@@ -305,7 +312,7 @@ defaultHandlers = (path, options) ->
             r = (entity.id for entity in entities)
             json r
 
-    return o if options.disableAuthc is true or coala.disableAuthc is true
+    return o if options.disableAuthz is true or coala.disableAuthz is true
 
     map = list: 'show', get: 'show', create: 'add', update: 'edit', remove: 'del', batchRemove: 'del'
     p = path.replace(/^\//, '').replace(/\/$/, '')
