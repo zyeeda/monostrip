@@ -5,6 +5,7 @@
 {coala} = require 'coala/config'
 {json} = require 'coala/response'
 {generateForms} = require 'coala/scaffold/form-generator'
+objects = require 'coala/util/objects'
 
 log = require('ringo/logging').getLogger module.id
 entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
@@ -18,7 +19,8 @@ mountExtraRoutes = (router, meta, options) ->
         json generateForms(meta, options.labels, options.forms, options.fieldGroups, formName, options)
     )
     router.get('configuration/operators', (request) ->
-        operators = options['operators'] or coala.defaultOperators
+        operators = objects.extend {}, coala.defaultOperators, options['operators']
+        delete operators[key] for key, value of operators when not value
         json operators
     )
     router.get('configuration/grid', (request) ->
