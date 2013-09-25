@@ -3,9 +3,9 @@
 {EntityManagerFactoryUtils} = org.springframework.orm.jpa
 {Configuration} = org.hibernate.cfg
 {Class, Boolean, String, Integer, Double} = java.lang
-{ArrayList, Date} = java.util
+{ArrayList, Date, Collection} = java.util
 {Example, Order, Projections, MatchMode, Restrictions} = org.hibernate.criterion
-{ReflectionUtils} = org.springframework.util
+{ReflectionUtils, ClassUtils} = org.springframework.util
 {FieldMeta} = com.zyeeda.coala.web.scaffold
 
 {coala} = require 'coala/config'
@@ -102,7 +102,7 @@ exports.createManager = (entityClass, name) ->
     getAll: (option = {}) ->
         builder = em.getCriteriaBuilder()
         query = builder.createQuery entityClass
-        root = query.from entityClass;
+        root = query.from entityClass
 
         if option.orderBy
             orders = for order in option.orderBy
@@ -235,30 +235,41 @@ firstIfOnlyOne = (array) ->
 generateSql = (entityClass, isCount, filters, orders) ->
     converter = createConverter()
     ctx =
-        id: 0, prefix: 't', params: {}
+        id: 0, prefix: 't', params: {}, joins: {}
         check: (name) ->
             c = entityClass
             for n in name.split '.'
                 c = ReflectionUtils.findField c, n
                 throw new Error "field: #{name} is not defined in class #{entityClass}" if not c
-                c = c.type
+                if ClassUtils.isAssignable Collection, c.type
+                    ctx.join n
+                    c = c.getGenericType().getActualTypeArguments()[0]
+                else
+                    c = c.type
             c
         convert: (name, value) ->
             type = @check name
             converter.convert value, new FieldMeta('', type, false, null)
+        join: (name) ->
+            @joins[name] = name
+            return name
+        wrap: (name) ->
+            [first, others...] = name.split '.'
+            if @joins[first] then name else "#{@prefix}.#{name}"
         flat: (name) ->
             flat = name.replace /\./g, '_'
             flat += '_' + (ctx.id++)
 
-    sql = if isCount then 'select count(t) ' else ''
+    sql = if isCount then 'select count(t) ' else 'select t '
     sql += "from #{entityClass.name} t "
     if filters.length isnt 0
         conditions = operators.process.apply operators, [ctx, 'and'].concat filters
+        sql += "left join t.#{key} #{value} " for key, value of ctx.joins
         sql += 'where ' + conditions
     os = []
     if orders and not isCount
         for order in orders
-            os.push "#{key} #{value}" for key, value of order when ctx.check key
+            os.push "#{ctx.wrap key} #{value}" for key, value of order when ctx.check key
         sql += ' order by ' + os.join(',') if os.length > 0
     sql: sql
     params: ctx.params
@@ -271,7 +282,7 @@ operators =
     two: (op, ctx, name, value, options) ->
         flat = ctx.flat name
         ctx.params[flat] = ctx.convert name, value
-        "#{ctx.prefix}.#{name} #{op} :#{flat}"
+        "#{ctx.wrap name} #{op} :#{flat}"
     eq: (args...) -> @two.apply @, ['='].concat args
     ne: (args...) -> @two.apply @, ['!='].concat args
     gt: (args...) -> @two.apply @, ['>'].concat args
@@ -284,7 +295,7 @@ operators =
         ctx.check second
         flat1 = ctx.flat first
         flat2 = ctx.flat second
-        "#{ctx.prefix}.#{first} #{op} #{ctx.prefix}.#{second}"
+        "#{ctx.wrap first} #{op} #{ctx.wrap second}"
     eqp: (args...) -> @twop.apply @, ['='].concat args
     nep: (args...) -> @twop.apply @, ['!='].concat args
     gtp: (args...) -> @twop.apply @, ['>'].concat args
@@ -301,29 +312,29 @@ operators =
         type = ctx.check name
         flat = ctx.flat name
         ctx.params[flat] = v
-        "lower(#{ctx.prefix}.#{name}) like :#{flat}"
+        "lower(#{ctx.wrap name}) like :#{flat}"
     between: (ctx, name, start, end) ->
         flat = ctx.flat name
         if start and end
             ctx.params[flat + '_start'] = ctx.convert name, start
             ctx.params[flat + '_end'] = ctx.convert name, end
-            "#{ctx.prefix}.#{name} between :#{flat}_start and :#{flat}_end"
+            "#{ctx.wrap name} between :#{flat}_start and :#{flat}_end"
         else if start and not end
             ctx.params[flat + '_start'] = ctx.convert name, start
-            "#{ctx.prefix}.#{name} >= :#{flat}_start"
+            "#{ctx.wrap name} >= :#{flat}_start"
         else if not start and end
             ctx.params[flat + '_end'] = ctx.convert name, end
-            "#{ctx.prefix}.#{name} <= :#{flat}_end"
+            "#{ctx.wrap name} <= :#{flat}_end"
         else
             '1=1'
     null: (ctx, name, options) ->
         ctx.check name
         flat = ctx.flat name
-        "#{ctx.prefix}.#{name} is null"
+        "#{ctx.wrap name} is null"
     notnull: (ctx, name, options) ->
         ctx.check name
         flat = ctx.flat name
-        "#{ctx.prefix}.#{name} is not null"
+        "#{ctx.wrap name} is not null"
 
     and: (ctx, args...) ->
         terms = (@process.apply @, [ctx].concat item for item in args)
