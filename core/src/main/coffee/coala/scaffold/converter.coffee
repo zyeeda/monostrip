@@ -36,7 +36,9 @@ handleArray = (service, fieldType, targetType, value) ->
     list = if ClassUtils.isAssignable fieldType, ArrayList then new ArrayList() else new HashSet()
 
     manager = service.createManager targetType
-    list.add manager.find id for id in value
+    for id in value
+        entity = manager.find id
+        list.add entity if entity
 
     list
 
