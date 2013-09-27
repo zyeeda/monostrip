@@ -1,21 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- $Id$ -->
+<!-- $Id: pom.xml,v 11f877759a9a 2013/01/11 07:53:12 tangrui $ -->
 
 <!--
-Copyright 2012 Zyeeda Co. Ltd.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+$License$
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -32,6 +20,7 @@ limitations under the License.
 
     <artifactId>zyeeda-coala-test</artifactId>
     <name>Zyeeda Coala Test</name>
+    <description>Zyeeda Coala Framework unit test libraries.</description>
     <packaging>jar</packaging>
 
     <properties>
@@ -40,7 +29,6 @@ limitations under the License.
     </properties>
 
     <dependencies>
-
         <!-- slf4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -62,7 +50,8 @@ limitations under the License.
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-
+ 
+        <!-- testng -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -91,12 +80,14 @@ limitations under the License.
             <artifactId>spring-web</artifactId>
         </dependency>
 
+        <!-- h2 database -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>${h2.version}</version>
         </dependency>
 
+        <!-- btm -->
         <dependency>
             <groupId>org.codehaus.btm</groupId>
             <artifactId>btm</artifactId>
@@ -108,7 +99,6 @@ limitations under the License.
             <groupId>org.ringojs</groupId>
             <artifactId>ringojs</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>
