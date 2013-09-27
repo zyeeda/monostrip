@@ -18,10 +18,10 @@ $License$
         <version>2</version>
     </parent>
 
-    <artifactId>zyeeda-coala</artifactId>
+    <artifactId>zyeeda-coala-framework</artifactId>
     <version>2.0.0-SNAPSHOT</version>
-    <name>Zyeeda Coala Framework</name>
-    <url>http://www.zyeeda.com/products/zyeeda-coala</url>
+    <name>Zyeeda Coala Framework (ZCF)</name>
+    <url>http://www.zyeeda.com/products/zyeeda-coala-framework</url>
     <packaging>pom</packaging>
 
     <repositories>
@@ -59,7 +59,7 @@ $License$
 
     <dependencyManagement>
         <dependencies>
-
+            <!-- servlet api -->
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
