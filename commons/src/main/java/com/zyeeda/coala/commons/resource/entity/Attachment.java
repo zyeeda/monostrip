@@ -8,16 +8,14 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.zyeeda.coala.commons.annotation.scaffold.Scaffold;
 import com.zyeeda.coala.commons.base.entity.DomainEntity;
 
 /**
  * @author guyong
- * 
+ *
  */
 @Entity
 @Table(name = "ZDA_ATTACHMENT")
-@Scaffold("/system/attachments")
 public class Attachment extends DomainEntity {
 
     private static final long serialVersionUID = -2215059798590231842L;
