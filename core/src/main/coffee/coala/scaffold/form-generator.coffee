@@ -2,6 +2,7 @@
 objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
 {buildValidateRules} = require 'coala/validation/validator'
+scaffoldRouter = require 'coala/scaffold/router'
 
 {Create, Update} = com.zyeeda.coala.validator.group
 {TreeNode} = com.zyeeda.coala.commons.base.data
@@ -77,6 +78,18 @@ defineFieldType = (field, fieldMeta, entityMeta) ->
         if (fieldMeta.isManyToManyTarget() or fieldMeta.isOneToMany())
             field.source = fieldMeta.getPath()
             return
+
+    if field.type is 'inline-grid'
+        field.source = fieldMeta.getPath()
+        field.oneToMany = fieldMeta.oneToMany
+        field.manyToManyOwner = fieldMeta.manyToManyOwner
+        field.manyToManyTarget = fieldMeta.manyToManyTarget
+        field.mappedBy = fieldMeta.mappedBy
+        options = scaffoldRouter.requireScaffoldConfig field.source
+        grid = options['inline-grid'] or options['grid']
+        field.grid = scaffoldRouter.wrapGrid grid, options
+        field.allowPick = field.allowPick isnt false
+        return
 
     return if field.type
     return field.type = 'text' if not fieldMeta

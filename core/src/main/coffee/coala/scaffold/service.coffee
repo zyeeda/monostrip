@@ -8,6 +8,8 @@ createProcessService = require('coala/scaffold/process-service').createService
 {Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 {ProcessStatusAware} = com.zyeeda.coala.entities.base
 {Authentication} = org.activiti.engine.impl.identity
+{ArrayList, HashSet} = java.util
+{ClassUtils} = org.springframework.util
 entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
 exports.createService = (entityClass, entityMeta, scaffold) ->
@@ -25,8 +27,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 values = entity[fieldMeta.name]
                 if values != null and values.isEmpty and not values.isEmpty()
                     for value in values.toArray()
+                        value = fieldManager.merge value
                         value[fieldMeta.mappedBy] = entity
-                        fieldManager.merge value
             else if fieldMeta.isManyToManyTarget()
                 fieldManager = baseService.createManager fieldMeta.manyToManyOwnerType
 
@@ -37,8 +39,19 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 values = entity[fieldMeta.name]
                 if values != null and values.isEmpty and not values.isEmpty()
                     for value in values.toArray()
-                        value[fieldMeta.mappedBy].add entity
-                        fieldManager.merge value
+                        value = fieldManager.merge value
+                        list = value[fieldMeta.mappedBy]
+                        if not list
+                            value[fieldMeta.mappedBy] = list = if ClassUtils.isAssignable fieldMeta.type, ArrayList then new ArrayList() else new HashSet()
+                        list.add entity
+            else if fieldMeta.isManyToManyOwner()
+                fieldManager = baseService.createManager fieldMeta.manyToManyOwnerType
+                values = entity[fieldMeta.name]
+                if values != null and values.isEmpty and not values.isEmpty()
+                    vs = (fieldManager.merge value for value in values.toArray())
+                    values.clear()
+                    values.add v for v in vs
+        true
 
     startProcess = mark('beans', 'runtimeService').on (runtimeService, entity, manager) ->
         currentUser = 'tom'
@@ -79,7 +92,15 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
 
         create: mark('tx').on (entity) ->
             manager = baseService.createManager service.entityClass
+            backup = {}
+            for fm in entityMeta.getFields()
+                if fm.isManyToManyTarget() or fm.isOneToMany() or fm.isManyToManyOwner()
+                    backup[fm.name] = entity[fm.name]
+                    entity[fm.name] = null
+
             entity = manager.save entity
+
+            entity[key] = value for key, value of backup
             manySideUpdate entity
 
             if scaffold.boundProcessId
@@ -92,11 +113,10 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
 
             pre = {}
             for fieldMeta in entityMeta.getFields()
-                if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget()
+                if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget() or fieldMeta.isManyToManyOwner()
                     pre[fieldMeta.name] = entity[fieldMeta.name].toArray()
 
             return null if fn(entity, service) is false
-            manager.merge entity
             manySideUpdate entity, pre
             entity
 
