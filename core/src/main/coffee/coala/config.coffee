@@ -77,6 +77,10 @@ exports.coala = _.extend defaultConfigure, projectLevelConfigure.coala
 
 log.debug "environment variable #{name}:#{value}" for name, value of exports.coala
 
+exports.getOptionInProperties = (key) ->
+    ctx = Context.getInstance(module)
+    context = ctx.getSpringContext().getBeanFactory()
+    context.resolveEmbeddedValue('${' + key + '}')
 
 # frontend settings
 

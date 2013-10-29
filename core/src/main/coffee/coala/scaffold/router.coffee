@@ -14,6 +14,15 @@ router = exports.router = createRouter()
 
 metas = entityMetaResolver.resolveScaffoldEntities coala.entityPackages
 
+exports.wrapGrid = wrapGrid = (grid, options) ->
+    if not grid and options.labels
+        columns = []
+        columns.push {name: name, header: value} for name, value of options.labels
+        grid = columns: columns
+    else if grid and options.labels
+        grid.columns = setLabelToColModel grid.columns, options.labels
+    grid
+
 mountExtraRoutes = (router, meta, options) ->
     router.get('configuration/forms/:formName', (request, formName) ->
         json generateForms(meta, options.labels, options.forms, options.fieldGroups, formName, options)
@@ -29,7 +38,7 @@ mountExtraRoutes = (router, meta, options) ->
                 operators[k] = objects.extend {}, coala.defaultOperators[k], operators[k] if k of coala.defaultOperators
         json operators
     )
-
+    
     router.get('configuration/grid', (request) ->
         grid = options['grid']
         if not grid and options.labels
@@ -40,6 +49,7 @@ mountExtraRoutes = (router, meta, options) ->
             grid.columns = setLabelToColModel grid.columns, options.labels
         json grid
     )
+
 
     router.get('configuration/picker', (request) ->
         picker = options['picker']
