@@ -1,10 +1,14 @@
-/* $Id$ */
+/* $Id: Permission.java,v 42c279a9a032 2013/09/06 08:59:11 tangrui $ */
 
 package com.zyeeda.coala.commons.authc.entity;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -15,7 +19,7 @@ import com.zyeeda.coala.commons.base.entity.DomainEntity;
 /**
  * 权限.
  *
- * @author $Author$
+ * @author $Author: tangrui $
  *
  */
 @Entity
@@ -47,6 +51,11 @@ public class Permission extends DomainEntity {
      * 是否自动生成.
      */
     private Boolean scaffold = null;
+
+    /**
+     * 该权限被包含在哪些角色中.
+     */
+    private Set<Role> roles = new HashSet<Role>();
 
     @Basic
     @Column(name = "F_NAME", length = 100)
@@ -88,6 +97,15 @@ public class Permission extends DomainEntity {
 
     public void setScaffold(final Boolean scaffold) {
         this.scaffold = scaffold;
+    }
+
+    @ManyToMany(mappedBy = "permissions")
+    public Set<Role> getRoles() {
+        return this.roles;
+    }
+
+    public void setRoles(final Set<Role> roles) {
+        this.roles = roles;
     }
 
 }
