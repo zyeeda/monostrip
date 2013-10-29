@@ -1,9 +1,11 @@
-/* $Id$ */
+/* $Id: Role.java,v 42c279a9a032 2013/09/06 08:59:11 tangrui $ */
 
 package com.zyeeda.coala.commons.authc.entity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -24,7 +26,7 @@ import com.zyeeda.coala.commons.organization.entity.Department;
 /**
  * 角色.
  *
- * @author $Author$
+ * @author $Author: tangrui $
  *
  */
 @Entity
@@ -60,7 +62,7 @@ public class Role extends DomainEntity {
     /**
      * 角色包含的权限.
      */
-    private List<Permission> permissions = new ArrayList<Permission>();
+    private Set<Permission> permissions = new HashSet<Permission>();
 
     /**
      * 是否为动态角色.
@@ -116,11 +118,11 @@ public class Role extends DomainEntity {
             name = "ZDA_ROLE_PERMISSION",
             joinColumns = @JoinColumn(name = "F_ROLE_ID"),
             inverseJoinColumns = @JoinColumn(name = "F_PERMISSION_ID"))
-    public List<Permission> getPermissions() {
+    public Set<Permission> getPermissions() {
         return this.permissions;
     }
 
-    public void setPermissions(final List<Permission> permissions) {
+    public void setPermissions(final Set<Permission> permissions) {
         this.permissions = permissions;
     }
 
