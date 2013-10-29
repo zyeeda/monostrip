@@ -18,11 +18,18 @@ mountExtraRoutes = (router, meta, options) ->
     router.get('configuration/forms/:formName', (request, formName) ->
         json generateForms(meta, options.labels, options.forms, options.fieldGroups, formName, options)
     )
+
     router.get('configuration/operators', (request) ->
-        operators = objects.extend {}, coala.defaultOperators, options['operators']
-        delete operators[key] for key, value of operators when not value
+        ops = options.operators
+        operators = objects.extend {}, coala.defaultOperators, ops
+        for k, v of operators
+            if operators[k] is false
+                delete operators[k]
+            else
+                operators[k] = objects.extend {}, coala.defaultOperators[k], operators[k] if k of coala.defaultOperators
         json operators
     )
+
     router.get('configuration/grid', (request) ->
         grid = options['grid']
         if not grid and options.labels
@@ -33,6 +40,7 @@ mountExtraRoutes = (router, meta, options) ->
             grid.columns = setLabelToColModel grid.columns, options.labels
         json grid
     )
+
     router.get('configuration/picker', (request) ->
         picker = options['picker']
         if not picker and options.labels
@@ -42,9 +50,11 @@ mountExtraRoutes = (router, meta, options) ->
                 columns: colModel
         json picker
     )
+
     router.get('configuration/:name', (request, name) ->
         json options[name]
     )
+
     router.get('configuration/feature', (request) ->
         feature = options.feature or {}
         feature.style = options.style or 'grid'
@@ -53,6 +63,7 @@ mountExtraRoutes = (router, meta, options) ->
 
         json feature
     )
+
     router.get('configuration/fields', (request) ->
         if options.configs and options.configs.fields
             json options.configs.fields
