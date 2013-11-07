@@ -2,10 +2,13 @@
 
 package com.zyeeda.coala.commons.organization.entity;
 
+import java.util.Set;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -15,6 +18,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.zyeeda.coala.commons.annotation.scaffold.Scaffold;
+import com.zyeeda.coala.commons.authc.entity.Role;
 import com.zyeeda.coala.commons.base.entity.DomainEntity;
 import com.zyeeda.coala.validation.constraint.Matches;
 import com.zyeeda.coala.validation.constraint.NullableSize;
@@ -92,6 +96,11 @@ public class Account extends DomainEntity {
      * 删除标记.
      */
     private Boolean deleted;
+    
+    /**
+     * 帐号拥有的角色
+     */
+    private Set<Role> roles = null;
 
     @Basic
     @Column(name = "F_ACCOUNT_NAME", length = 30)
@@ -212,4 +221,14 @@ public class Account extends DomainEntity {
         this.deleted = deleted;
     }
 
+    @ManyToMany(mappedBy = "accounts")
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    
 }
