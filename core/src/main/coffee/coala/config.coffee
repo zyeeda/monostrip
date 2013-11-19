@@ -26,9 +26,9 @@ defaultConfigure =
         add:
             label: '添加', icon: 'icon-plus', group: 'add', style: 'btn-success', show: 'always'
         show:
-            label: '查看', icon: 'icon-eye-open', group: 'selected', style: 'btn-primary'
+            label: '查看', icon: 'icon-eye-open', group: 'selected', style: 'btn-primary', show: 'single-selected'
         edit:
-            label: '编辑', icon: 'icon-edit', group: 'selected', style: 'btn-primary'
+            label: '编辑', icon: 'icon-edit', group: 'selected', style: 'btn-primary', show: 'single-selected'
         del:
             label: '删除', icon: 'icon-minus', group: 'selected', style: 'btn-danger'
         refresh:
