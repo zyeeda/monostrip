@@ -85,10 +85,20 @@ defineFieldType = (field, fieldMeta, entityMeta) ->
         field.manyToManyOwner = fieldMeta.manyToManyOwner
         field.manyToManyTarget = fieldMeta.manyToManyTarget
         field.mappedBy = fieldMeta.mappedBy
+        t = if field.oneToMany
+            fieldMeta.manyType
+        else if field.manyToManyTarget
+            fieldMeta.manyToManyOwnerType
+        else if field.manyToManyOwner
+            fieldMeta.manyToManyTargetType
+
         options = scaffoldRouter.requireScaffoldConfig field.source
         grid = options['inline-grid'] or options['grid']
         field.grid = scaffoldRouter.wrapGrid grid, options
         field.allowPick = field.allowPick isnt false
+        if field.allowPick
+            if ClassUtils.isAssignable(TreeNode, t) then field.pickerType = 'tree-picker' else field.pickerType = 'grid-picker'
+
         return
 
     return if field.type
