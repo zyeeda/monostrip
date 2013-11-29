@@ -98,6 +98,13 @@ exports.json = (object, config) ->
 
         status: 200,
         headers: contentType 'application/json'
+        ###
+        headers:
+            'Content-Type': 'application/json; charset=utf-8'
+            'Cache-Control': 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0'
+            'Pragma': 'no-cache'
+            'Expires': 'Thu, 19 Nov 1981 08:52:00 GMT'
+        ###
 
         add: (filter, fields, type) ->
             target = if type is 'exclude' then @_excluded else @_included
@@ -121,9 +128,11 @@ exports.json = (object, config) ->
                 writer = getObjectWriter @_included, @_excluded
                 # mapper = buildObjectMapper @_included, @_excluded, result
                 @_jsonResult = writer.writeValueAsString @_object
-                log.debug "Generation finished. json result = #{@_jsonResult}"
+                log.debug 'Generation finished.'
+                log.trace "json result = #{@_jsonResult}"
             else
-                log.debug "Using cached json result. json result = #{@_jsonResult}"
+                log.debug 'Using cached json result.'
+                log.trace "json result = #{@_jsonResult}"
 
             ###
             unless @_jsonResult?
