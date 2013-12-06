@@ -75,7 +75,7 @@ exports.create = (module, mountDefaultRouters = true) ->
         processRepository router, root, '/'
 
     if mountDefaultRouters
-        router.mount '/helper', 'coala/frontend-helper' if coala.development
+        router.mount '/helper', 'coala/frontend-helper'
         router.mount '/scaffold', 'coala/scaffold/router'
         router.mount '/scaffold/tasks', 'coala/scaffold/task'
 
