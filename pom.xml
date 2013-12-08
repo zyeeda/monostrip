@@ -15,7 +15,7 @@ $License$
     <parent>
         <groupId>com.zyeeda</groupId>
         <artifactId>zyeeda-project</artifactId>
-        <version>2</version>
+        <version>3-SNAPSHOT</version>
     </parent>
 
     <artifactId>zyeeda-coala-framework</artifactId>
