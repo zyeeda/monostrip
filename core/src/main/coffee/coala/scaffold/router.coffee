@@ -23,12 +23,12 @@ exports.wrapGrid = wrapGrid = (grid, options) ->
         grid.columns = setLabelToColModel grid.columns, options.labels
     grid
 
-mountExtraRoutes = (router, meta, options) ->
-    router.get('configuration/forms/:formName', (request, formName) ->
+mountExtraRoutes = (r, meta, options) ->
+    r.get('configuration/forms/:formName', (request, formName) ->
         json generateForms(meta, options.labels, options.forms, options.fieldGroups, formName, options)
     )
 
-    router.get('configuration/operators', (request) ->
+    r.get('configuration/operators', (request) ->
         ops = options.operators
         operators = objects.extend {}, coala.defaultOperators, ops
         for k, v of operators
@@ -38,8 +38,8 @@ mountExtraRoutes = (router, meta, options) ->
                 operators[k] = objects.extend {}, coala.defaultOperators[k], operators[k] if k of coala.defaultOperators
         json operators
     )
-    
-    router.get('configuration/grid', (request) ->
+
+    r.get('configuration/grid', (request) ->
         grid = options['grid']
         if not grid and options.labels
             columns = []
@@ -51,7 +51,7 @@ mountExtraRoutes = (router, meta, options) ->
     )
 
 
-    router.get('configuration/picker', (request) ->
+    r.get('configuration/picker', (request) ->
         picker = options['picker']
         if not picker and options.labels
             colModel = []
@@ -61,11 +61,11 @@ mountExtraRoutes = (router, meta, options) ->
         json picker
     )
 
-    router.get('configuration/:name', (request, name) ->
+    r.get('configuration/:name', (request, name) ->
         json options[name]
     )
 
-    router.get('configuration/feature', (request) ->
+    r.get('configuration/feature', (request) ->
         feature = options.feature or {}
         feature.style = options.style or 'grid'
         feature.enableFrontendExtension = !!options.enableFrontendExtension
@@ -74,7 +74,7 @@ mountExtraRoutes = (router, meta, options) ->
         json feature
     )
 
-    router.get('configuration/fields', (request) ->
+    r.get('configuration/fields', (request) ->
         if options.configs and options.configs.fields
             json options.configs.fields
         else
@@ -105,14 +105,16 @@ setLabelToColModel = (colModel, labels) ->
         newModel.push f
     newModel
 
-for meta in metas
-    do (meta, mountExtraRoutes) ->
-        path = meta.path
-        options = requireScaffoldConfig path
-        log.debug "find scaffolding entity:#{meta.entityClass} bind to #{meta.path}, with options:#{JSON.stringify options}"
-        doWithRouter = options.doWithRouter or ->
-        options.doWithRouter = (router) ->
-            doWithRouter router
-            mountExtraRoutes router, meta, options
+mountPath = (path, meta) ->
+    options = requireScaffoldConfig path
+    log.debug "find scaffolding entity:#{meta.entityClass} bind to #{meta.path}, with options:#{JSON.stringify options}"
+    doWithRouter = options.doWithRouter or ->
+    options.doWithRouter = (r) ->
+        doWithRouter r
+        mountExtraRoutes r, meta, options, path
 
-        router.attachDomain meta.path, meta.entityClass, options
+    router.attachDomain path, meta, options
+
+for meta in metas
+    mountPath meta.path, meta
+    mountPath path, meta for path in meta.otherPaths

@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 public @interface Scaffold {
 
-    String value();
+    String[] value();
     
 }

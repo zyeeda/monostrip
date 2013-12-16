@@ -12,6 +12,7 @@ import com.zyeeda.coala.commons.annotation.scaffold.Filters;
 public class EntityMeta {
 
     private String path = null;
+    private String[] otherPaths = null;
     private String[] excludedActions = null;
     private Map<String, Filters> jsonFilters = null;
     
@@ -29,14 +30,34 @@ public class EntityMeta {
     }
 
     public void setPath(String path) {
+        this.path = parsePath(path);
+    }
+
+    private String parsePath(String path) {
         if( path == null ) {
-            this.path = null;
-            return;
+            return null;
         }
         
         String newPath = path.endsWith("/") ? path.substring(0, path.length()-1) : path;
         newPath = newPath.startsWith("/") ? newPath : "/" + newPath;
-        this.path = newPath;
+        return newPath;
+    }
+    
+    public String[] getOtherPaths() {
+        return otherPaths;
+    }
+
+    public void setOtherPaths(String[] otherPaths) {
+        if (otherPaths == null) {
+            this.otherPaths = null;
+            return;
+        }
+        
+        String[] ps = new String[otherPaths.length];
+        for (int i = 0; i < otherPaths.length; i ++) {
+            ps[i] = parsePath(otherPaths[i]);
+        }
+        this.otherPaths = ps;
     }
 
     public String[] getExcludedActions() {

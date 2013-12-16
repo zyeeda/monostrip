@@ -75,12 +75,12 @@ generateField = (config, meta, labels, groupName, group) ->
 defineFieldType = (field, fieldMeta, entityMeta) ->
     if field.type is 'multi-picker' or field.type is 'multi-tree-picker'
         field.type = 'multi-tree-picker' if ClassUtils.isAssignable(TreeNode, fieldMeta.getType())
-        if (fieldMeta.isManyToManyTarget() or fieldMeta.isOneToMany())
+        if not field.source and (fieldMeta.isManyToManyTarget() or fieldMeta.isOneToMany())
             field.source = fieldMeta.getPath()
             return
 
     if field.type is 'inline-grid'
-        field.source = fieldMeta.getPath()
+        field.source = field.source or fieldMeta.getPath()
         field.oneToMany = fieldMeta.oneToMany
         field.manyToManyOwner = fieldMeta.manyToManyOwner
         field.manyToManyTarget = fieldMeta.manyToManyTarget
@@ -113,7 +113,7 @@ defineFieldType = (field, fieldMeta, entityMeta) ->
         return
     if fieldMeta.isEntity()
         field.type = if ClassUtils.isAssignable(TreeNode, fieldMeta.getType()) then 'tree-picker' else 'grid-picker'
-        field.source = fieldMeta.getPath()
+        field.source = field.source or fieldMeta.getPath()
         return
 
     field.type = 'text'

@@ -134,7 +134,7 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
         if (isEntity) {
             Scaffold scaffold = type.getAnnotation(Scaffold.class);
             if (scaffold != null) {
-                path = scaffold.value();
+                path = scaffold.value()[0];
             }
         }
 
@@ -142,7 +142,7 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
             Class<?> parameterizedType = getParameterizedType(field);
             Scaffold scaffold = parameterizedType.getAnnotation(Scaffold.class);
             if (scaffold != null) {
-                path = scaffold.value();
+                path = scaffold.value()[0];
             }
             if (isManyToManyOwner(field)) {
                 return new FieldMeta(name, type, isEntity, path, true, parameterizedType);
@@ -167,7 +167,11 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
             for( EntityMeta meta : metas ) {
                 Scaffold scaffold = meta.getEntityClass().getAnnotation(Scaffold.class);
                 if( scaffold != null ) {
-                    meta.setPath(scaffold.value());
+                    String[] paths = scaffold.value();
+                    String[] others = new String[paths.length];
+                    System.arraycopy(paths, 1, others, 0, others.length);
+                    meta.setPath(paths[0]);
+                    meta.setOtherPaths(others);
                     /*
                     if ("grid".equals(scaffold.type()) && TreeNode.class.isAssignableFrom(meta.getEntityClass())) {
                         meta.setType("tree");

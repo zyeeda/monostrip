@@ -20,44 +20,6 @@ paths = require 'coala/util/paths'
 log = getLogger module.id
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
-###
-processRoot = (router, repo, prefix) ->
-    routersRepo = repo.getChildRepository coala.routerFoldername
-    log.debug "routersRepo.exists = #{routersRepo.exists()}"
-    return if not routersRepo.exists()
-    routers = routersRepo.getResources false
-    for r in routers
-        try
-            module = r.getModuleName()
-            url = prefix + r.getBaseName()
-            log.debug "mount #{module} to #{url}"
-            router.mount url, module
-        catch e
-            log.error "Cannot mount #{r.getModuleName()}."
-    true
-
-processRepository = (router, repo, prefix) ->
-    processRoot router, repo, prefix
-    for r in repo.getRepositories()
-        processRepository router, r, prefix + r.getName() + '/'
-    true
-
-exports.createApplication = (module, mountDefaultRouters = true) ->
-    router = new Application()
-    router.configure 'mount'
-
-    if module
-        root = module.getRepository('./')
-        processRepository router, root, '/'
-
-    if mountDefaultRouters
-        router.mount '/helper', 'coala/frontend-development-helper-router' if coala.development
-        router.mount '/scaffold', 'coala/scaffold/router'
-        router.mount '/scaffold/tmasks', 'coala/scaffold/task'
-
-    router
-###
-
 exports.createRouter = ->
     router = new Application()
     router.configure 'params', 'route'
@@ -108,11 +70,7 @@ resolveEntity = (entity, params, converters) ->
 
 ID_SUFFIX = '/:id'
 
-attachDomain = (router, path, clazz, options = {}) ->
-    entityMeta = entityMetaResovler.resolveEntity clazz
-    entityMeta.path = path if entityMeta.path is null
-    path = entityMeta.path
-
+attachDomain = (router, path, entityMeta, options = {}) ->
     listUrl = createUrl = path
     removeUrl = updateUrl = getUrl = path + ID_SUFFIX
     batchRemoveUrl = path + '/delete'
@@ -211,22 +169,7 @@ defaultHandlers = (path, options) ->
             orderInfo = coala.extractOrderInfo request.params
             if orderInfo?.length isnt 0
                 config.orderBy = orderInfo
-            ###
-            configs = coala.extractPaginationInfo request.params
-            orders = coala.extractOrderInfo request.params
-            if configs?
-                configs.fetchCount = true
-                pageSize = configs.maxResults
-                count = service.list entity, configs
-                result.recordCount = count
-                result.pageCount = Math.ceil count/pageSize
-                delete configs.fetchCount
 
-            if orders?.length isnt 0
-                configs = configs or {}
-                configs.orderBy = orders
-
-            ###
             result.results = service.list entity, config
 
             o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
