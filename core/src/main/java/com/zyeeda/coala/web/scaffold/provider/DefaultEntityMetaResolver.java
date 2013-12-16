@@ -168,7 +168,7 @@ public class DefaultEntityMetaResolver implements EntityMetaResolver {
                 Scaffold scaffold = meta.getEntityClass().getAnnotation(Scaffold.class);
                 if( scaffold != null ) {
                     String[] paths = scaffold.value();
-                    String[] others = new String[paths.length];
+                    String[] others = new String[paths.length - 1];
                     System.arraycopy(paths, 1, others, 0, others.length);
                     meta.setPath(paths[0]);
                     meta.setOtherPaths(others);
