@@ -107,7 +107,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 startProcess entity, manager
             entity
 
-        update: mark('tx').on (id, fn) ->
+        update: mark('tx', { needStatus: true }).on (txStatus, id, fn) ->
             manager = baseService.createManager service.entityClass
             entity = manager.find id
 
@@ -116,15 +116,11 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget() or fieldMeta.isManyToManyOwner()
                     pre[fieldMeta.name] = entity[fieldMeta.name].toArray()
 
-            return null if fn(entity, service) is false
+            if fn(entity, service) is false
+                txStatus.setRollbackOnly()
+                null
             manySideUpdate entity, pre
             entity
-
-        ###
-        remove: mark('tx').on (id...) ->
-            manager = baseService.createManager service.entityClass
-            manager.removeById.apply manager, id
-        ###
 
         remove: mark('tx').on (entities...) ->
             manager = baseService.createManager service.entityClass
