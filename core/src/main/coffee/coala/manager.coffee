@@ -7,6 +7,7 @@
 {Example, Order, Projections, MatchMode, Restrictions} = org.hibernate.criterion
 {ReflectionUtils, ClassUtils} = org.springframework.util
 {FieldMeta} = com.zyeeda.coala.web.scaffold
+{Search} = org.hibernate.search.jpa
 
 {coala} = require 'coala/config'
 {type} = require 'coala/util/type'
@@ -140,6 +141,32 @@ exports.createManager = (entityClass, name) ->
             fillPageInfo query, pageInfo
         query.setParameter key, value for key, value of params
         if option.fetchCount then query.getSingleResult() else query.getResultList()
+
+    getFullTextEntityManager: ->
+        Search.getFullTextEntityManager em
+
+    rebuildIndexes: ->
+        @getFullTextEntityManager().createIndexer().startAndWait()
+
+    fullTextSearch: (fields, keyword, options) ->
+        clazz = entityClass
+        fem = @getFullTextEntityManager()
+        {firstResult, maxResults} = options
+        paged = firstResult >= 0 and maxResults > 0
+
+        qb = fem.getSearchFactory().buildQueryBuilder().forEntity(clazz).get()
+        q = qb.keyword().onFields fields...
+        query = q.matching(keyword).createQuery()
+        jpaQuery = fem.createFullTextQuery(query, clazz)
+
+        if paged
+            jpaQuery.setFirstResult firstResult
+            jpaQuery.setMaxResults maxResults
+
+            resultCount: jpaQuery.getResultSize()
+            results: jpaQuery.getResultList()
+        else
+            jpaQuery.getResultList()
 
     __noSuchMethod__: (name, args) ->
         params = args[0] or {}
