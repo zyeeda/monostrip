@@ -96,9 +96,9 @@ public class Account extends DomainEntity {
      * 删除标记.
      */
     private Boolean deleted;
-    
+
     /**
-     * 帐号拥有的角色
+     * 帐号拥有的角色.
      */
     private Set<Role> roles = null;
 
@@ -223,12 +223,11 @@ public class Account extends DomainEntity {
 
     @ManyToMany(mappedBy = "accounts")
     public Set<Role> getRoles() {
-        return roles;
+        return this.roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(final Set<Role> roles) {
         this.roles = roles;
     }
 
-    
 }

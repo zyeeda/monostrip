@@ -111,7 +111,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 startProcess entity, manager
             entity
 
-        update: mark('tx').on (id, fn) ->
+        update: mark('tx', { needStatus: true }).on (txStatus, id, fn) ->
             manager = baseService.createManager service.entityClass
             entity = manager.find id
 
@@ -123,7 +123,9 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 if entity[fieldMeta.name] and entity[fieldMeta.name] instanceof Attachment
                     attachments[fieldMeta.name] = entity[fieldMeta.name].id
 
-            return null if fn(entity, service) is false
+            if fn(entity, service) is false
+                txStatus.setRollbackOnly()
+                null
             for key, value of attachments
                 if value
                     if not entity[key]
@@ -133,15 +135,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                         upload.remove value
                     else
                         upload.commitAttachment entity[key].id
-
             manySideUpdate entity, pre
             entity
-
-        ###
-        remove: mark('tx').on (id...) ->
-            manager = baseService.createManager service.entityClass
-            manager.removeById.apply manager, id
-        ###
 
         remove: mark('tx').on (entities...) ->
             manager = baseService.createManager service.entityClass

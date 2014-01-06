@@ -1,4 +1,5 @@
 {tx} = require 'coala/tx'
+_ = require 'underscore'
 
 exports.handler = (context, attributes, fn, args) ->
     options = attributes[0] or {}
@@ -6,4 +7,4 @@ exports.handler = (context, attributes, fn, args) ->
     options.callback = (status) ->
         args.unshift status if needStatus is true
         fn.apply null, args
-    tx options
+    tx _.extend({}, options)
