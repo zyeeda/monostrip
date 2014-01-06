@@ -1,6 +1,7 @@
 {mark} = require 'coala/mark'
 {createService} = require 'coala/service'
 {type} = require 'coala/util/type'
+upload = require 'coala/util/upload'
 fs = require 'fs'
 {coala} = require 'coala/config'
 createProcessService = require('coala/scaffold/process-service').createService
@@ -10,6 +11,7 @@ createProcessService = require('coala/scaffold/process-service').createService
 {Authentication} = org.activiti.engine.impl.identity
 {ArrayList, HashSet} = java.util
 {ClassUtils} = org.springframework.util
+{Attachment} = com.zyeeda.coala.commons.resource.entity
 entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
 exports.createService = (entityClass, entityMeta, scaffold) ->
@@ -97,6 +99,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 if fm.isManyToManyTarget() or fm.isOneToMany() or fm.isManyToManyOwner()
                     backup[fm.name] = entity[fm.name]
                     entity[fm.name] = null
+                if entity[fm.name] and entity[fm.name] instanceof Attachment
+                    upload.commitAttachment entity[fm.name].id
 
             entity = manager.save entity
 
@@ -112,11 +116,24 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             entity = manager.find id
 
             pre = {}
+            attachments = {}
             for fieldMeta in entityMeta.getFields()
                 if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget() or fieldMeta.isManyToManyOwner()
                     pre[fieldMeta.name] = entity[fieldMeta.name].toArray()
+                if entity[fieldMeta.name] and entity[fieldMeta.name] instanceof Attachment
+                    attachments[fieldMeta.name] = entity[fieldMeta.name].id
 
             return null if fn(entity, service) is false
+            for key, value of attachments
+                if value
+                    if not entity[key]
+                        upload.remove value
+                    else if value isnt entity[key].id
+                        upload.commitAttachment entity[key].id
+                        upload.remove value
+                    else
+                        upload.commitAttachment entity[key].id
+
             manySideUpdate entity, pre
             entity
 

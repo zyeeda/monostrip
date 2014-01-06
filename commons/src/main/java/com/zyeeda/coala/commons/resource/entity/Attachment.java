@@ -4,11 +4,13 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.zyeeda.coala.commons.base.entity.DomainEntity;
+import com.zyeeda.coala.commons.hibernate.listeners.DeleteAttachmentFileEventListener;
 
 /**
  * @author guyong
@@ -16,6 +18,7 @@ import com.zyeeda.coala.commons.base.entity.DomainEntity;
  */
 @Entity
 @Table(name = "ZDA_ATTACHMENT")
+@EntityListeners(DeleteAttachmentFileEventListener.class)
 public class Attachment extends DomainEntity {
 
     private static final long serialVersionUID = -2215059798590231842L;

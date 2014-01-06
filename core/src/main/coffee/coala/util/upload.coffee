@@ -12,7 +12,13 @@ response = require 'ringo/jsgi/response'
 
 CONFIG_KEY = 'coala.upload.path'
 
-exports.createRequestHandler = (path, callbacks...) ->
+exports.mountTo = (router, prefix, args...) ->
+    url = if prefix then join('/', prefix) else '/'
+    router.post url, createRequestHandler.apply null, args
+    router.del join(url, '/:id'), createDeleteHandler()
+    router.get join(url, '/:id'), createViewer()
+
+createRequestHandler = exports.createRequestHandler = (path, callbacks...) ->
 
     if type(path) isnt 'string'
         callbacks.unshift path
@@ -53,7 +59,7 @@ exports.createRequestHandler = (path, callbacks...) ->
             result = callbacks[1]?(attachment, file, params, request)
             return result if result?.body
 
-            json id: attachment.id
+            json id: attachment.id, name: attachment.filename
 
         else if params.files.length > 1
             result = callbacks[0]?(params.file, params, request)
@@ -63,7 +69,7 @@ exports.createRequestHandler = (path, callbacks...) ->
             result = callbacks[1]?(attachment, params.files, params, request)
             return result if result?.body
 
-            json (id: a.id for a in attachments)
+            json (id: a.id, name: a.filename for a in attachments)
 
 exports.commitAttachment = mark('managers', Attachment).mark('tx').on (am, ids...) ->
     for id in ids
@@ -71,7 +77,12 @@ exports.commitAttachment = mark('managers', Attachment).mark('tx').on (am, ids..
         attachment.draft = false
 
 
-exports.createViewer =  ->
+createDeleteHandler = exports.createDeleteHandler = ->
+
+    (req, id) ->
+        json id: removeHandler(id)
+
+createViewer = exports.createViewer =  ->
 
     mark('managers', Attachment).on (am, request, id) ->
         attachment = am.find id
@@ -79,3 +90,26 @@ exports.createViewer =  ->
 
         path = join getOptionInProperties(CONFIG_KEY), attachment.path
         response.static path, attachment.contentType
+
+exports.copy = mark('managers', Attachment).mark('tx').on (am, id) ->
+    attachment = am.find id
+    path = attachment.path
+    prefix = path.substring(0, path.lastIndexOf '/')
+    newPath = join prefix, UUID.randomUUID().toString()
+    prefix = getOptionInProperties CONFIG_KEY
+    fs.copy join(prefix, attachment.path), join(prefix, newPath)
+
+    atta = new Attachment()
+    atta.filename = attachment.filename
+    atta.path = newPath
+    atta.contentType = attachment.contentType
+    atta.draft = false
+
+    am.save atta
+    atta
+
+removeHandler = exports.remove = mark('managers', Attachment).mark('tx').on (am, id) ->
+    attachment = am.find id
+    fs.remove join(getOptionInProperties(CONFIG_KEY), attachment.path)
+    am.remove attachment
+    id

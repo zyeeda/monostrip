@@ -1,6 +1,5 @@
 package com.zyeeda.coala.web;
 
-import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -17,14 +16,14 @@ import com.zyeeda.coala.commons.resource.entity.Attachment;
 
 /**
  * @author guyong
- * 
+ *
  */
 public class AttachmentCleaner {
 
     private EntityManager entityManager = null;
     private TransactionTemplate transactionTemplate = null;
     private String path = null;
-    
+
     @PersistenceContext
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
@@ -37,7 +36,6 @@ public class AttachmentCleaner {
 
     public void setPath(String path) {
         this.path = path;
-        System.out.println("======" + path);
     }
 
     public void execute() {
@@ -52,15 +50,11 @@ public class AttachmentCleaner {
                     long t = now - a.getCreateTime().getTime();
                     if (t > 86400000) {
                         entityManager.remove(a);
-                        File file = new File(path, a.getPath());
-                        if (file.exists()) {
-                            file.delete();
-                        }
                     }
                 }
                 return null;
             }
-            
+
         });
     }
 
