@@ -116,7 +116,7 @@ createMockRouter = ->
 mountMockRouter = (target, path, router) ->
     for name in ['get', 'post', 'put', 'del']
         do (name) ->
-            target[name].call target, paths.join(path, url), fn for url, fn of router[name + 's']
+            target[name].call target, '/' + paths.join(path, url, true), fn for url, fn of router[name + 's']
 
     !!router.gets['/picker']
 
