@@ -107,7 +107,7 @@ setLabelToColModel = (colModel, labels) ->
 
 mountPath = (path, meta) ->
     options = requireScaffoldConfig path
-    log.debug "find scaffolding entity:#{meta.entityClass} bind to #{meta.path}, with options:#{JSON.stringify options}"
+    log.trace "find scaffolding entity:#{meta.entityClass} bind to #{meta.path}, with options:#{JSON.stringify options}"
     doWithRouter = options.doWithRouter or ->
     options.doWithRouter = (r) ->
         doWithRouter r
