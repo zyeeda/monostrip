@@ -125,7 +125,9 @@ createEntity = (clazz) ->
     c.newInstance()
 
 getService = (options, entityMeta) ->
-    options.service or createService entityMeta.entityClass, entityMeta, options
+    return options.service if options.service and not _.isFunction(options.service)
+    service = createService entityMeta.entityClass, entityMeta, options
+    if options.service then options.service(service) else service
 
 getJsonFilter = exports.getJsonFilter = (options, type) ->
     return {} unless options.filters
