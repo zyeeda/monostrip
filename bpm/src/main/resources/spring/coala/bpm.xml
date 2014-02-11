@@ -6,10 +6,19 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
 
+	<bean id="taskListener" class="com.zyeeda.coala.bpm.support.TaskStatusChangerListener"/>
+	<bean id="taskHandler" class="com.zyeeda.coala.bpm.support.AddGlobalTaskListenerParseHandler"/>
+
 	<bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration"
 		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"
 		p:databaseSchemaUpdate="true" p:jobExecutorActivate="false" p:history="full"
-		p:deploymentResources="classpath:bpmn/test-task-*.bpmn" />
+		p:deploymentResources="classpath:bpmn/test-task-*.bpmn" >
+		<property name="postBpmnParseHandlers">
+			<list>
+				<ref bean="taskHandler"/>
+			</list>
+		</property>
+	</bean>
 
 	<bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean"
 		p:processEngineConfiguration-ref="processEngineConfiguration" />
@@ -30,4 +39,5 @@
 	<bean id="taskService" class="com.zyeeda.coala.bpm.support.DefaultTaskService"
 		p:processEngine-ref="processEngine" />
 
+	
 </beans>
