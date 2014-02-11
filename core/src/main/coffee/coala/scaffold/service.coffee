@@ -7,7 +7,7 @@ fs = require 'fs'
 createProcessService = require('coala/scaffold/process-service').createService
 
 {Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
-{ProcessStatusAware} = com.zyeeda.coala.entities.base
+{ProcessStatusAware} = com.zyeeda.coala.commons.annotation.scaffold
 {Authentication} = org.activiti.engine.impl.identity
 {ArrayList, HashSet} = java.util
 {ClassUtils} = org.springframework.util

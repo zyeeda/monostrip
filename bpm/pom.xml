@@ -24,7 +24,7 @@ $License$
     <packaging>jar</packaging>
 
     <properties>
-        <activiti.version>5.10</activiti.version>
+        <activiti.version>5.14</activiti.version>
     </properties>
 
     <dependencies>

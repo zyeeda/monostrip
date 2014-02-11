@@ -2,6 +2,7 @@ package com.zyeeda.coala.bpm.support;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Event;
 import org.activiti.engine.task.IdentityLink;
+import org.activiti.engine.task.NativeTaskQuery;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.slf4j.Logger;
@@ -215,8 +217,8 @@ public class DefaultTaskService implements TaskService {
     }
     
     @Override
-    public void addComment(String taskId, String processInstanceId, String message) {
-        this.taskService.addComment(taskId, processInstanceId, message);
+    public Comment addComment(String taskId, String processInstanceId, String message) {
+        return this.taskService.addComment(taskId, processInstanceId, message);
     }
     
     @Override
@@ -299,4 +301,102 @@ public class DefaultTaskService implements TaskService {
         this.runtimeService.signalEventReceived(signal,  task.getExecutionId());
     }
 
+    @Override
+    public void deleteTask(String taskId, String deleteReason) {
+        taskService.deleteTask(taskId, deleteReason);
+    }
+
+    @Override
+    public void deleteTasks(Collection<String> taskIds, String deleteReason) {
+        taskService.deleteTasks(taskIds, deleteReason);
+    }
+
+    @Override
+    public void unclaim(String taskId) {
+        taskService.unclaim(taskId);
+    }
+
+    @Override
+    public void resolveTask(String taskId, Map<String, Object> variables) {
+        taskService.resolveTask(taskId, variables);
+    }
+
+    @Override
+    public void setDueDate(String taskId, Date dueDate) {
+        taskService.setDueDate(taskId, dueDate);
+    }
+
+    @Override
+    public NativeTaskQuery createNativeTaskQuery() {
+        return taskService.createNativeTaskQuery();
+    }
+
+    @Override
+    public boolean hasVariable(String taskId, String variableName) {
+        return taskService.hasVariable(taskId, variableName);
+    }
+
+    @Override
+    public boolean hasVariableLocal(String taskId, String variableName) {
+        return taskService.hasVariableLocal(taskId, variableName);
+    }
+
+    @Override
+    public void removeVariable(String taskId, String variableName) {
+        taskService.removeVariable(taskId, variableName);
+        
+    }
+
+    @Override
+    public void removeVariableLocal(String taskId, String variableName) {
+        taskService.removeVariableLocal(taskId, variableName);
+    }
+
+    @Override
+    public void removeVariables(String taskId, Collection<String> variableNames) {
+        taskService.removeVariables(taskId, variableNames);
+    }
+
+    @Override
+    public void removeVariablesLocal(String taskId,
+            Collection<String> variableNames) {
+        taskService.removeVariablesLocal(taskId, variableNames);
+    }
+
+    @Override
+    public Comment addComment(String taskId, String processInstanceId,
+            String type, String message) {
+        return taskService.addComment(taskId, processInstanceId, type, message);
+    }
+
+    @Override
+    public Comment getComment(String commentId) {
+        return taskService.getComment(commentId);
+    }
+
+    @Override
+    public void deleteComments(String taskId, String processInstanceId) {
+        taskService.deleteComments(taskId, processInstanceId);
+    }
+
+    @Override
+    public void deleteComment(String commentId) {
+        taskService.deleteComment(commentId);
+    }
+
+    @Override
+    public List<Comment> getTaskComments(String taskId, String type) {
+        return taskService.getTaskComments(taskId, type);
+    }
+
+    @Override
+    public List<Comment> getCommentsByType(String type) {
+        return taskService.getCommentsByType(type);
+    }
+
+    @Override
+    public Event getEvent(String eventId) {
+        return taskService.getEvent(eventId);
+    }
+    
 }
