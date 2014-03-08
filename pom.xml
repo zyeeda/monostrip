@@ -3,7 +3,7 @@
 <!-- $Id: pom.xml,v 5d0317600b80 2013/09/02 09:25:47 tangrui $ -->
 
 <!--
-$License$
+$License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. Ltd. All rights reserved. $
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -42,19 +42,18 @@ $License$
     <properties>
         <servlet.api.version>2.5</servlet.api.version>
         <transaction.api.version>1.1</transaction.api.version>
-        <spring.version>3.1.2.RELEASE</spring.version>
+        <spring.version>3.2.8.RELEASE</spring.version>
         <hibernate.jpa2.api.version>1.0.1.Final</hibernate.jpa2.api.version>
-        <hibernate.version>4.1.9.Final</hibernate.version>
+        <hibernate.version>4.2.10.Final</hibernate.version>
         <hibernate.validator.version>4.3.1.Final</hibernate.validator.version>
-        <hibernate.envers.version>4.1.9.Final</hibernate.envers.version>
         <validation.api.version>1.0.0.GA</validation.api.version>
         <commons.beanutils.version>1.8.3</commons.beanutils.version>
         <commons.lang.version>2.6</commons.lang.version>
         <commons.collections.version>3.2.1</commons.collections.version>
         <jackson.version>2.1.0</jackson.version>
-        <ringo.version>0.9.0</ringo.version>
+        <ringo.version>0.10.0</ringo.version>
         <jffi.version>1.0.10</jffi.version>
-        <quartz.version>2.1.3</quartz.version>
+        <quartz.version>2.2.1</quartz.version>
     </properties>
 
     <dependencyManagement>
@@ -173,13 +172,6 @@ $License$
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate.validator.version}</version>
-            </dependency>
-
-            <!-- hibernate envers -->
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-envers</artifactId>
-                <version>${hibernate.envers.version}</version>
             </dependency>
 
             <!-- apache commons -->
