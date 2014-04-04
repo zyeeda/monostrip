@@ -82,7 +82,7 @@ attachDomain = (router, path, entityMeta, options = {}) ->
     handlers = objects.extend {}, defaultHandlers(path, options), options.handlers or {}
 
     defaultPickerRouter = ->
-    	pickerOptions = objects.extend {}, options, {listType: 'picker'}
+        pickerOptions = objects.extend {}, options, {listType: 'picker'}
         router.get paths.join(path, '/picker'), handlers.list.bind handlers, pickerOptions, service, entityMeta unless excludes.list
 
     if type(options.doWithRouter) is 'function'
@@ -95,7 +95,7 @@ attachDomain = (router, path, entityMeta, options = {}) ->
 	if not excludes.list
 		listOptions = objects.extend {}, options, {listType: 'list'}
 		router.get listUrl, handlers.list.bind handlers, listOptions, service, entityMeta unless excludes.list
-    
+
     router.get getUrl, handlers.get.bind handlers, options, service, entityMeta unless excludes.get
     router.post createUrl, handlers.create.bind handlers, options, service, entityMeta unless excludes.create
     router.put updateUrl, handlers.update.bind handlers, options, service, entityMeta unless excludes.update
@@ -146,7 +146,7 @@ defaultHandlers = (path, options) ->
             result = {}
             config = {}
 
-			objects.extend config, {listType: options.listType}
+            objects.extend config, {listType: options.listType}
 
             appPath = request.env.servletRequest.getRealPath '/WEB-INF/app'
             config.appPath = appPath
