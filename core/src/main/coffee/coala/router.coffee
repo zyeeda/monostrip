@@ -92,9 +92,9 @@ attachDomain = (router, path, entityMeta, options = {}) ->
     else
         defaultPickerRouter()
 
-	if not excludes.list
-		listOptions = objects.extend {}, options, {listType: 'list'}
-		router.get listUrl, handlers.list.bind handlers, listOptions, service, entityMeta unless excludes.list
+    if not excludes.list
+        listOptions = objects.extend {}, options, {listType: 'list'}
+        router.get listUrl, handlers.list.bind handlers, listOptions, service, entityMeta
 
     router.get getUrl, handlers.get.bind handlers, options, service, entityMeta unless excludes.get
     router.post createUrl, handlers.create.bind handlers, options, service, entityMeta unless excludes.create
