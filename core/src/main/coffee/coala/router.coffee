@@ -160,6 +160,7 @@ defaultHandlers = (path, options) ->
 
             paginationInfo = coala.extractPaginationInfo request.params
             if paginationInfo?
+                paginationInfo.listType = config.listType
                 paginationInfo.fetchCount = true
                 pageSize = paginationInfo.maxResults
                 paginationInfo.appPath = config.appPath
