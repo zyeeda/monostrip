@@ -146,7 +146,7 @@ defaultHandlers = (path, options) ->
             result = {}
             config = {}
 
-            objects.extend config, {listType: options.listType}
+            objects.extend config, {listType: options.listType, pickerFeatureName: request.params.pickerFeatureName, pickerFeatureType: request.params.pickerFeatureType, pickerFiled: request.params.pickerFiled}
 
             appPath = request.env.servletRequest.getRealPath '/WEB-INF/app'
             config.appPath = appPath
@@ -161,6 +161,9 @@ defaultHandlers = (path, options) ->
             paginationInfo = coala.extractPaginationInfo request.params
             if paginationInfo?
                 paginationInfo.listType = config.listType
+                paginationInfo.pickerFeatureName = config.pickerFeatureName
+                paginationInfo.pickerFeatureType = config.pickerFeatureType
+                paginationInfo.pickerFiled = config.pickerFiled
                 paginationInfo.fetchCount = true
                 pageSize = paginationInfo.maxResults
                 paginationInfo.appPath = config.appPath
