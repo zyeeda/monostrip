@@ -14,22 +14,35 @@
 {createConverter} = require 'coala/scaffold/converter'
 fs = require 'fs'
 
+# Specify date and time format.
+#
+# @todo These format pattern should use global coala configuration.
+#
 dateFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd'
 timeFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd HH:mm:ss'
 
 context = Context.getInstance(module)
-# parameter name is the name of EntityManagerFactory which is configed in spring context
 
-getEntityManager = (name) ->
-    name = 'entityManagerFactory' if not name
-    emf = context.getBean name
+# Get contextual EntityManager.
+#
+# The parameter `emfName` is the id of EntityManagerFactory bean specified in
+# Spring config file. If ommited, `EntityManagerFactory` will be used.
+#
+getEntityManager = (emfName) ->
+    emfName = 'entityManagerFactory' if not emfName
+    emf = context.getBean emfName
     em = EntityManagerFactoryUtils.doGetTransactionalEntityManager emf, null
+    # @todo refine this error message
     throw new Error('can not find an EntityManager in current thread') unless em?
     em
 
-exports.createManager = (entityClass, name) ->
-    em = getEntityManager name
+# The exported function to create a manager.
+#
+exports.createManager = (entityClass, emfName) ->
+    em = getEntityManager emfName
 
+    # When define custom manager, mixin the base manager members to the custom.
+    #
     mixin: (mixins) ->
         for name, value of mixins
             if type(value) is 'function'
@@ -91,16 +104,27 @@ exports.createManager = (entityClass, name) ->
     createNamedQuery: (name) ->
         createQuery em, name
 
-    # option can be like this:
+    # Get all entities without any filter.
+    #
+    # Some options can be passed:
+    # * `firstResult` the offset of the first item
+    # * `maxResults` how many items will be fetched
+    # * `orderBy` the order-by infomation
+    #
+    # For example:
+    # ```javascript
     # {
     #     firstResult: 0,
     #     maxResults: 10,
     #     orderBy: [
-    #         {property1: 'asc'},
-    #         {property2: 'desc'}
+    #         {name: 'asc'},
+    #         {age: 'desc'}
     #     ]
     # }
+    # ```
+    #
     getAll: (option = {}) ->
+        #{ Change this to use JPA interfaces.
         builder = em.getCriteriaBuilder()
         query = builder.createQuery entityClass
         root = query.from entityClass
@@ -117,6 +141,10 @@ exports.createManager = (entityClass, name) ->
 
         q.getResultList()
 
+    # Get all entities by some example.
+    #
+    # The `option` parameter is the as function `getAll`.
+    #
     findByExample: (example, option = {}) ->
         ex = Example.create(example).excludeZeroes().enableLike(MatchMode.ANYWHERE)
         criteria = em.getDelegate().createCriteria(entityClass).add ex
@@ -131,6 +159,17 @@ exports.createManager = (entityClass, name) ->
                     criteria.addOrder Order[value] property for property, value of order
             criteria.list()
 
+    # Get all entities by filters.
+    #
+    # Some options can be passed:
+    # * `filters` the searching filter
+    # * `firstResult` the offset of the first item
+    # * `maxResults` how many items will be fetched
+    # * `orderBy` the order-by infomation
+    # * `fetchCount` whether to only fetch the count not all the entities, if
+    # `fetchCount` is specified the `firstResult`, `maxResults` and `orderBy`
+    # options will be omitted
+    #
     findByEntity: (option = {}) ->
         filters = option.filters or []
         orders = option.orderBy
@@ -142,12 +181,23 @@ exports.createManager = (entityClass, name) ->
         query.setParameter key, value for key, value of params
         if option.fetchCount then query.getSingleResult() else query.getResultList()
 
+    # Get the Hibernate Search FullTextEntityManager.
+    #
     getFullTextEntityManager: ->
         Search.getFullTextEntityManager em
 
     rebuildIndexes: ->
         @getFullTextEntityManager().createIndexer().startAndWait()
 
+    # Full text search the keyword.
+    #
+    # The `fields` parameter represents which fields of the entity should be
+    # searched, the `keyword` is the search target, `options` can be passed the
+    # pagination info, including `firstResult` and `maxResults`.
+    #
+    # This function will return both the entities of current page and the whole
+    # count.
+    #
     fullTextSearch: (fields, keyword, options) ->
         clazz = entityClass
         fem = @getFullTextEntityManager()
@@ -168,6 +218,25 @@ exports.createManager = (entityClass, name) ->
         else
             jpaQuery.getResultList()
 
+    # If calling a manager with an undefined function, this one will be called.
+    #
+    # This function will try to execute a query as the same name of the function
+    # call.
+    #
+    # For example, if calling `manager.getUserById` function, but it is not
+    # defined, then the manager will try to execute a query named `getUserById`.
+    # This named query should be declared in orm.xml files.
+    #
+    # This method can be passed two parameters:
+    # * the first one is an object to fill the query parameter, the key is the
+    # parameter name and the value is the parameter value;
+    # * the second one can be an object, a boolean, a number or a string. If it
+    # is an object, it represents the pagination info, including `firstResult`
+    # and `maxResults` options. If it is boolean value `true`, it means this
+    # query will do an execute-update, like `INSERT`, `UPDATE` and `DELETE`.
+    # If it is number 1 or string `singleResult`, it means the query will return
+    # a single result.
+    #
     __noSuchMethod__: (name, args) ->
         params = args[0] or {}
         pageInfo = args[1]
@@ -191,6 +260,8 @@ exports.createManager = (entityClass, name) ->
             if singleResult then query.getSingleResult() else query.getResultList()
 
 
+# Get pagination info.
+#
 getPageInfo = (object) ->
     result =
         firstResult: 0
@@ -204,38 +275,47 @@ getPageInfo = (object) ->
     result
 
 
-fillPageInfo = (query,pageInfo) ->
+fillPageInfo = (query, pageInfo) ->
     if pageInfo?
         query.setFirstResult pageInfo.firstResult
         query.setMaxResults pageInfo.maxResults
         return true
     false
 
+# When in development mode, reload orm.xml files.
+#
 if coala.development is true
     fs = require 'fs'
     {Configuration} = org.hibernate.cfg
     namedQueries = {}
     modifyRecord = []
 
+    # Check if the orm files are modified.
+    #
     modified = ->
         times = (fs.lastModified name for name in coala.orms).map (date) -> date.getTime()
         if times.length != modifyRecord.length
             modifiyRecord = times
             true
         else
-            result =  modifyRecord.every (value, i) -> value == times[i]
+            result = modifyRecord.every (value, i) -> value == times[i]
             modifyRecord = times
             !result
 
+    # Reload orm files.
+    #
     loadOrms = ->
+        #{ This method will reload all orm files without caring about whether
+        #{ being modified, so this should be changed to improve performance.
+        #{
         config = new Configuration()
         config.addFile file for file in coala.orms
         config.buildMappings()
 
-        queries = config.getNamedQueries()
         namedQueries = {}
-        i = queries.keySet().iterator()
 
+        queries = config.getNamedQueries()
+        i = queries.keySet().iterator()
         while i.hasNext()
             name = i.next()
             namedQueries[name] = queries.get(name).getQuery()
@@ -256,9 +336,14 @@ else
     createQuery = (em, name) ->
         em.createNamedQuery name
 
+# If the array contains only one item, then unwrap the array and return the
+# item.
+#
 firstIfOnlyOne = (array) ->
     if array.length is 1 then array[0] else array
 
+#{ This function should be replaced with a third party implementation.
+#{
 generateSql = (entityClass, isCount, filters, orders) ->
     converter = createConverter()
     ctx =

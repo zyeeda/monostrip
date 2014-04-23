@@ -1,3 +1,5 @@
+# THIS FILE IS USELESS.
+#
 paths = require 'coala/util/paths'
 {json} = require 'coala/response'
 {coala} = require 'coala/config'
