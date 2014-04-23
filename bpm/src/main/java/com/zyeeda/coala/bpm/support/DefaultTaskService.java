@@ -398,5 +398,11 @@ public class DefaultTaskService implements TaskService {
     public Event getEvent(String eventId) {
         return taskService.getEvent(eventId);
     }
+
+	@Override
+	public void complete(String taskId, Map<String, Object> variables,
+			boolean localScope) {
+		taskService.complete(taskId, variables, localScope);
+	}
     
 }
