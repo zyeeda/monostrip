@@ -3,7 +3,7 @@
 <!-- $Id: pom.xml,v 1da72f83007b 2013/01/19 04:43:15 tangrui $ -->
 
 <!--
-$License$
+$License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. Ltd. All rights reserved. $
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"

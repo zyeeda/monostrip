@@ -1,6 +1,6 @@
 /**
  * @preserve jquery.layout 1.3.0 - Release Candidate 30.4
- * $Date$
+ * $Date: 2012/05/21 03:17:44 $
  * $Rev: 303004 $
  *
  * Copyright (c) 2012 
@@ -4457,7 +4457,7 @@ $.fn.layout = function (opts) {
 
 /**
  * jquery.layout.state 1.0
- * $Date$
+ * $Date: 2012/05/21 03:17:44 $
  *
  * Copyright (c) 2010 
  *   Kevin Dalman (http://allpro.net)
@@ -4814,7 +4814,7 @@ $.layout.onUnload.push( $.layout.state._unload );
 
 /**
  * jquery.layout.buttons 1.0
- * $Date$
+ * $Date: 2012/05/21 03:17:44 $
  *
  * Copyright (c) 2010 
  *   Kevin Dalman (http://allpro.net)
@@ -5096,7 +5096,7 @@ $.layout.onLoad.push(  $.layout.buttons._load );
 
 /**
  * jquery.layout.browserZoom 1.0
- * $Date$
+ * $Date: 2012/05/21 03:17:44 $
  *
  * Copyright (c) 2012 
  *   Kevin Dalman (http://allpro.net)
