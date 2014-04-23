@@ -1,12 +1,16 @@
 package com.zyeeda.coala.commons.resource.entity;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.zyeeda.coala.commons.annotation.scaffold.Scaffold;
+import com.zyeeda.coala.commons.base.data.TreeNode;
 import com.zyeeda.coala.commons.base.entity.DomainEntity;
 
 /**
@@ -18,7 +22,7 @@ import com.zyeeda.coala.commons.base.entity.DomainEntity;
 @Entity
 @Table(name = "ZDA_MENUITEM")
 @Scaffold("/system/menu")
-public class MenuItem extends DomainEntity {
+public class MenuItem extends DomainEntity implements TreeNode<MenuItem> {
 
     /**
      * 自动生成的序列化版本 UID.
@@ -54,6 +58,17 @@ public class MenuItem extends DomainEntity {
      * 父节点菜单项.
      */
     private MenuItem parent;
+
+    /**
+     * 排序字段
+     * 手动维护 5、10 .. 95.
+     */
+    private Integer rank;
+
+    /**
+     * 子菜单.
+     */
+    private List<MenuItem> children;
 
     @Column(name = "F_NAME", length = 100)
     public String getName() {
@@ -100,14 +115,36 @@ public class MenuItem extends DomainEntity {
         this.option = option;
     }
 
+    @Column(name = "F_RANK", length = 200)
+    public Integer getRank() {
+        return this.rank;
+    }
+
+    public void setRank(final Integer rank) {
+        this.rank = rank;
+    }
+
+    @Override
     @ManyToOne
     @JoinColumn(name = "F_PARENT_ID")
     public MenuItem getParent() {
         return this.parent;
     }
 
+    @Override
     public void setParent(final MenuItem parent) {
         this.parent = parent;
+    }
+
+    @Override
+    @OneToMany(mappedBy = "parent")
+    public List<MenuItem> getChildren() {
+        return this.children;
+    }
+
+    @Override
+    public void setChildren(final List<MenuItem> children) {
+        this.children = children;
     }
 
 }
