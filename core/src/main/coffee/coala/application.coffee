@@ -1,12 +1,18 @@
-{Application} = require 'stick'
+logger = require('ringo/logging').getLogger module.id
 
-{getLogger} = require 'ringo/logging'
+{Application} = require 'stick'
 
 {coala} = require 'coala/config'
 {registerHandler} = require 'coala/mark'
 
-LOGGER = getLogger module.id
-
+# Process the feature root, and mount path to the router.
+#
+# * If `router.js` is found, then mount the repository path (with prefix) to the
+# router.
+# * If `router-xxx.js` is found, then mount the repository path and xxx to the
+# router. For example, if `router-bar.js` is found under the repository `foo`,
+# then path `foo/bar` will be mounted to the router.
+#
 processRoot = (router, repo, prefix) ->
     routers = repo.getResources false
     for r in routers
@@ -17,20 +23,34 @@ processRoot = (router, repo, prefix) ->
             module = r.moduleName
             try
                 router.mount p, module
-                LOGGER.debug "found router:#{r}, mount it to #{p}"
+                logger.debug "found router:#{r}, mount it to #{p}"
             catch e
-                LOGGER.error "Cannot mount module #{r.getModuleName()}.", e
+                logger.error "Cannot mount module #{r.getModuleName()}.", e
 
+# Process all sub repositories under the current.
+#
+# * If the sub repository ends with `.feature`, then process it as a feature root.
+# * If the sub repository doesn't end with `.feature`, process it as another
+# repository.
+#
 processRepository = (router, repo, prefix) ->
     for r in repo.getRepositories()
         name = r.name
         idx = name.indexOf '.feature'
-        if idx is name.length - 8
+        if idx is name.length - 8 # should check whether name ends with .feature
             processRoot router, r, prefix + name.substring(0, idx)
         else
             processRepository router, r, prefix + r.getName() + '/'
 
+# The exported function to create an coala application.
+#
+# For example:
+# ```
+# require('coala/application').create(this);
+# ```
+#
 exports.create = (module, mountDefaultRouters = true) ->
+    # Register all marker handlers.
     registerHandler "tx", require('coala/marker/tx').handler
     registerHandler "beans", require('coala/marker/beans').handler
     registerHandler "services", require('coala/marker/services').handler
@@ -45,6 +65,7 @@ exports.create = (module, mountDefaultRouters = true) ->
     registerHandler "RequiresPerms", require('coala/marker/permission').handlers.perms
     registerHandler "RequiresRoles", require('coala/marker/permission').handlers.roles
 
+    # New a stick application and configurate `mount` middleware.
     router = new Application()
     router.configure 'mount'
 
@@ -53,7 +74,7 @@ exports.create = (module, mountDefaultRouters = true) ->
         processRepository router, root, '/'
 
     if mountDefaultRouters
-        router.mount '/helper', 'coala/frontend-helper'
+        router.mount '/helper', 'coala/frontend-helper' # this is useless
         router.mount '/scaffold', 'coala/scaffold/router'
         router.mount '/scaffold/tasks', 'coala/scaffold/task'
 
