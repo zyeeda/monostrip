@@ -1,9 +1,7 @@
-package com.zyeeda.meterage.commons.entity;
+package com.zyeeda.coala.commons.base.entity;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
-
-import com.zyeeda.coala.commons.base.entity.RevisionDomainEntity;
 
 /**
  * 树类型基类实体
