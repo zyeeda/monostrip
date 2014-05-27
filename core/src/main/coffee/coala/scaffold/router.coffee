@@ -81,6 +81,13 @@ mountExtraRoutes = (r, meta, options) ->
             json {}
     )
 
+    r.get('configuration/export-module', (request) ->
+        if options.configs and options.configs.exportModule
+            json {exportModule: options.configs.exportModule}
+        else
+            json {}
+    )
+
 requireScaffoldConfig = exports.requireScaffoldConfig = (path) ->
     path = path.replace /(^\/)|(\/$)/g, ''
     p = path + '.feature/scaffold'
