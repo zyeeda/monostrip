@@ -32,7 +32,7 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
     result = {}
     result.labelOnTop = form.labelOnTop
     result.size = form.size
-    result.custom = form.custom
+    result.custom = !!form.custom
     result.groups = groups
 
     fg = result.fieldGroups = {}
