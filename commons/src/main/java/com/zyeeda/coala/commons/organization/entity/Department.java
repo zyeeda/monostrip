@@ -18,7 +18,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import com.zyeeda.coala.commons.annotation.scaffold.Scaffold;
 import com.zyeeda.coala.commons.base.data.TreeNode;
-import com.zyeeda.coala.commons.base.entity.DomainEntity;
+import com.zyeeda.coala.commons.base.entity.TreeNodeDomainEntity;
 import com.zyeeda.coala.validation.constraint.Unique;
 import com.zyeeda.coala.validation.group.Create;
 import com.zyeeda.coala.validation.group.Update;
@@ -37,7 +37,7 @@ import com.zyeeda.coala.validation.group.Update;
         @Unique(groups = Create.class, namedQuery = "findDuplicateDeptNameOnCreate", bindingProperties = "name"),
         @Unique(groups = Update.class, namedQuery = "findDuplicateDeptNameOnUpdate", bindingProperties = "name")
 })
-public class Department extends DomainEntity implements TreeNode<Department> {
+public class Department extends TreeNodeDomainEntity implements TreeNode<Department> {
 
     /**
      * 自动生成的序列化版本 UID.
@@ -73,6 +73,12 @@ public class Department extends DomainEntity implements TreeNode<Department> {
      * 删除标记.
      */
     private Boolean deleted;
+
+    /**
+     * 排序字段
+     * 手动维护 5、10 .. 95.
+     */
+    private Integer rank;
 
     @Basic
     @Column(name = "F_NAME", length = 30)
@@ -138,4 +144,12 @@ public class Department extends DomainEntity implements TreeNode<Department> {
         this.deleted = deleted;
     }
 
+    @Column(name = "F_RANK", length = 200)
+    public Integer getRank() {
+        return this.rank;
+    }
+
+    public void setRank(final Integer rank) {
+        this.rank = rank;
+    }
 }
