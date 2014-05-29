@@ -60,6 +60,8 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
         if options.validation 
             result.validation.rules = _.extend (result.validation.rules || {}), options.validation.rules if options.validation.rules
             result.validation.messages = _.extend (result.validation.messages || {}), options.validation.messages if options.validation.messages
+            result.validation.ignore = options.validation.ignore if options.validation.ignore
+            result.validation.errorsAppend = options.validation.errorsAppend if options.validation.errorsAppend
 
     result.entityLabel = options.entityLabel if options.entityLabel
 
