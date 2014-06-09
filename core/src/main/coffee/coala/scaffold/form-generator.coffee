@@ -33,6 +33,7 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
     result.labelOnTop = form.labelOnTop
     result.size = form.size
     result.custom = !!form.custom
+    result.template = form.template
     result.groups = groups
 
     fg = result.fieldGroups = {}
