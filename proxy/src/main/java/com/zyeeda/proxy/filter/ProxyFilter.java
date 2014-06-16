@@ -135,13 +135,12 @@ public class ProxyFilter implements Filter {
 
             servletResponse.setStatus(statusCode, proxyResponse.getStatusLine()
                     .getReasonPhrase());
-
             if("true".equals(reverseCookie)) {
                 Header header = proxyResponse.getFirstHeader("Set-Cookie");
                 if(header != null) {
                     String setCookie = header.getValue();
                     String JSESSIONID = setCookie.substring("JSESSIONID=".length(), setCookie.indexOf(";"));
-                    cookie = new Cookie("BJSESSIONID", JSESSIONID);
+                    cookie = new Cookie("JSESSIONID", JSESSIONID);
                     servletResponse.addCookie(cookie);
                 }
             }
