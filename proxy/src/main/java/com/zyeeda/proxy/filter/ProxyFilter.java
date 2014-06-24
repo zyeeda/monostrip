@@ -140,7 +140,7 @@ public class ProxyFilter implements Filter {
                 if(header != null) {
                     String setCookie = header.getValue();
                     String JSESSIONID = setCookie.substring("JSESSIONID=".length(), setCookie.indexOf(";"));
-                    cookie = new Cookie("JSESSIONID", JSESSIONID);
+                    cookie = new Cookie("BSESSIONID", JSESSIONID);
                     servletResponse.addCookie(cookie);
                 }
             }
@@ -245,7 +245,20 @@ public class ProxyFilter implements Filter {
                     if (host.getPort() != -1)
                         headerValue += ":" + host.getPort();
                 }
-                proxyRequest.addHeader(headerName, headerValue);
+                if("Cookie".equals(headerName)) {
+                    if(reverseCookie.equals("true")) {
+                        String[] cookies = headerValue.split(";");
+                        for(String c : cookies) {
+                            if(c.startsWith("BSESSIONID")) {
+                                String tempValue = "JSESSIONID=" + c.split("=")[1];
+                                proxyRequest.addHeader(headerName, tempValue);
+                                break;
+                            }
+                        }
+                    }
+                }else {
+                    proxyRequest.addHeader(headerName, headerValue);
+                }
             }
         }
     }
