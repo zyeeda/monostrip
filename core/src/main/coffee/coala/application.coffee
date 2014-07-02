@@ -50,6 +50,7 @@ processRepository = (router, repo, prefix) ->
 # ```
 #
 exports.create = (module, mountDefaultRouters = true) ->
+    logger.debug "application is executing ..."
     # Register all marker handlers.
     registerHandler "tx", require('coala/marker/tx').handler
     registerHandler "beans", require('coala/marker/beans').handler
@@ -73,6 +74,7 @@ exports.create = (module, mountDefaultRouters = true) ->
         root = module.getRepository('./')
         processRepository router, root, '/'
 
+    # 配置了三个默认的路径,前端可以直接调用
     if mountDefaultRouters
         router.mount '/helper', 'coala/frontend-helper' # this is useless
         router.mount '/scaffold', 'coala/scaffold/router'

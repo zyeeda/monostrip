@@ -1,6 +1,7 @@
 {type} = require 'coala/util/type'
 objects = require 'coala/util/objects'
 {coala} = require 'coala/config'
+_ = require 'underscore'
 {buildValidateRules} = require 'coala/validation/validator'
 scaffoldRouter = require 'coala/scaffold/router'
 _ = require 'underscore'
@@ -27,6 +28,7 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
     for value in form.groups or []
         g = if type(value) is 'string' then name: value else objects.extend {}, value
         g.readOnly = true if formName is 'show'
+        # g.readOnly = if _.isBoolean value.readOnly  then value.readOnly else if formName is 'show' then true  else false
         groups.push g
 
     result = {}

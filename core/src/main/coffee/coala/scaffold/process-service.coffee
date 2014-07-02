@@ -150,6 +150,7 @@ exports.createService = ->
             service.task.claim id, userId
             service.task.complete id
 
+        entityToVariables: entityToVariables
         __noSuchMethod__: (name, args) ->
             throw new Error("no such method: #{name}") if not taskService[name]
             taskService[name].apply taskService, args

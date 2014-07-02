@@ -11,6 +11,7 @@ router = exports.router = require('coala/router').createRouter()
 exports.setScriptFolder = (path) ->
     scriptFolder = path
 
+# 返回是否为开发模式
 router.get '/development', ->
     json coala.development
 

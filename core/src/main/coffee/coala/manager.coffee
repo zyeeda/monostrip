@@ -8,6 +8,7 @@
 {ReflectionUtils, ClassUtils} = org.springframework.util
 {FieldMeta} = com.zyeeda.coala.web.scaffold
 {Search} = org.hibernate.search.jpa
+{Authentication} = org.activiti.engine.impl.identity
 
 {coala} = require 'coala/config'
 {type} = require 'coala/util/type'
@@ -180,6 +181,18 @@ exports.createManager = (entityClass, emfName) ->
             fillPageInfo query, pageInfo
         query.setParameter key, value for key, value of params
         if option.fetchCount then query.getSingleResult() else query.getResultList()
+
+    # 查询流程数据
+    findByEntity4Process: (option = {}) ->
+        filters = option.filters or []
+        orders = option.orderBy
+        {sql, params} = generateSql4Process entityClass, option.taskType, option.fetchCount, filters, orders
+        query = em.createQuery sql
+        if not option.fetchCount
+            pageInfo = getPageInfo option
+            fillPageInfo query, pageInfo
+        query.setParameter key, value for key, value of params
+        if option.fetchCount then query.getSingleResult() else query.getResultList()        
 
     # Get the Hibernate Search FullTextEntityManager.
     #
@@ -386,6 +399,85 @@ generateSql = (entityClass, isCount, filters, orders) ->
     sql: sql
     params: ctx.params
 
+# 生成流程查询 hql
+generateSql4Process = (entityClass, taskType='waiting' ,isCount, filters, orders) ->
+    converter = createConverter()
+    currentUser = getCurrentUser()
+    ctx =
+        id: 0, prefix: 't', params: {}, joins: {}
+        check: (name) ->
+            c = entityClass
+            for n in name.split '.'
+                c = ReflectionUtils.findField c, n
+                throw new Error "field: #{name} is not defined in class #{entityClass}" if not c
+                if ClassUtils.isAssignable Collection, c.type
+                    ctx.join n
+                    c = c.getGenericType().getActualTypeArguments()[0]
+                else
+                    c = c.type
+            c
+        convert: (name, value) ->
+            type = @check name
+            converter.convert value, new FieldMeta('', type, false, null)
+        join: (name) ->
+            @joins[name] = name
+            return name
+        wrap: (name) ->
+            [first, others...] = name.split '.'
+            if @joins[first] then name else "#{@prefix}.#{name}"
+        flat: (name) ->
+            flat = name.replace /\./g, '_'
+            flat += '_' + (ctx.id++)
+
+    if taskType is 'waiting'
+        sql = if isCount then 'select count(ec) ' else 'select ec '
+        sql += "from #{entityClass.name} ec, TaskEntity te, IdentityLinkEntity i "
+        sql += " where ec.processDefinitionId = substring(te.processDefinitionId,1,length(ec.processDefinitionId)) "
+        sql += " and ec.processInstanceId = te.processInstanceId "
+        sql += " and te.id = i.taskId "
+        sql += " and te.assignee is null "
+        sql += " and i.type = 'candidate' "
+        sql += " and (i.userId='#{currentUser}' or (i.groupId in ('1','2')))" 
+    else if taskType is 'doing'
+        sql = if isCount then 'select count(ec) ' else 'select ec '
+        sql += "from #{entityClass.name} ec, TaskEntity te"
+        sql += " where ec.processDefinitionId = substring(te.processDefinitionId,1,length(ec.processDefinitionId)) "
+        sql += " and ec.processInstanceId = te.processInstanceId "
+        sql += " and te.assignee = '#{currentUser}' "
+    else if taskType is 'done'
+        sql = if isCount then 'select count(distinct ec) ' else 'select ec '
+        sql += "from #{entityClass.name} ec, HistoricTaskInstanceEntity htie "
+        sql += " where ec.processDefinitionId = substring(htie.processDefinitionId,1,length(ec.processDefinitionId)) "
+        sql += " and htie.assignee='#{currentUser}' "
+        sql += " and htie.deleteReason ='completed' "
+    # taskType is 'none' , seatch all data
+    else
+        return generateSql entityClass, isCount, filters, orders
+
+
+    # sql = if isCount then 'select count(ec) ' else 'select ec '
+    # sql += "from #{entityClass.name} ec, TaskEntity te, IdentityLinkEntity i "
+    # # if filters.length isnt 0
+    # #     conditions = operators.process.apply operators, [ctx, 'and'].concat filters
+    # #     sql += "left join t.#{key} #{value} " for key, value of ctx.joins
+    # #     sql += 'where ' + conditions
+    # # os = []
+    # # if orders and not isCount
+    # #     for order in orders
+    # #         os.push "#{ctx.wrap key} #{value}" for key, value of order when ctx.check key
+    # #     sql += ' order by ' + os.join(',') if os.length > 0
+    # sql += " where ec.processDefinitionId = substring(te.processDefinitionId,1,length(ec.processDefinitionId)) "
+    # sql += " and te.id = i.taskId "
+    # if taskType is 'waiting'
+    #     sql += " and te.assignee is null "
+    # else if taskType is 'doing'
+    #     sql += " and te.assignee = '#{currentUser}' "
+
+    # sql += " and i.type = 'candidate' "
+    # sql += " and (i.userId='#{currentUser}' or (i.groupId in ('1','2')))" 
+
+    sql: sql
+    params: ctx.params
 operators =
     process: (ctx, op = 'eq', args...) ->
         op = op.toLowerCase()
@@ -454,3 +546,8 @@ operators =
     or: (ctx, args...) ->
         terms = (@process.apply @, [ctx].concat item for item in args)
         '(' + terms.join(' or ') + ')'
+
+getCurrentUser = ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+    currentUser

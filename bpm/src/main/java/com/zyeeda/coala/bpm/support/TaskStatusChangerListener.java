@@ -23,7 +23,7 @@ public class TaskStatusChangerListener implements TaskListener {
 	public void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
-	
+
 	@Override
 	@Transactional
 	public void notify(DelegateTask delegateTask) {

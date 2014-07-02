@@ -4,7 +4,7 @@ public interface TaskService extends org.activiti.engine.TaskService {
 
     void reject(String taskId);
     
-    void revoke(String historicTaskId);
+    void recall(String historicTaskId);
     
     /*
     最好能在Task中包含entity, 或者entity的id,class

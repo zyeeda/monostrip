@@ -59,21 +59,27 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
         currentUser = 'tom'
         Authentication.setAuthenticatedUserId currentUser
 
-        processId = scaffold.boundProcessId
-        if type(processId) is 'function'
-            processId = processId entity
+        processDefinitionId = scaffold.boundProcessId
+        if type(processDefinitionId) is 'function'
+            processDefinitionId = processDefinitionId entity
         variables =
             ENTITY: entity.id
-            ENTITYCLASS: entityMeta.entityClass.getName()
+            ENTITYCLASS: entity.getClass()?.getName()
             SUBMITTER: currentUser
         for property, value of entity
             variables[property] = value if value isnt undefined and type(value) isnt 'function' and value isnt null
 
-        processInstance = runtimeService.startProcessInstanceByKey processId, variables
+        processInstance = runtimeService.startProcessInstanceByKey processDefinitionId, variables
+
+        # 写入流程实例id到实体中
+        entity.processInstanceId = processInstance.processInstanceId
         if entity instanceof ProcessStatusAware
-            entity.processId = processId
+            entity.processDefinitionId = processDefinitionId
             entity.processInstanceId = processInstance.id
-            entity.status = processId
+            entity.submitter = currentUser
+            # entity.status = '开始'
+            manager.merge entity
+        else
             manager.merge entity
 
         processInstance
@@ -87,6 +93,11 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 manager.findByEntity options
             else
                 manager.findByExample entity, options
+
+        # 查询流程数据
+        list4Process: (entity, options) ->
+            manager = baseService.createManager service.entityClass
+            manager.findByEntity4Process options
 
         get: (id) ->
             manager = baseService.createManager service.entityClass
@@ -107,8 +118,9 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             entity[key] = value for key, value of backup
             manySideUpdate entity
 
+            # 启动流程
             if scaffold.boundProcessId
-                startProcess entity, manager
+                processInstanceId = startProcess entity, manager
             entity
 
         update: mark('tx', { needStatus: true }).on (txStatus, id, fn) ->

@@ -1,15 +1,18 @@
 package com.zyeeda.coala.bpm.support;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.history.HistoricTaskInstance;
+import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Event;
@@ -26,8 +29,8 @@ public class DefaultTaskService implements TaskService {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTaskService.class);
     
-    private static final String REJECT_SIGNAL_PREFIX = "reject-";
-    private static final String REVOKE_SIGNAL_PREFIX = "revoke-";
+    private static final String REJECT_SIGNAL_PREFIX = "reject-from-";
+    private static final String RECALL_SIGNAL_PREFIX = "recall-to-";
 
     private ProcessEngine processEngine;
     private org.activiti.engine.TaskService taskService;
@@ -291,14 +294,28 @@ public class DefaultTaskService implements TaskService {
         this.runtimeService.signalEventReceived(signal, task.getExecutionId());
     }
     
-    public void revoke(String historicTaskId) {
+    public void recall(String historicTaskId) {
         HistoricTaskInstance task = this.historyService.createHistoricTaskInstanceQuery().taskId(historicTaskId).singleResult();
         if (task == null) {
             throw new IllegalArgumentException("Cannot find historic task by taskId " + historicTaskId);
         }
-        String signal = REVOKE_SIGNAL_PREFIX + task.getTaskDefinitionKey();
-        LOGGER.debug("revoke signal event = {}", signal);
-        this.runtimeService.signalEventReceived(signal,  task.getExecutionId());
+        String signal = RECALL_SIGNAL_PREFIX + task.getTaskDefinitionKey();
+        LOGGER.debug("recall signal event = {}", signal);
+        String executionId = null;
+        List<Execution> executions = this.runtimeService.createExecutionQuery().processInstanceId(task.getProcessInstanceId()).list();
+        List<Execution> executionsWithoutProcessInstance = new ArrayList<Execution>();
+        
+        //排除流程实例
+        for(Execution e:executions){
+        	if(e.getParentId()!=null){
+        		executionsWithoutProcessInstance.add(e);
+        	}
+        }
+        if(executionsWithoutProcessInstance.size()>1){
+        	throw new ActivitiException("流程引擎不支持多分支情况下的召回操作。");
+        }
+        executionId = executionsWithoutProcessInstance.get(0).getId();
+        this.runtimeService.signalEventReceived(signal,  executionId);
     }
 
     @Override

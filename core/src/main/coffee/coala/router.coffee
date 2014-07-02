@@ -8,15 +8,19 @@ paths = require 'coala/util/paths'
 {coala} = require 'coala/config'
 {mark} = require 'coala/mark'
 {json, html, notFound, internalServerError} = require 'coala/response'
+{Authentication} = org.activiti.engine.impl.identity
+{EventSubscriptionQueryImpl} = org.activiti.engine.impl
 
 {createService} = require 'coala/scaffold/service'
 {createConverter} = require 'coala/scaffold/converter'
 {createValidator} = require 'coala/validation/validator'
 {createValidationContext} = require 'coala/validation/validation-context'
+# processService = require 'coala/scaffold/process-service'
 
 {Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 {Create, Update} = com.zyeeda.coala.validation.group
 
+timeFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd HH:mm:ss'
 log = getLogger module.id
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
@@ -80,6 +84,8 @@ attachDomain = (router, path, entityMeta, options = {}) ->
 
     service = getService options, entityMeta
     handlers = objects.extend {}, defaultHandlers(path, options), options.handlers or {}
+    processHandlers = ->
+
 
     defaultPickerRouter = ->
         pickerOptions = objects.extend {}, options, {listType: 'picker'}
@@ -92,15 +98,69 @@ attachDomain = (router, path, entityMeta, options = {}) ->
     else
         defaultPickerRouter()
 
-    if not excludes.list
-        listOptions = objects.extend {}, options, {listType: 'list'}
-        router.get listUrl, handlers.list.bind handlers, listOptions, service, entityMeta
+    if options.style is 'process'
+        url_subfix = '/process/'
 
-    router.get getUrl, handlers.get.bind handlers, options, service, entityMeta unless excludes.get
-    router.post createUrl, handlers.create.bind handlers, options, service, entityMeta unless excludes.create
-    router.put updateUrl, handlers.update.bind handlers, options, service, entityMeta unless excludes.update
-    router.del removeUrl, handlers.remove.bind handlers, options, service, entityMeta unless excludes.remove
-    router.post batchRemoveUrl, handlers.batchRemove.bind handlers, options, service, entityMeta unless excludes.batchRemove
+        listUrl = path + url_subfix + 'waiting'
+        getUrl = updateUrl = path + url_subfix + 'waiting' + ID_SUFFIX
+        options.taskType = 'waiting'
+        waitingListOptions = objects.extend {}, options, {listType: 'list', taskType: 'waiting'}
+        router.get getUrl, handlers.get4Process.bind handlers, options, service, entityMeta unless excludes.get
+        router.get listUrl, handlers.list.bind handlers, waitingListOptions, service, entityMeta
+
+        listUrl = path + url_subfix + 'doing'
+        getUrl = path + url_subfix + 'doing' + ID_SUFFIX
+        options.taskType = 'doing'
+        doingListOptions = objects.extend {}, options, {listType: 'list', taskType: 'doing'}
+        router.get getUrl, handlers.get4Process.bind handlers, options, service, entityMeta unless excludes.get
+        router.get listUrl, handlers.list.bind handlers, doingListOptions, service, entityMeta
+
+        listUrl = path + url_subfix + 'done'
+        getUrl = path + url_subfix + 'done' + ID_SUFFIX
+        options.taskType = 'done'
+        doneListOptions = objects.extend {}, options, {listType: 'list', taskType: 'done'}
+        router.get getUrl, handlers.get4ProcessHistory.bind handlers, options, service, entityMeta unless excludes.get
+        router.get listUrl, handlers.list.bind handlers, doneListOptions, service, entityMeta
+
+        # 
+        listUrl = createUrl = path + url_subfix + 'none'
+        getUrl = updateUrl = path + url_subfix + 'none' + ID_SUFFIX
+        options.taskType = 'none'
+        noneListOptions = objects.extend {}, options, {listType: 'list'}
+        router.get getUrl, handlers.get.bind handlers, options, service, entityMeta unless excludes.get
+        router.get listUrl, handlers.list.bind handlers, noneListOptions, service, entityMeta
+        router.post createUrl, handlers.create4Process.bind handlers, options, service, entityMeta unless excludes.create
+        router.put updateUrl, handlers.update.bind handlers, options, service, entityMeta unless excludes.update
+
+        url_subfix = '/task/'
+        # for task
+        task_url = path + url_subfix + 'claim' + ID_SUFFIX
+        router.put task_url, handlers.claim.bind handlers, options, service, entityMeta
+
+        task_url = path + url_subfix + 'complete' + ID_SUFFIX
+        router.put task_url, handlers.complete.bind handlers, options, service, entityMeta
+
+        task_url = path + url_subfix + 'reject' + ID_SUFFIX
+        router.put task_url, handlers.reject.bind handlers, options, service, entityMeta
+
+        task_url = path + url_subfix + 'recall' + ID_SUFFIX
+        router.put task_url, handlers.recall.bind handlers, options, service, entityMeta
+
+        # 历史信息
+        history_url = path + '/history' + ID_SUFFIX
+        historyListOptions = objects.extend {}, options, {listType: 'list'}
+        router.get history_url, handlers.listHistoryTask.bind handlers, historyListOptions, service, entityMeta
+
+    else
+        if not excludes.list
+            listOptions = objects.extend {}, options, {listType: 'list'}
+            router.get listUrl, handlers.list.bind handlers, listOptions, service, entityMeta
+
+        router.get getUrl, handlers.get.bind handlers, options, service, entityMeta unless excludes.get
+        router.post createUrl, handlers.create.bind handlers, options, service, entityMeta unless excludes.create
+        router.put updateUrl, handlers.update.bind handlers, options, service, entityMeta unless excludes.update
+        router.del removeUrl, handlers.remove.bind handlers, options, service, entityMeta unless excludes.remove
+        router.post batchRemoveUrl, handlers.batchRemove.bind handlers, options, service, entityMeta unless excludes.batchRemove
 
     router
 
@@ -139,7 +199,7 @@ getJsonFilter = exports.getJsonFilter = (options, type) ->
 
 defaultHandlers = (path, options) ->
     o =
-        list: (options, service, entityMeta, request) ->
+        list: (options, service, entityMeta, request, taskType) ->
             entity = createEntity entityMeta.entityClass
             mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
 
@@ -170,7 +230,8 @@ defaultHandlers = (path, options) ->
                 paginationInfo.restricts = config.restricts
                 paginationInfo.fields = config.fields
                 paginationInfo.filters = filters if filters
-                count = service.list entity, paginationInfo
+                paginationInfo.taskType = options.taskType if options.style is 'process'
+                count = if options.style is 'process' then service.list4Process entity, paginationInfo else service.list entity, paginationInfo
 
                 result.recordCount = count
                 result.pageCount = Math.ceil count/pageSize
@@ -182,16 +243,167 @@ defaultHandlers = (path, options) ->
             if orderInfo?.length isnt 0
                 config.orderBy = orderInfo
 
-            result.results = service.list entity, config
+            if options.style is 'process'
+                config.taskType = options.taskType
+                result.results = service.list4Process entity, config
+            else 
+                result.results = service.list entity, config
 
             o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
             json o, getJsonFilter(options, 'list')
+
+        # 查询任务历史信息
+        listHistoryTask: mark('process').on (process, options, service, entityMeta, request, id) ->
+            entity = service.get id
+            # mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
+
+            result = {}
+            config = {}
+
+            objects.extend config, {listType: options.listType, pickerFeatureName: request.params.pickerFeatureName, pickerFeatureType: request.params.pickerFeatureType, pickerFiled: request.params.pickerFiled}
+
+            appPath = request.env.servletRequest.getRealPath '/WEB-INF/app'
+            config.appPath = appPath
+
+            filters = coala.extractFilterInfo request.params
+            config.filters = filters if filters
+
+            style = options.style
+            if style? and options[style]? and options[style].colModel?
+                config.fields= options[style].colModel
+
+            htQuery = process.history.createHistoricTaskInstanceQuery()
+                .processInstanceId(entity.processInstanceId)
+            paginationInfo = coala.extractPaginationInfo request.params
+            if paginationInfo?
+                paginationInfo.listType = config.listType
+                paginationInfo.pickerFeatureName = config.pickerFeatureName
+                paginationInfo.pickerFeatureType = config.pickerFeatureType
+                paginationInfo.pickerFiled = config.pickerFiled
+                paginationInfo.fetchCount = true
+                pageSize = paginationInfo.maxResults
+                paginationInfo.appPath = config.appPath
+                paginationInfo.restricts = config.restricts
+                paginationInfo.fields = config.fields
+                paginationInfo.filters = filters if filters
+                count = service.list entity, paginationInfo
+
+                result.recordCount = 1
+                result.pageCount = Math.ceil count/pageSize
+
+                delete paginationInfo.fetchCount
+                objects.extend config, paginationInfo
+
+            # hts = htQuery.list()
+            # _.each hts.toArray(), (task) -> 
+            #     task.startTime = timeFormat.format task.startTime
+
+            result.results = htQuery.list()
+
+            o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
+            json o, 
+                include:
+                    # '!historicTaskInstanceEntityFilter': ''
+                    historicTaskInstanceEntityFilter: ['id', 'name', 'assignee', 'startTime', 'claimTime', 'endTime']
 
         get: (options, service, entityMeta, request, id) ->
             entity = service.get id
             return notFound() if entity is null
 
             json entity, getJsonFilter(options, 'get')
+        # 获取实体及任务信息
+        get4Process: mark('process').on (process, options, service, entityMeta, request, id) ->
+            entity = service.get id
+            currentUser = getCurrentUser()
+            # 查询待办任务
+            task = process.task.createTaskQuery()
+            .taskCandidateUser(currentUser)
+            .processDefinitionKey(options.boundProcessId)
+            .processInstanceId(entity.processInstanceId)
+            .processVariableValueEquals('ENTITY', id)
+            .singleResult()
+
+            # 如果待办任务为空，查询在办任务
+            if task is null
+                task = process.task.createTaskQuery()
+                .taskAssignee(currentUser)
+                .processDefinitionKey(options.boundProcessId)
+                .processVariableValueEquals('ENTITY', id)
+                .singleResult()
+
+            historicProcessInstance = process.history.createHistoricProcessInstanceQuery()
+                .processInstanceId(entity.processInstanceId)
+                .singleResult()
+            e = {}
+
+            for key, value of entity
+                e[key] = value if type(value) isnt 'function'
+
+            e = objects.extend e, 
+                pass: '1'
+                _t_taskId: task.id
+                _t_taskName: task.name
+                _t_createTime: task.createTime
+                _t_rejectable: false
+                _p_startTime: historicProcessInstance.startTime
+                _p_endTime: historicProcessInstance.endTime
+                _p_submitter: entity.submitter
+            # task = taskToVo task
+
+            # 判断是否可以回退
+            eventQuery = new EventSubscriptionQueryImpl(process.runtime.commandExecutor)
+            events = eventQuery.executionId(task.executionId).list()
+            e._t_rejectable = true for event in events.toArray() when event.eventName is 'reject-from-' + task.taskDefinitionKey
+
+            return notFound() if entity is null
+
+            json e, getJsonFilter(options, 'get')            
+
+        # 获取实体及任务历史信息
+        get4ProcessHistory: mark('process').on (process, options, service, entityMeta, request, id) ->
+            entity = service.get id
+            currentUser = getCurrentUser()
+
+            historicProcessInstance = process.history.createHistoricProcessInstanceQuery()
+                .processInstanceId(entity.processInstanceId)
+                .singleResult()
+            historicTasks = process.history.createHistoricTaskInstanceQuery()
+                .processInstanceId(entity.processInstanceId)
+                .taskAssignee(currentUser)
+                .orderByHistoricTaskInstanceEndTime()
+                .desc()
+                .list()
+                .toArray()
+            historicTask = historicTasks[0]
+            e = {}
+
+            for key, value of entity
+                e[key] = value if type(value) isnt 'function'
+
+            e = objects.extend e, 
+                pass: '1'
+                _t_taskId: historicTask.id
+                _t_taskName: historicTask.name
+                _t_createTime: historicTask.startTime
+                _t_endTime: historicTask.endTime
+                _t_rejectable: false
+                _t_recallable: false
+                _p_startTime: historicProcessInstance.startTime
+                _p_endTime: historicProcessInstance.endTime
+                _p_submitter: entity.submitter
+
+            # 判断是否可以回退,含有signal事件的activity会被置为scope
+            # 在scope节点被创建时流程会暂停当前的execution，创建子execution并执行
+            # 所以根据历史任务的executionId无法查询到相应的召回事件，此处需要根据processInstanceId进行查询
+            # TODO 处理任务被认领的情况
+            eventQuery = new EventSubscriptionQueryImpl(process.runtime.commandExecutor)
+            events = eventQuery.processInstanceId(historicTask.processInstanceId).list()
+            e._t_recallable = true for event in events.toArray() when event.eventName is 'recall-to-' + historicTask.taskDefinitionKey
+
+            return notFound() if entity is null
+
+            json e, getJsonFilter(options, 'get')            
+
 
         create: (options, service, entityMeta, request) ->
             entity = createEntity entityMeta.entityClass
@@ -209,6 +421,26 @@ defaultHandlers = (path, options) ->
             return result if result isnt undefined
 
             json entity, objects.extend getJsonFilter(options, 'create'), { status: 201 }
+
+        create4Process: mark('process').on (process, options, service, entityMeta, request) ->
+            entity = createEntity entityMeta.entityClass
+            mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
+
+            result = callValidation 'create', options, request, entity
+            return result if result isnt true
+
+            result = callHook 'before', 'Create', options, entityMeta, request, entity
+            return result if result isnt undefined
+
+            entity.processDefinitionId = options.boundProcessId
+            entity = service.create(entity)
+
+            result = callHook 'after', 'Create', options, entityMeta, request, entity
+            # 启动流程
+            # process.startProcess getCurrentUser(), options.boundProcessId, entity
+            return result if result isnt undefined
+
+            json entity, objects.extend getJsonFilter(options, 'create'), { status: 201 }            
 
         update: (options, service, entityMeta, request, id) ->
             result = true
@@ -267,6 +499,70 @@ defaultHandlers = (path, options) ->
             r = (entity.id for entity in entities)
             json r
 
+        # for task
+        claim: mark('process').on (process, options, service, entityMeta, request, id) ->
+            entityId = id.split('|')[0]
+            taskId = id.split('|')[1]
+            result = true
+            updateIt = (entity) ->
+                mergeEntityAndParameter options, request.params, entityMeta, 'update', entity
+
+                result = callValidation 'update', options, request, entity
+                return false if result isnt true
+
+                result = callHook 'before', 'Update', options, entityMeta, request, entity
+                return false if result isnt undefined
+                result = true
+
+            entity = service.update entityId, updateIt
+
+            process.task.claim taskId, getCurrentUser()
+            return result if result isnt true
+
+            result = callHook 'after', 'Update', options, entityMeta, request, entity
+            return result if result isnt undefined
+
+            json entity, getJsonFilter(options, 'update')
+
+        complete: mark('process').on (process, options, service, entityMeta, request, id) ->
+            entityId = id.split('|')[0]
+            taskId = id.split('|')[1]
+            result = true
+            updateIt = (entity) ->
+                mergeEntityAndParameter options, request.params, entityMeta, 'update', entity
+
+                result = callValidation 'update', options, request, entity
+                return false if result isnt true
+
+                result = callHook 'before', 'Update', options, entityMeta, request, entity
+                return false if result isnt undefined
+                result = true
+
+            entity = service.update entityId, updateIt
+
+            variables = objects.extend {}, process.entityToVariables(entity)
+            task = process.getTask taskId
+            process.runtime.setVariables task.getExecutionId(), variables
+            process.task.claim taskId, getCurrentUser() if task.assignee is null
+            process.task.complete taskId
+
+            return result if result isnt true
+
+            result = callHook 'after', 'Update', options, entityMeta, request, entity
+            return result if result isnt undefined
+
+            json entityId
+
+        reject: mark('process').on (process, options, service, entityMeta, request, id) ->
+            taskId = id.split('|')[1]
+            process.task.reject taskId
+            json taskId
+
+        recall: mark('process').on (process, options, service, entityMeta, request, id) ->
+            taskId = id.split('|')[1]
+            process.task.recall taskId
+            json taskId
+
     return o if options.disableAuthz is true or coala.disableAuthz is true
 
     map = list: 'show', get: 'show', create: 'add', update: 'edit', remove: 'del', batchRemove: 'del'
@@ -284,7 +580,18 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
         entity[key] = converter.convert value, entityMeta.getField(key)
     options.afterMerge? entity, type
     entity
-
+getCurrentUser = ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+    currentUser
+taskToVo = (task) ->
+    ps = [
+        'id', 'name', 'description', 'priority', 'assignee', 'processInstanceId', 
+        'processDefinitionId', 'createTime', 'dueDate', 'startTime', 'endTime', 'executionId'
+    ]
+    vo = {}
+    vo[name] = task[name] for name in ps
+    vo
 validationGroupMapping =
     create: Create
     update: Update
