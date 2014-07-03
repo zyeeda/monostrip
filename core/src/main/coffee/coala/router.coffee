@@ -15,12 +15,20 @@ paths = require 'coala/util/paths'
 {createConverter} = require 'coala/scaffold/converter'
 {createValidator} = require 'coala/validation/validator'
 {createValidationContext} = require 'coala/validation/validation-context'
+
+{createManager} = require 'coala/manager'
+
 # processService = require 'coala/scaffold/process-service'
 
 {Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 {Create, Update} = com.zyeeda.coala.validation.group
 
+{Account} = com.zyeeda.coala.commons.organization.entity
+
+{SecurityUtils} = org.apache.shiro
+
 timeFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd HH:mm:ss'
+
 log = getLogger module.id
 entityMetaResovler = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
@@ -199,7 +207,7 @@ getJsonFilter = exports.getJsonFilter = (options, type) ->
 
 defaultHandlers = (path, options) ->
     o =
-        list: (options, service, entityMeta, request, taskType) ->
+        list: mark('managers', Account).on (accountMgr, options, service, entityMeta, request, taskType) ->
             entity = createEntity entityMeta.entityClass
             mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
 
@@ -212,6 +220,32 @@ defaultHandlers = (path, options) ->
             config.appPath = appPath
 
             filters = coala.extractFilterInfo request.params
+            filters = filters or []
+
+            # if scaffold do not have setting: exports.haveDataLevel = false
+            #    then means this scaffold need to filter data with dataLevel
+            #
+            if options.haveDataLevel isnt false
+                currSessionUser = SecurityUtils.getSubject().getPrincipal()
+                currUser = accountMgr.find currSessionUser.id
+                if currUser.dataLevel isnt undefined and currUser.dataLevel isnt null and currUser.dataLevel isnt 1
+                    currDepartPath = currUser.department.path
+                    currDeptPathArr = currDepartPath.split '/'
+                    likeDeptPath = '/'
+
+                    # here department.path's array.length - 1 because the path have '/' in begin and end position
+                    # if department.path's level >= dataLevel
+                    #    then filter the data
+                    # if department.path's level < dataLevel
+                    #    then should return empty collection
+                    #
+                    if currDeptPathArr.length - 1 >= currUser.dataLevel
+                        for i in [0..currUser.dataLevel-1] by 1
+                            likeDeptPath += currDeptPathArr[i]
+                        if currUser.dataLevel > 1 then likeDeptPath += '/'
+                        filters.push(['like', 'createDeptPath', likeDeptPath, {mode: 'start'}])
+                    else
+                        filters.push(['eq', 'id', ''])
             config.filters = filters if filters
 
             style = options.style
@@ -405,7 +439,7 @@ defaultHandlers = (path, options) ->
             json e, getJsonFilter(options, 'get')            
 
 
-        create: (options, service, entityMeta, request) ->
+        create: mark('managers', Account).on (accountMgr, options, service, entityMeta, request) ->
             entity = createEntity entityMeta.entityClass
             mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
 
@@ -414,6 +448,10 @@ defaultHandlers = (path, options) ->
 
             result = callHook 'before', 'Create', options, entityMeta, request, entity
             return result if result isnt undefined
+
+            currSessionUser = SecurityUtils.getSubject().getPrincipal()
+            currUser = accountMgr.find currSessionUser.id
+            entity.createDeptPath = currUser.department?.path or ''
 
             entity = service.create(entity)
 

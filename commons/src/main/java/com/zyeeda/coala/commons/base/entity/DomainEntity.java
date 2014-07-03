@@ -28,6 +28,11 @@ public class DomainEntity implements Serializable {
      */
     private String id;
 
+    /**
+     * 创建数据的部门路径.
+     */
+    private String createDeptPath;
+
     @Id
     @GeneratedValue(generator = "system-uuid")
     //@GenericGenerator(name = "system-uuid", strategy = "com.zyeeda.coala.commons.generator.FallbackUUIDHexGenerator")
@@ -39,6 +44,15 @@ public class DomainEntity implements Serializable {
 
     public void setId(final String id) {
         this.id = id;
+    }
+
+    @Column(name = "F_CREATE_DEPT_PATH", length = 3000)
+    public String getCreateDeptPath() {
+        return createDeptPath;
+    }
+
+    public void setCreateDeptPath(String createDeptPath) {
+        this.createDeptPath = createDeptPath;
     }
 
 }
