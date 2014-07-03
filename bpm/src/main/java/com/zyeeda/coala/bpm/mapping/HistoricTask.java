@@ -1,6 +1,7 @@
 package com.zyeeda.coala.bpm.mapping;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author guyong
@@ -13,8 +14,9 @@ public class HistoricTask implements Serializable {
     private String id = null;
     private String processInstanceId = null;
     private String processDefinitionId = null;
-    private String startTime = null;
-    private String endTime = null;
+    private Date startTime = null;
+    private Date claimTime = null;
+    private Date endTime = null;
     private String durationInMillis = null;
     private String deleteReason = null;
     private String executionId = null;
@@ -23,6 +25,7 @@ public class HistoricTask implements Serializable {
     private String description = null;
     private String owner = null;
     private String assignee = null;
+    private String assigneeName = null;
     private String taskDefinitionKey = null;
     private String priority = null;
     private String dueDate = null;
@@ -51,19 +54,19 @@ public class HistoricTask implements Serializable {
         this.processDefinitionId = processDefinitionId;
     }
 
-    public String getStartTime() {
+    public Date getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 
@@ -154,5 +157,21 @@ public class HistoricTask implements Serializable {
     public void setDueDate(String dueDate) {
         this.dueDate = dueDate;
     }
+
+	public String getAssigneeName() {
+		return assigneeName;
+	}
+
+	public void setAssigneeName(String assigneeName) {
+		this.assigneeName = assigneeName;
+	}
+
+	public Date getClaimTime() {
+		return claimTime;
+	}
+
+	public void setClaimTime(Date claimTime) {
+		this.claimTime = claimTime;
+	}
 
 }

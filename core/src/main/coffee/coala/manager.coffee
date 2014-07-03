@@ -186,7 +186,7 @@ exports.createManager = (entityClass, emfName) ->
     findByEntity4Process: (option = {}) ->
         filters = option.filters or []
         orders = option.orderBy
-        {sql, params} = generateSql4Process entityClass, option.taskType, option.fetchCount, filters, orders
+        {sql, params} = generateSql4Process entityClass, option, filters, orders
         query = em.createQuery sql
         if not option.fetchCount
             pageInfo = getPageInfo option
@@ -400,7 +400,7 @@ generateSql = (entityClass, isCount, filters, orders) ->
     params: ctx.params
 
 # 生成流程查询 hql
-generateSql4Process = (entityClass, taskType='waiting' ,isCount, filters, orders) ->
+generateSql4Process = (entityClass, option, filters, orders) ->
     converter = createConverter()
     currentUser = getCurrentUser()
     ctx =
@@ -429,55 +429,38 @@ generateSql4Process = (entityClass, taskType='waiting' ,isCount, filters, orders
             flat = name.replace /\./g, '_'
             flat += '_' + (ctx.id++)
 
-    if taskType is 'waiting'
-        sql = if isCount then 'select count(ec) ' else 'select ec '
+    if option.taskType is 'waiting'
+        sql = if option.fetchCount then 'select count(ec) ' else 'select ec '
         sql += "from #{entityClass.name} ec, TaskEntity te, IdentityLinkEntity i "
         sql += " where ec.processDefinitionId = substring(te.processDefinitionId,1,length(ec.processDefinitionId)) "
         sql += " and ec.processInstanceId = te.processInstanceId "
         sql += " and te.id = i.taskId "
         sql += " and te.assignee is null "
         sql += " and i.type = 'candidate' "
-        sql += " and (i.userId='#{currentUser}' or (i.groupId in ('1','2')))" 
-    else if taskType is 'doing'
-        sql = if isCount then 'select count(ec) ' else 'select ec '
+        # sql += " and (i.userId='#{currentUser}' or (i.groupId in ('1','2')))"
+        groupIds = 'undefined'
+        groupIds = option.groupIds.join ',' if option.groupIds.length isnt 0
+        sql += " and (i.userId='#{currentUser}' or (i.groupId in (#{groupIds})))"
+    else if option.taskType is 'doing'
+        sql = if option.fetchCount then 'select count(ec) ' else 'select ec '
         sql += "from #{entityClass.name} ec, TaskEntity te"
         sql += " where ec.processDefinitionId = substring(te.processDefinitionId,1,length(ec.processDefinitionId)) "
         sql += " and ec.processInstanceId = te.processInstanceId "
         sql += " and te.assignee = '#{currentUser}' "
-    else if taskType is 'done'
-        sql = if isCount then 'select count(distinct ec) ' else 'select ec '
+    else if option.taskType is 'done'
+        sql = if option.fetchCount then 'select count(distinct ec) ' else 'select ec '
         sql += "from #{entityClass.name} ec, HistoricTaskInstanceEntity htie "
         sql += " where ec.processDefinitionId = substring(htie.processDefinitionId,1,length(ec.processDefinitionId)) "
         sql += " and htie.assignee='#{currentUser}' "
         sql += " and htie.deleteReason ='completed' "
     # taskType is 'none' , seatch all data
     else
-        return generateSql entityClass, isCount, filters, orders
-
-
-    # sql = if isCount then 'select count(ec) ' else 'select ec '
-    # sql += "from #{entityClass.name} ec, TaskEntity te, IdentityLinkEntity i "
-    # # if filters.length isnt 0
-    # #     conditions = operators.process.apply operators, [ctx, 'and'].concat filters
-    # #     sql += "left join t.#{key} #{value} " for key, value of ctx.joins
-    # #     sql += 'where ' + conditions
-    # # os = []
-    # # if orders and not isCount
-    # #     for order in orders
-    # #         os.push "#{ctx.wrap key} #{value}" for key, value of order when ctx.check key
-    # #     sql += ' order by ' + os.join(',') if os.length > 0
-    # sql += " where ec.processDefinitionId = substring(te.processDefinitionId,1,length(ec.processDefinitionId)) "
-    # sql += " and te.id = i.taskId "
-    # if taskType is 'waiting'
-    #     sql += " and te.assignee is null "
-    # else if taskType is 'doing'
-    #     sql += " and te.assignee = '#{currentUser}' "
-
-    # sql += " and i.type = 'candidate' "
-    # sql += " and (i.userId='#{currentUser}' or (i.groupId in ('1','2')))" 
+        return generateSql entityClass, option.fetchCount, filters, orders
 
     sql: sql
     params: ctx.params
+
+
 operators =
     process: (ctx, op = 'eq', args...) ->
         op = op.toLowerCase()

@@ -3,6 +3,7 @@
 {type} = require 'coala/util/type'
 upload = require 'coala/util/upload'
 fs = require 'fs'
+_ = require 'underscore'
 {coala} = require 'coala/config'
 createProcessService = require('coala/scaffold/process-service').createService
 
@@ -97,6 +98,27 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
         # 查询流程数据
         list4Process: (entity, options) ->
             manager = baseService.createManager service.entityClass
+            if options.taskType is 'waiting'
+                currentUser = getCurrentUser()
+                accountClass = ClassUtils.forName 'com.zyeeda.coala.commons.organization.entity.Account'   
+                accountManager = baseService.createManager accountClass
+                account = accountManager.find currentUser
+
+                groupIds = []
+                departments = []
+                roles = []
+                departments = getParentDepatments account.department if account.department
+                roles = account.roles.toArray() if account.roles
+                departmentIds = _.map departments, (department) ->
+                    "'" + department.id + "'"
+                roleIds = _.map roles, (role) ->
+                    "'" + role.id + "'"
+                _.each departmentIds, (id) ->
+                    groupIds.push id
+                _.each roleIds, (id) ->
+                    groupIds.push id
+                options.groupIds = groupIds
+
             manager.findByEntity4Process options
 
         get: (id) ->
@@ -155,3 +177,16 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             manager.remove.apply manager, entities
 
     service
+getCurrentUser = ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+    currentUser
+
+# 递归查询父部门
+# TODO 可能存在性能问题
+getParentDepatments = (department, parents = []) ->
+    parents.push department
+    if department.parent
+        getParentDepatments department.parent, parents
+
+    parents        

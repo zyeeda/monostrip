@@ -10,6 +10,7 @@ paths = require 'coala/util/paths'
 {json, html, notFound, internalServerError} = require 'coala/response'
 {Authentication} = org.activiti.engine.impl.identity
 {EventSubscriptionQueryImpl} = org.activiti.engine.impl
+{ClassUtils} = org.springframework.util
 
 {createService} = require 'coala/scaffold/service'
 {createConverter} = require 'coala/scaffold/converter'
@@ -135,7 +136,7 @@ attachDomain = (router, path, entityMeta, options = {}) ->
         getUrl = updateUrl = path + url_subfix + 'none' + ID_SUFFIX
         options.taskType = 'none'
         noneListOptions = objects.extend {}, options, {listType: 'list'}
-        router.get getUrl, handlers.get.bind handlers, options, service, entityMeta unless excludes.get
+        router.get getUrl, handlers.get4Process.bind handlers, options, service, entityMeta unless excludes.get
         router.get listUrl, handlers.list.bind handlers, noneListOptions, service, entityMeta
         router.post createUrl, handlers.create4Process.bind handlers, options, service, entityMeta unless excludes.create
         router.put updateUrl, handlers.update.bind handlers, options, service, entityMeta unless excludes.update
@@ -200,6 +201,13 @@ getService = (options, entityMeta) ->
     return options.service if options.service and not _.isFunction(options.service)
     service = createService entityMeta.entityClass, entityMeta, options
     if options.service then options.service(service) else service
+getAccountService = ->
+    entityClass = ClassUtils.forName 'com.zyeeda.coala.commons.organization.entity.Account'    
+    entityMeta = entityMetaResovler.resolveEntity entityClass
+    createService entityMeta.entityClass, entityMeta
+
+getAccountById = (id) ->
+    getAccountService().get id
 
 getJsonFilter = exports.getJsonFilter = (options, type) ->
     return {} unless options.filters
@@ -332,13 +340,15 @@ defaultHandlers = (path, options) ->
             # _.each hts.toArray(), (task) -> 
             #     task.startTime = timeFormat.format task.startTime
 
-            result.results = htQuery.list()
+            # result.results = htQuery.list()
+
+            result.results = process.history.getHistoricTasksByProcessInstanceId entity.processInstanceId
 
             o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
             json o, 
                 include:
                     # '!historicTaskInstanceEntityFilter': ''
-                    historicTaskInstanceEntityFilter: ['id', 'name', 'assignee', 'startTime', 'claimTime', 'endTime']
+                    historicTaskFilter: ['id', 'name', 'assignee', 'assigneeName', 'startTime', 'claimTime', 'endTime']
 
         get: (options, service, entityMeta, request, id) ->
             entity = service.get id
@@ -381,7 +391,7 @@ defaultHandlers = (path, options) ->
                 _t_rejectable: false
                 _p_startTime: historicProcessInstance.startTime
                 _p_endTime: historicProcessInstance.endTime
-                _p_submitter: entity.submitter
+                _p_submitter: getAccountById(entity.submitter)?.accountName or entity.submitter if entity.submitter
             # task = taskToVo task
 
             # 判断是否可以回退
@@ -414,6 +424,7 @@ defaultHandlers = (path, options) ->
             for key, value of entity
                 e[key] = value if type(value) isnt 'function'
 
+
             e = objects.extend e, 
                 pass: '1'
                 _t_taskId: historicTask.id
@@ -424,7 +435,7 @@ defaultHandlers = (path, options) ->
                 _t_recallable: false
                 _p_startTime: historicProcessInstance.startTime
                 _p_endTime: historicProcessInstance.endTime
-                _p_submitter: entity.submitter
+                _p_submitter: getAccountById(entity.submitter)?.accountName or entity.submitter if entity.submitter
 
             # 判断是否可以回退,含有signal事件的activity会被置为scope
             # 在scope节点被创建时流程会暂停当前的execution，创建子execution并执行
