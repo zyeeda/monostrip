@@ -14,11 +14,13 @@ import org.apache.ibatis.annotations.Select;
  ****************************
  */
 public interface HistoricTaskMapper {
+	// 此处与 comment 表进行关联，只支持一个任务只有一条 comment 的情况，如果多于一个 comment 则会出现任务历史冗余	
     @Select("select t.ID_ as id, t.name_ as name, t.assignee_ as assignee, "
     		+ " t.start_time_ as startTime, t.claim_time_ as claimTime, t.end_time_ as endTime, "
-    		+ " a.f_account_name as assigneeName "
+    		+ " a.f_account_name as assigneeName, c.message_ comment "
     		+ " from act_hi_taskinst t"
-    		+ " left outer join zda_account a on t.assignee_ = a.f_id "
+    		+ " left outer join zda_account a on t.assignee_ = a.f_id  "
+    		+ " left outer join act_hi_comment c on t.id_ = c.task_id_ "
     		+ " where t.proc_inst_id_ = #{processInstanceId} ")
     List<Map<String, Object>> getHistoricTasksByProcessInstanceId(String processInstanceId);
 }

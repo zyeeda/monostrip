@@ -348,7 +348,7 @@ defaultHandlers = (path, options) ->
             json o, 
                 include:
                     # '!historicTaskInstanceEntityFilter': ''
-                    historicTaskFilter: ['id', 'name', 'assignee', 'assigneeName', 'startTime', 'claimTime', 'endTime']
+                    historicTaskFilter: ['id', 'name', 'assignee', 'assigneeName', 'startTime', 'claimTime', 'endTime', 'comment']
 
         get: (options, service, entityMeta, request, id) ->
             entity = service.get id
@@ -384,20 +384,23 @@ defaultHandlers = (path, options) ->
                 e[key] = value if type(value) isnt 'function'
 
             e = objects.extend e, 
-                pass: '1'
-                _t_taskId: task.id
-                _t_taskName: task.name
-                _t_createTime: task.createTime
+                _t_pass: '1'
+                _t_taskId: task?.id
+                _t_taskName: task?.name
+                _t_createTime: task?.createTime
                 _t_rejectable: false
                 _p_startTime: historicProcessInstance.startTime
                 _p_endTime: historicProcessInstance.endTime
                 _p_submitter: getAccountById(entity.submitter)?.accountName or entity.submitter if entity.submitter
             # task = taskToVo task
 
-            # 判断是否可以回退
-            eventQuery = new EventSubscriptionQueryImpl(process.runtime.commandExecutor)
-            events = eventQuery.executionId(task.executionId).list()
-            e._t_rejectable = true for event in events.toArray() when event.eventName is 'reject-from-' + task.taskDefinitionKey
+            if task 
+                # 判断是否可以回退
+                eventQuery = new EventSubscriptionQueryImpl(process.runtime.commandExecutor)
+                events = eventQuery.executionId(task.executionId).list()
+                e._t_rejectable = true for event in events.toArray() when event.eventName is 'reject-from-' + task.taskDefinitionKey
+            else 
+                e._t_rejectable = false
 
             return notFound() if entity is null
 
@@ -426,7 +429,7 @@ defaultHandlers = (path, options) ->
 
 
             e = objects.extend e, 
-                pass: '1'
+                _t_pass: '1'
                 _t_taskId: historicTask.id
                 _t_taskName: historicTask.name
                 _t_createTime: historicTask.startTime
@@ -590,7 +593,17 @@ defaultHandlers = (path, options) ->
             entity = service.update entityId, updateIt
 
             variables = objects.extend {}, process.entityToVariables(entity)
+            pass = request.params._t_pass or 'true'
+            comment = request.params._t_comment or '1'
+            if pass is '1' then pass = true else pass = false
+            objects.extend variables, 
+                '_t_pass': pass
+                '_t_comment': comment
+
             task = process.getTask taskId
+            # 保存审核意见
+            process.task.addComment taskId, task.getProcessInstanceId(), comment if not _.isEmpty comment
+
             process.runtime.setVariables task.getExecutionId(), variables
             process.task.claim taskId, getCurrentUser() if task.assignee is null
             process.task.complete taskId

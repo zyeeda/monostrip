@@ -29,6 +29,7 @@ public class HistoricTask implements Serializable {
     private String taskDefinitionKey = null;
     private String priority = null;
     private String dueDate = null;
+    private String comment = null;
 
     public String getId() {
         return id;
@@ -172,6 +173,14 @@ public class HistoricTask implements Serializable {
 
 	public void setClaimTime(Date claimTime) {
 		this.claimTime = claimTime;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 }

@@ -134,9 +134,11 @@ public class DefaultHistoryService implements HistoryService{
 		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"); 
 		for(Map<String, Object> entry: results){
+//			System.out.println("---map :" + entry);
 			historicTask = new HistoricTask();
 			historicTask.setId(entry.get("id").toString());
 			historicTask.setName(entry.get("name").toString());
+			
 			if(entry.get("assigneeName")!=null){
 				historicTask.setAssigneeName(entry.get("assigneeName").toString());
 			}
@@ -147,23 +149,23 @@ public class DefaultHistoryService implements HistoryService{
 					historicTask.setStartTime(date);
 				} catch (ParseException e) {
 				} 
-//				historicTask.setStartTime(new Date(Long.parseLong(entry.get("startTime").toString())));
 			}
 			if(entry.get("claimTime")!=null){
 				try {
 					Date date = df.parse(entry.get("claimTime").toString());
-					historicTask.setStartTime(date);
+					historicTask.setClaimTime(date);
 				} catch (ParseException e) {
 				} 
-//				historicTask.setClaimTime(new Date(Long.parseLong(entry.get("claimTime").toString())));
 			}
 			if(entry.get("endTime")!=null){
 				try {
 					Date date = df.parse(entry.get("endTime").toString());
-					historicTask.setStartTime(date);
+					historicTask.setEndTime(date);
 				} catch (ParseException e) {
 				}
-//				historicTask.setEndTime(new Date(Long.parseLong(entry.get("endTime").toString())));
+			}
+			if(entry.get("comment")!=null){
+				historicTask.setComment(entry.get("comment").toString());
 			}
 			
 			historicTasks.add(historicTask);

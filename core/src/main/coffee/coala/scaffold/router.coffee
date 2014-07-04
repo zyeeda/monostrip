@@ -149,7 +149,7 @@ mountExtraRoutes = (r, meta, options) ->
                     'name', 'age', 'sex', 'phone', 'address'
                 ],
                 'task-info-group': [
-                    '_t_taskId',
+                    # '_t_taskId',
                     '_t_taskName', 
                     '_t_createTime'
                 ],
@@ -166,7 +166,7 @@ mountExtraRoutes = (r, meta, options) ->
             forms.show =
                 size: options.forms?.show?.size or null,
                 groups: [
-                    {name: 'task-info-group', columns: 3, labelOnTop: true, label: '任务信息'}, 
+                    {name: 'task-info-group', columns: 2, labelOnTop: true, label: '任务信息'}, 
                     {name: 'process-info-group', columns: 3},
                     {name: 'history-group', columns: 5}
                 ],
@@ -180,9 +180,8 @@ mountExtraRoutes = (r, meta, options) ->
         else if formName is 'complete'
             fieldGroups =
                 'task-audit-group': [
-                    {name: 'pass', type: 'dropdown', defaultValue: '1', source: [{id: '1', text: '通过'}, {id: '0', text: '不通过'}]},
-                    # 'pass',
-                    {name: 'comment', type: 'textarea', colspan: 3, rowspan: 3, heigth: 80}
+                    {name: '_t_pass', type: 'dropdown', defaultValue: '1', source: [{id: 1, text: '通过'}, {id: 0, text: '不通过'}]},
+                    {name: '_t_comment', type: 'textarea', colspan: 3, rowspan: 3, heigth: 80}
                 ]           
             fieldGroups['base-info-group'] = options.fieldGroups['base-info-group']
 
@@ -191,7 +190,17 @@ mountExtraRoutes = (r, meta, options) ->
             forms = options.forms
             fieldGroups = options.fieldGroups
 
-        json generateForms(meta, options.labels.defaults, forms, fieldGroups, formName, options)
+        labels =  objects.extend {}, options.labels.defaults
+        labels._t_taskId = '任务id' if not labels._t_taskId
+        labels._t_taskName = '任务名称' if not labels._t_taskName
+        labels._t_createTime = '创建时间' if not labels._t_createTime
+        labels._t_pass = '是否通过' if not labels._t_pass
+        labels._t_comment = '意见' if not labels._t_comment
+        labels._p_startTime = '开始时间' if not labels._p_startTime
+        labels._p_endTime = '结束时间' if not labels._p_endTime
+        labels._p_submitter = '发起人' if not labels._p_submitter
+
+        json generateForms(meta, labels, forms, fieldGroups, formName, options)
     )
 
 getJsonFilter = exports.getJsonFilter = (options, type) ->
