@@ -230,10 +230,10 @@ defaultHandlers = (path, options) ->
             filters = coala.extractFilterInfo request.params
             filters = filters or []
 
-            # if scaffold do not have setting: exports.haveDataLevel = false
+            # if scaffold have setting: exports.haveDataLevel = true
             #    then means this scaffold need to filter data with dataLevel
             #
-            if options.haveDataLevel isnt false
+            if options.haveDataLevel is true
                 currSessionUser = SecurityUtils.getSubject().getPrincipal()
                 currUser = accountMgr.find currSessionUser.id
                 if currUser.dataLevel isnt undefined and currUser.dataLevel isnt null and currUser.dataLevel isnt 1
