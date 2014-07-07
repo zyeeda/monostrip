@@ -29,7 +29,7 @@ public class DomainEntity implements Serializable {
     private String id;
 
     /**
-     * 创建数据的部门路径.
+     * 创建数据的用户所属部门路径.
      */
     private String createDeptPath;
 
@@ -46,7 +46,7 @@ public class DomainEntity implements Serializable {
         this.id = id;
     }
 
-    @Column(name = "F_CREATE_DEPT_PATH", length = 3000)
+    @Column(name = "F_CREATE_DEPT_PATH", length = 3000， updatable = false)
     public String getCreateDeptPath() {
         return createDeptPath;
     }
