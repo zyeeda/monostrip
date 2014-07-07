@@ -46,7 +46,7 @@ public class DomainEntity implements Serializable {
         this.id = id;
     }
 
-    @Column(name = "F_CREATE_DEPT_PATH", length = 3000， updatable = false)
+    @Column(name = "F_CREATE_DEPT_PATH", length = 3000, updatable = false)
     public String getCreateDeptPath() {
         return createDeptPath;
     }
