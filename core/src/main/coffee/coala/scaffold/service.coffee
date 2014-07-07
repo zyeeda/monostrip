@@ -60,9 +60,9 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
         currentUser = 'tom'
         Authentication.setAuthenticatedUserId currentUser
 
-        processDefinitionId = scaffold.boundProcessId
-        if type(processDefinitionId) is 'function'
-            processDefinitionId = processDefinitionId entity
+        processDefinitionKey = scaffold.processDefinitionKey
+        if type(processDefinitionKey) is 'function'
+            processDefinitionKey = processDefinitionKey entity
         variables =
             ENTITY: entity.id
             ENTITYCLASS: entity.getClass()?.getName()
@@ -70,15 +70,14 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
         for property, value of entity
             variables[property] = value if value isnt undefined and type(value) isnt 'function' and value isnt null
 
-        processInstance = runtimeService.startProcessInstanceByKey processDefinitionId, variables
+        processInstance = runtimeService.startProcessInstanceByKey processDefinitionKey, variables
 
         # 写入流程实例id到实体中
         entity.processInstanceId = processInstance.processInstanceId
         if entity instanceof ProcessStatusAware
-            entity.processDefinitionId = processDefinitionId
+            entity.processDefinitionId = processInstance.processDefinitionId
             entity.processInstanceId = processInstance.id
             entity.submitter = currentUser
-            # entity.status = '开始'
             manager.merge entity
         else
             manager.merge entity
@@ -141,7 +140,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             manySideUpdate entity
 
             # 启动流程
-            if scaffold.boundProcessId
+            if scaffold.processDefinitionKey
                 processInstanceId = startProcess entity, manager
             entity
 

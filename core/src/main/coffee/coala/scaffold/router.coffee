@@ -164,7 +164,7 @@ mountExtraRoutes = (r, meta, options) ->
             # 追加 scaffold 中配置的 'base-info-group' 信息
             fieldGroups['base-info-group'] = options.fieldGroups['base-info-group']
             forms.show =
-                size: options.forms?.show?.size or null,
+                size: options.forms?.show?.size or 'large',
                 groups: [
                     {name: 'task-info-group', columns: 2, labelOnTop: true, label: '任务信息'}, 
                     {name: 'process-info-group', columns: 3},

@@ -362,7 +362,7 @@ defaultHandlers = (path, options) ->
             # 查询待办任务
             task = process.task.createTaskQuery()
             .taskCandidateUser(currentUser)
-            .processDefinitionKey(options.boundProcessId)
+            .processDefinitionKey(options.processDefinitionKey)
             .processInstanceId(entity.processInstanceId)
             .processVariableValueEquals('ENTITY', id)
             .singleResult()
@@ -371,7 +371,7 @@ defaultHandlers = (path, options) ->
             if task is null
                 task = process.task.createTaskQuery()
                 .taskAssignee(currentUser)
-                .processDefinitionKey(options.boundProcessId)
+                .processDefinitionKey(options.processDefinitionKey)
                 .processVariableValueEquals('ENTITY', id)
                 .singleResult()
 
@@ -484,12 +484,12 @@ defaultHandlers = (path, options) ->
             result = callHook 'before', 'Create', options, entityMeta, request, entity
             return result if result isnt undefined
 
-            entity.processDefinitionId = options.boundProcessId
+            # entity.processDefinitionId = options.processDefinitionKey
             entity = service.create(entity)
 
             result = callHook 'after', 'Create', options, entityMeta, request, entity
             # 启动流程
-            # process.startProcess getCurrentUser(), options.boundProcessId, entity
+            # process.startProcess getCurrentUser(), options.processDefinitionKey, entity
             return result if result isnt undefined
 
             json entity, objects.extend getJsonFilter(options, 'create'), { status: 201 }            

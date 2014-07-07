@@ -129,7 +129,7 @@ mountPath = (path, meta) ->
     options = requireScaffoldConfig path
     # 只解析 style 为 process 的 scaffold
     return if options.style isnt 'process'
-    log.debug "taksk router --- mountPath options.boundProcessId = #{options.boundProcessId}"
+    log.debug "taksk router --- mountPath options.processDefinitionKey = #{options.processDefinitionKey}"
     doWithRouter = options.doWithRouter or ->
     options.doWithRouter = (r) ->
         # 首先执行 feature 中定义的 doWithRouter 方法
