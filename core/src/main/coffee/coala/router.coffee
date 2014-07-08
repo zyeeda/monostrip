@@ -209,6 +209,12 @@ getAccountService = ->
 getAccountById = (id) ->
     getAccountService().get id
 
+# 根据流程定义id 查询流程定义
+getProcessDefinition = mark('process').on (process, processDefinitionId) ->
+    process.repository.createProcessDefinitionQuery()
+        .processDefinitionId(processDefinitionId)
+        .singleResult()
+
 getJsonFilter = exports.getJsonFilter = (options, type) ->
     return {} unless options.filters
     options.filters[type] or options.filters.defaults or {}
@@ -378,6 +384,7 @@ defaultHandlers = (path, options) ->
             historicProcessInstance = process.history.createHistoricProcessInstanceQuery()
                 .processInstanceId(entity.processInstanceId)
                 .singleResult()
+            processDefinition = getProcessDefinition(historicProcessInstance.processDefinitionId)
             e = {}
 
             for key, value of entity
@@ -388,18 +395,24 @@ defaultHandlers = (path, options) ->
                 _t_taskId: task?.id
                 _t_taskName: task?.name
                 _t_createTime: task?.createTime
+                _t_assignee: task?.assignee
+                _t_assigneeName: getAccountById(task.assignee)?.accountName or task.assignee if task.assignee
                 _t_rejectable: false
+                _p_name: processDefinition.name
+                _p_description: processDefinition.description
                 _p_startTime: historicProcessInstance.startTime
                 _p_endTime: historicProcessInstance.endTime
                 _p_submitter: getAccountById(entity.submitter)?.accountName or entity.submitter if entity.submitter
-            # task = taskToVo task
 
-            if task 
+            if task
                 # 判断是否可以回退
-                eventQuery = new EventSubscriptionQueryImpl(process.runtime.commandExecutor)
-                events = eventQuery.executionId(task.executionId).list()
-                e._t_rejectable = true for event in events.toArray() when event.eventName is 'reject-from-' + task.taskDefinitionKey
-            else 
+                if task.assignee
+                    eventQuery = new EventSubscriptionQueryImpl(process.runtime.commandExecutor)
+                    events = eventQuery.executionId(task.executionId).list()
+                    e._t_rejectable = true for event in events.toArray() when event.eventName is 'reject-from-' + task.taskDefinitionKey
+                else
+                    e._t_rejectable = false #任务未被认领不能进行回退
+            else
                 e._t_rejectable = false
 
             return notFound() if entity is null
@@ -421,6 +434,8 @@ defaultHandlers = (path, options) ->
                 .desc()
                 .list()
                 .toArray()
+
+            processDefinition = getProcessDefinition(historicProcessInstance.processDefinitionId)
             historicTask = historicTasks[0]
             e = {}
 
@@ -434,13 +449,17 @@ defaultHandlers = (path, options) ->
                 _t_taskName: historicTask.name
                 _t_createTime: historicTask.startTime
                 _t_endTime: historicTask.endTime
+                _t_assignee: historicTask.assignee
+                _t_assigneeName: getAccountById(historicTask.assignee)?.accountName or historicTask.assignee if historicTask.assignee
                 _t_rejectable: false
                 _t_recallable: false
+                _p_name: processDefinition.name
+                _p_description: processDefinition.description                
                 _p_startTime: historicProcessInstance.startTime
                 _p_endTime: historicProcessInstance.endTime
                 _p_submitter: getAccountById(entity.submitter)?.accountName or entity.submitter if entity.submitter
 
-            # 判断是否可以回退,含有signal事件的activity会被置为scope
+            # 判断是否可以回退,含有signal事件的activity 的scope属性会被设置为true
             # 在scope节点被创建时流程会暂停当前的execution，创建子execution并执行
             # 所以根据历史任务的executionId无法查询到相应的召回事件，此处需要根据processInstanceId进行查询
             # TODO 处理任务被认领的情况
@@ -593,8 +612,8 @@ defaultHandlers = (path, options) ->
             entity = service.update entityId, updateIt
 
             variables = objects.extend {}, process.entityToVariables(entity)
-            pass = request.params._t_pass or 'true'
-            comment = request.params._t_comment or '1'
+            pass = request.params._t_pass or '1'
+            comment = request.params._t_comment or ''
             if pass is '1' then pass = true else pass = false
             objects.extend variables, 
                 '_t_pass': pass
@@ -617,11 +636,24 @@ defaultHandlers = (path, options) ->
 
         reject: mark('process').on (process, options, service, entityMeta, request, id) ->
             taskId = id.split('|')[1]
+            rejectReason = request.params._t_reject_reason
+            if not _.isEmpty rejectReason
+                task = process.getTask taskId
+                process.task.addComment taskId, task.getProcessInstanceId(), rejectReason 
+
             process.task.reject taskId
             json taskId
 
         recall: mark('process').on (process, options, service, entityMeta, request, id) ->
             taskId = id.split('|')[1]
+            # recallReason = request.params._t_recall_reason
+            # if not _.isEmpty recallReason
+            #     # task = process.getTask taskId
+            #     historicTask = process.history.createHistoricTaskInstanceQuery()
+            #         .taskId(task)
+            #         .singleResult()
+            #     process.task.addComment taskId, historicTask.getProcessInstanceId(), recallReason
+
             process.task.recall taskId
             json taskId
 

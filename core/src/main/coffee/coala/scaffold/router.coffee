@@ -125,19 +125,28 @@ mountExtraRoutes = (r, meta, options) ->
         json operators
     )
     r.get('configuration/process/grid/:taskType', (request, taskType) ->
-        # 判断有 grid 的配置信息
         grid = options['grid']
-        if not grid
-            # 如果不存在相应的表头信息，则所有的 tab 页统一使用 defaults 所设置的内容
-            lableName = if options.labels[taskType] then taskType else 'defaults'
+        if (not grid or not grid[taskType]) and options.labels
             columns = []
-            columns.push {name: name, header: value} for name, value of options.labels[lableName]
+            columns.push {name: name, header: value} for name, value of options.labels
             grid = columns: columns
-        # 存在 grid 配置信息的情况，目前尚不支持
-        else if grid and options.labels
-            grid.columns = setLabelToColModel grid.columns, options.labels
-
+        else if grid and grid[taskType] and options.labels
+            grid.columns = setLabelToColModel grid[taskType].columns, options.labels
         json grid
+
+        # # 判断有 grid 的配置信息
+        # grid = options['grid']
+        # if not grid
+        #     # 如果不存在相应的表头信息，则所有的 tab 页统一使用 defaults 所设置的内容
+        #     lableName = if options.labels[taskType] then taskType else 'defaults'
+        #     columns = []
+        #     columns.push {name: name, header: value} for name, value of options.labels[lableName]
+        #     grid = columns: columns
+        # # 存在 grid 配置信息的情况，目前尚不支持
+        # else if grid and options.labels
+        #     grid.columns = setLabelToColModel grid.columns, options.labels
+
+        # json grid
     )
     r.get('configuration/process/forms/:formName', (request, formName) ->
         forms = {}
@@ -151,12 +160,15 @@ mountExtraRoutes = (r, meta, options) ->
                 'task-info-group': [
                     # '_t_taskId',
                     '_t_taskName', 
-                    '_t_createTime'
+                    '_t_createTime',
+                    '_t_assigneeName'
                 ],
                 'process-info-group': [
-                    '_p_startTime',
+                    '_p_name',
                     '_p_submitter',
-                    '_p_endTime'
+                    '_p_startTime',
+                    '_p_endTime',
+                    {name: '_p_description', type: 'textarea', colspan: 2}
                 ],
                 'history-group': [
                     'name', 'description'
@@ -166,8 +178,8 @@ mountExtraRoutes = (r, meta, options) ->
             forms.show =
                 size: options.forms?.show?.size or 'large',
                 groups: [
-                    {name: 'task-info-group', columns: 2, labelOnTop: true, label: '任务信息'}, 
-                    {name: 'process-info-group', columns: 3},
+                    {name: 'task-info-group', columns: 3, labelOnTop: true, label: '任务信息'}, 
+                    {name: 'process-info-group', columns: 2},
                     {name: 'history-group', columns: 5}
                 ],
                 tabs: [
@@ -182,20 +194,47 @@ mountExtraRoutes = (r, meta, options) ->
                 'task-audit-group': [
                     {name: '_t_pass', type: 'dropdown', defaultValue: '1', source: [{id: 1, text: '通过'}, {id: 0, text: '不通过'}]},
                     {name: '_t_comment', type: 'textarea', colspan: 3, rowspan: 3, heigth: 80}
-                ]           
+                ]
             fieldGroups['base-info-group'] = options.fieldGroups['base-info-group']
 
             forms.complete = options.forms.complete
+        else if formName is 'reject'
+            fieldGroups =
+                'task-reject-group': [
+                    {name: '_t_reject_reason', type: 'textarea', colspan: 3, rowspan: 3, heigth: 80}
+                ]
+            forms.reject = 
+                groups: [
+                    {name: 'task-reject-group', columns: 1}
+                ]                
+        else if formName is 'recall'
+            fieldGroups =
+                'task-recall-group': [
+                    {name: '_t_recall_reason', type: 'textarea', colspan: 3, rowspan: 3, heigth: 80}
+                ]
+            forms.reject = 
+                groups: [
+                    {name: 'task-recall-group', columns: 1}
+                ] 
         else
             forms = options.forms
             fieldGroups = options.fieldGroups
 
-        labels =  objects.extend {}, options.labels.defaults
+
+        labels =  objects.extend {}, options.labels
+
+        labels._t_reject_reason = '回退原因'
+        labels._t_recall_reason = '召回原因'
+
         labels._t_taskId = '任务id' if not labels._t_taskId
         labels._t_taskName = '任务名称' if not labels._t_taskName
+        labels._t_assigneeName = '执行人' if not labels._t_assigneeName
         labels._t_createTime = '创建时间' if not labels._t_createTime
         labels._t_pass = '是否通过' if not labels._t_pass
         labels._t_comment = '意见' if not labels._t_comment
+
+        labels._p_name = '名称' if not labels._p_name
+        labels._p_description = '描述' if not labels._p_description
         labels._p_startTime = '开始时间' if not labels._p_startTime
         labels._p_endTime = '结束时间' if not labels._p_endTime
         labels._p_submitter = '发起人' if not labels._p_submitter
