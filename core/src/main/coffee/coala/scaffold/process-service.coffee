@@ -5,6 +5,7 @@ objects = require 'coala/util/objects'
 {Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 {HashMap} = java.util
 {TaskService} = com.zyeeda.coala.bpm
+{HistoryService} = com.zyeeda.coala.bpm
 {ProcessEngine} = org.activiti.engine
 {ProcessStatusAware} = com.zyeeda.coala.entities.base
 {ClassUtils} = org.springframework.util
@@ -26,6 +27,7 @@ entityToVariables = (entity) ->
 
 exports.createService = ->
     taskService = context.getBeanByClass TaskService
+    historyService = context.getBeanByClass HistoryService
     factory = context.getBeanByClass ProcessEngine
 
     service =
@@ -33,7 +35,8 @@ exports.createService = ->
         repository: factory.getRepositoryService()
         runtime: factory.getRuntimeService()
         form: factory.getFormService()
-        history: factory.getHistoryService()
+        # history: factory.getHistoryService()
+        history: historyService
         identity: factory.getIdentityService()
         management: factory.getManagementService()
 
@@ -150,6 +153,7 @@ exports.createService = ->
             service.task.claim id, userId
             service.task.complete id
 
+        entityToVariables: entityToVariables
         __noSuchMethod__: (name, args) ->
             throw new Error("no such method: #{name}") if not taskService[name]
             taskService[name].apply taskService, args

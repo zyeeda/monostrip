@@ -3,6 +3,7 @@
 {type} = require 'coala/util/type'
 upload = require 'coala/util/upload'
 fs = require 'fs'
+_ = require 'underscore'
 {coala} = require 'coala/config'
 createProcessService = require('coala/scaffold/process-service').createService
 
@@ -59,21 +60,26 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
         currentUser = 'tom'
         Authentication.setAuthenticatedUserId currentUser
 
-        processId = scaffold.boundProcessId
-        if type(processId) is 'function'
-            processId = processId entity
+        processDefinitionKey = scaffold.processDefinitionKey
+        if type(processDefinitionKey) is 'function'
+            processDefinitionKey = processDefinitionKey entity
         variables =
             ENTITY: entity.id
-            ENTITYCLASS: entityMeta.entityClass.getName()
+            ENTITYCLASS: entity.getClass()?.getName()
             SUBMITTER: currentUser
         for property, value of entity
             variables[property] = value if value isnt undefined and type(value) isnt 'function' and value isnt null
 
-        processInstance = runtimeService.startProcessInstanceByKey processId, variables
+        processInstance = runtimeService.startProcessInstanceByKey processDefinitionKey, variables
+
+        # 写入流程实例id到实体中
+        entity.processInstanceId = processInstance.processInstanceId
         if entity instanceof ProcessStatusAware
-            entity.processId = processId
+            entity.processDefinitionId = processInstance.processDefinitionId
             entity.processInstanceId = processInstance.id
-            entity.status = processId
+            entity.submitter = currentUser
+            manager.merge entity
+        else
             manager.merge entity
 
         processInstance
@@ -87,6 +93,32 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 manager.findByEntity options
             else
                 manager.findByExample entity, options
+
+        # 查询流程数据
+        list4Process: (entity, options) ->
+            manager = baseService.createManager service.entityClass
+            if options.taskType is 'waiting'
+                currentUser = getCurrentUser()
+                accountClass = ClassUtils.forName 'com.zyeeda.coala.commons.organization.entity.Account'   
+                accountManager = baseService.createManager accountClass
+                account = accountManager.find currentUser
+
+                groupIds = []
+                departments = []
+                roles = []
+                departments = getParentDepatments account.department if account.department
+                roles = account.roles.toArray() if account.roles
+                departmentIds = _.map departments, (department) ->
+                    "'" + department.id + "'"
+                roleIds = _.map roles, (role) ->
+                    "'" + role.id + "'"
+                _.each departmentIds, (id) ->
+                    groupIds.push id
+                _.each roleIds, (id) ->
+                    groupIds.push id
+                options.groupIds = groupIds
+
+            manager.findByEntity4Process options
 
         get: (id) ->
             manager = baseService.createManager service.entityClass
@@ -107,8 +139,9 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             entity[key] = value for key, value of backup
             manySideUpdate entity
 
-            if scaffold.boundProcessId
-                startProcess entity, manager
+            # 启动流程
+            if scaffold.processDefinitionKey
+                processInstanceId = startProcess entity, manager
             entity
 
         update: mark('tx', { needStatus: true }).on (txStatus, id, fn) ->
@@ -143,3 +176,16 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             manager.remove.apply manager, entities
 
     service
+getCurrentUser = ->
+    currentUser = 'tom'
+    Authentication.setAuthenticatedUserId currentUser
+    currentUser
+
+# 递归查询父部门
+# TODO 可能存在性能问题
+getParentDepatments = (department, parents = []) ->
+    parents.push department
+    if department.parent
+        getParentDepatments department.parent, parents
+
+    parents        

@@ -61,15 +61,10 @@ $License: Copyright &copyright 2014 Shenzhen Zyeeda Information Technology Co. L
 		    <artifactId>activiti-simple-workflow</artifactId>
 		    <version>${activiti.version}</version>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 		    <groupId>org.apache.servicemix.examples</groupId> -->
-<!-- 		    <artifactId>activiti-examples</artifactId> -->
-<!-- 		    <version>5.0.0</version> -->
-<!-- 		</dependency> -->
 		<dependency>
 		  <groupId>org.activiti</groupId>
-		  <artifactId>activiti-engine-examples</artifactId>
-		  <version>5.0.beta1</version>
+		  <artifactId>activiti-ldap</artifactId>
+		  <version>${activiti.version}</version>
 		</dependency>
     </dependencies>
 

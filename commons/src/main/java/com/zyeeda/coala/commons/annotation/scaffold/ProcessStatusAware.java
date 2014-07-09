@@ -7,12 +7,12 @@ package com.zyeeda.coala.commons.annotation.scaffold;
 public interface ProcessStatusAware {
 
     void setSubmitter(String submitter);
-    void setProcessId(String processId);
+    void setProcessDefinitionId(String processDefinitionId);
     void setProcessInstanceId(String processInstanceId);
     void setStatus(String taskName);
     
     String getSubmitter();
-    String getProcessId();
+    String getProcessDefinitionId();
     String getProcessInstanceId();
     String getStatus();
 }

@@ -11,8 +11,139 @@ objects = require 'coala/util/objects'
 {ClassUtils} = org.springframework.util
 {Authentication} = org.activiti.engine.impl.identity
 {EventSubscriptionQueryImpl} = org.activiti.engine.impl
+{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 
+log = require('ringo/logging').getLogger module.id
 router = exports.router = createRouter()
+entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
+
+# 所有的 app/config 中配置的 packages
+metas = entityMetaResolver.resolveScaffoldEntities coala.entityPackages
+
+mountExtraRoutes = (r, meta, options) ->
+    router.get('configuration/feature', (request) ->
+        feature = options.feature or {}
+        # 默认 style 为 grid ，coala 所支持的类型在 coala/scaffold/scaffold-feature-loader 中进行定义
+        feature.style = options.style or 'process'
+        # 默认不支持前端扩展
+        feature.enableFrontendExtension = !!options.enableFrontendExtension
+        # 活动的标签，默认为 '全部' 标签，用于流程 feature 使用
+        feature.activeTab = options.activeTab or 'none'
+        # 默认 haveFilter = false
+        feature.haveFilter = !!options.haveFilter
+
+        json feature
+    )
+
+    # taskType ，待办:waiting ，在办:doing ，已办: done ,全部: none
+    r.get('configuration/operators/:taskType', (request, taskType) ->
+        
+        operators = 
+            show:
+                label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-primary', order: 100, show: 'single-selected'
+            refresh:
+                label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'always', order: 100
+
+        if taskType is 'none'
+            ops = options.operators
+            operators = objects.extend {}, coala.defaultOperators, ops
+
+        for k, v of operators
+            if operators[k] is false
+                delete operators[k]
+            else
+                operators[k] = objects.extend {}, coala.defaultOperators[k], operators[k] if k of coala.defaultOperators
+
+
+        json operators
+    )
+    r.get('configuration/grid/:taskType', (request, taskType) ->
+        # 判断有 grid 的配置信息
+        grid = options['grid']
+        if not grid
+            # 如果不存在相应的表头信息，则所有的 tab 页统一使用 defaults 所设置的内容
+            lableName = if options.labels[taskType] then taskType else 'defaults'
+            columns = []
+            columns.push {name: name, header: value} for name, value of options.labels[lableName]
+            grid = columns: columns
+        # 存在 grid 配置信息的情况，目前尚不支持
+        else if grid and options.labels
+            grid.columns = setLabelToColModel grid.columns, options.labels
+
+        json grid
+    )
+    r.get('configuration/forms/:formName', (request, formName) ->
+        forms = {}
+        fieldGroups = []
+
+        if formName is 'show'
+            # fieldGroups = objects.extend {}, options.fieldGroups
+            fieldGroups =
+                'base-info-group': [
+                    'name', 'age', 'sex', 'phone', 'address'
+                ],
+                'task-info-group': [
+                    'task-name', 
+                    'create-time', 
+                    # {name: 'pass', type: 'dropdown', defaultValue: '1', source: [{id: '1', text: '是'}, {id: '0', text: '否'}]},
+                    'pass',
+                    {name: 'comment', type: 'textarea', colspan: 3}
+                ],
+                'process-info-group': [
+                    'description'
+                ],
+                'process-map-group': [
+                    'name'
+                ],
+                'history-group': [
+                    'name', 'description'
+                    # {name: 'history', label: '历史信息', type: 'inline-grid', allowPick: false, allowAdd: false}
+                ]
+            # 追加 scaffold 中配置的 'base-info-group' 信息
+            fieldGroups['base-info-group'] = options.fieldGroups['base-info-group']
+            # options.forms = {} unless options.forms
+            forms.show =
+                groups: [
+                    {name: 'task-info-group', columns: 3, readOnly: false}, 
+                    {name: 'process-info-group', columns: 2}, 
+                    {name: 'process-map-group', columns: 2},
+                    {name: 'history-group', columns: 2}
+                ],
+                tabs: [
+                    {id:'task-info-group', title: '任务信息', groups: ['task-info-group']},
+                    {id:'process-info-group', title: '流程信息', groups: ['process-info-group']},
+                    {id:'process-map-group', title: '流程图'  , groups: ['process-map-group']},
+                    {id:'history-group', title: '历史信息', groups: ['history-group']}
+                ]
+            # 追加 scaffold 中的组配置信息和基本信息 tab 下的组信息
+            forms.show.groups.unshift options.forms.show.groups[0]
+            forms.show.tabs.unshift options.forms.show.tabs[0]
+        else
+            forms = options.forms
+            fieldGroups = options.fieldGroups
+
+        json generateForms(meta, options.labels.defaults, forms, fieldGroups, formName, options)
+    )
+
+mountPath = (path, meta) ->
+    options = requireScaffoldConfig path
+    # 只解析 style 为 process 的 scaffold
+    return if options.style isnt 'process'
+    log.debug "taksk router --- mountPath options.processDefinitionKey = #{options.processDefinitionKey}"
+    doWithRouter = options.doWithRouter or ->
+    options.doWithRouter = (r) ->
+        # 首先执行 feature 中定义的 doWithRouter 方法
+        doWithRouter r
+        mountExtraRoutes r, meta, options, path
+
+    router.attachDomain path, meta, options
+    
+# 遍历所有 package 中的实体, meta.path 即实体中 @Scaffold 注解中的参数值
+for meta in metas
+    mountPath meta.path, meta
+    mountPath path, meta for path in meta.otherPaths
+
+
 
 taskOrderMap =
     id: 'TaskId'

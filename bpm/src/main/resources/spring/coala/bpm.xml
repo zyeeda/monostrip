@@ -7,7 +7,9 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
 
 	<bean id="taskListener" class="com.zyeeda.coala.bpm.support.TaskStatusChangerListener"/>
+	<bean id="executionListener" class="com.zyeeda.coala.bpm.support.ProcessStatusChangerListener"/>
 	<bean id="taskHandler" class="com.zyeeda.coala.bpm.support.AddGlobalTaskListenerParseHandler"/>
+	<bean id="executionHandler" class="com.zyeeda.coala.bpm.support.AddGlobalExecutionListenerParseHandler"/>
 
 	<bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration"
 		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"
@@ -16,8 +18,20 @@
 		<property name="postBpmnParseHandlers">
 			<list>
 				<ref bean="taskHandler"/>
+				<ref bean="executionHandler"/>
 			</list>
 		</property>
+		<property name="configurators">
+          <list>
+              <bean class="com.zyeeda.coala.bpm.group.GroupConfigurator">
+              </bean>
+          </list>
+        </property>
+		<property name="customMybatisMappers">
+		  <set>
+		    <value>com.zyeeda.coala.bpm.mapper.HistoricTaskMapper</value>
+		  </set>
+		</property>        
 	</bean>
 
 	<bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean"
@@ -29,15 +43,13 @@
 		factory-method="getRuntimeService" />
 	<bean id="formService" factory-bean="processEngine"
 		factory-method="getFormService" />
-	<bean id="historyService" factory-bean="processEngine"
-		factory-method="getHistoryService" />
 	<bean id="identityService" factory-bean="processEngine"
 		factory-method="getIdentityService" />
 	<bean id="managementService" factory-bean="processEngine"
 		factory-method="getManagementService" />
 
-	<bean id="taskService" class="com.zyeeda.coala.bpm.support.DefaultTaskService"
-		p:processEngine-ref="processEngine" />
+	<bean id="taskService" class="com.zyeeda.coala.bpm.support.DefaultTaskService" p:processEngine-ref="processEngine" />
+	<bean id="historyService" class="com.zyeeda.coala.bpm.support.DefaultHistoryService" p:processEngine-ref="processEngine" />
 
 	
 </beans>

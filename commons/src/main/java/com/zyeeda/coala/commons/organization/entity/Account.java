@@ -102,6 +102,11 @@ public class Account extends DomainEntity {
      */
     private Set<Role> roles = null;
 
+    /**
+     * 数据权限级别.
+     */
+    private Integer dataLevel;
+
     @Basic
     @Column(name = "F_ACCOUNT_NAME", length = 30)
     @NotBlank
@@ -228,6 +233,16 @@ public class Account extends DomainEntity {
 
     public void setRoles(final Set<Role> roles) {
         this.roles = roles;
+    }
+
+    @Basic
+    @Column(name = "F_DATA_LEVEL")
+    public Integer getDataLevel() {
+        return this.dataLevel;
+    }
+
+    public void setDataLevel(final Integer dataLevel) {
+        this.dataLevel = dataLevel;
     }
 
 }

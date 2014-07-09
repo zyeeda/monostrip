@@ -14,6 +14,7 @@ mapper.registerModule new JodaModule()
 mapper.setAnnotationIntrospector new CustomIntrospector()
 
 df = new SimpleDateFormat(coala.dateTimeFormat)
+
 mapper.configure SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false
 mapper.setDateFormat df
 mapper.setTimeZone TimeZone.default
