@@ -66,6 +66,11 @@ public class MenuItem extends DomainEntity implements TreeNode<MenuItem> {
     private Integer rank;
 
     /**
+    * 是否展开菜单项
+    */
+    private Boolean opened = false;
+
+    /**
      * 子菜单.
      */
     private List<MenuItem> children;
@@ -122,6 +127,15 @@ public class MenuItem extends DomainEntity implements TreeNode<MenuItem> {
 
     public void setRank(final Integer rank) {
         this.rank = rank;
+    }
+
+    @Column(name = "F_OPENED")
+    public Boolean getOpened() {
+        return this.opened;
+    }
+
+    public void setOpened(final Boolean opened) {
+        this.opened = opened;
     }
 
     @Override
