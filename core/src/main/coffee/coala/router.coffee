@@ -243,7 +243,7 @@ defaultHandlers = (path, options) ->
                 currSessionUser = SecurityUtils.getSubject().getPrincipal()
                 currUser = accountMgr.find currSessionUser.id
                 if currUser.dataLevel isnt undefined and currUser.dataLevel isnt null and currUser.dataLevel isnt 1
-                    currDepartPath = currUser.department.path
+                    currDepartPath = currUser.department?.path or ''
                     currDeptPathArr = currDepartPath.split '/'
                     likeDeptPath = '/'
 
