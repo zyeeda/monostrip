@@ -80,6 +80,11 @@ public class Department extends TreeNodeDomainEntity implements TreeNode<Departm
      */
     private Integer rank;
 
+    /**
+     * 部门编号.
+     */
+    private String code;
+
     @Basic
     @Column(name = "F_NAME", length = 30)
     @NotBlank
@@ -151,5 +156,14 @@ public class Department extends TreeNodeDomainEntity implements TreeNode<Departm
 
     public void setRank(final Integer rank) {
         this.rank = rank;
+    }
+
+    @Column(name = "F_CODE", length = 3000)
+    public String getCode() {
+        return this.code;
+    }
+
+    public void setCode(final String code) {
+        this.code = code;
     }
 }
