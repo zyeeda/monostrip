@@ -71,10 +71,6 @@ defaultConfigure =
             label: '编辑', icon: 'icon-edit', group: '20-selected', style: 'btn-primary', show: 'single-selected', order: 200
         del:
             label: '删除', icon: 'icon-minus', group: '20-selected', style: 'btn-danger', order: 300
-        downloadModule:
-            label: '下载模板', icon: 'icon-cloud-download', group: '30-refresh', style: 'btn-info', show: 'unselected', order: 100
-        importXls:
-            label: '导入', icon: 'icon-download-alt', group: '30-refresh', style: 'btn-warning', show: 'unselected', order: 200
         refresh:
             label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'unselected', order: 300
 

@@ -49,27 +49,6 @@ mountExtraRoutes = (r, meta, options) ->
         ops = options.operators
         operators = objects.extend {}, coala.defaultOperators, ops
 
-        options.style = options.style or 'grid'
-
-        # change tree menu's operator show config
-        # because tree can't cancle select status
-        #
-        if options.style is 'tree'
-            operators['add'].show = 'always'
-            operators['refresh'].show = 'always'
-            operators['downloadModule'].show = 'always'
-            operators['importXls'].show = 'always'
-        else
-            operators['downloadModule'] = coala.defaultOperators['downloadModule']
-            operators['importXls'] = coala.defaultOperators['importXls']
-
-        # if enableImport is not true
-        #    then delete default import operators
-        #
-        if options.enableImport isnt true
-            delete operators['downloadModule']
-            delete operators['importXls']
-
         for k, v of operators
             if operators[k] is false
                 delete operators[k]
@@ -123,24 +102,6 @@ mountExtraRoutes = (r, meta, options) ->
             json options.configs.fields
         else
             json {}
-    )
-
-    r.get('configuration/export-module', (request) ->
-        if options.exportModule
-            json {exportModule: options.exportModule}
-        else
-            json {}
-    )
-
-    r.get('configuration/import-module', (request) ->
-        if options.enableImport and options.importModule
-            json {importModule: options.importModule}
-        else
-            json {}
-    )
-
-    router.get('/down-import-module/:filepath/:filename', (request, filepath, filename) ->
-        response["static"](join(getOptionInProperties('coala.webapp.path'), 'module/import', filepath, URLDecoder.decode(filename, 'utf-8')), 'application/vnd.ms-excel');
     )
 
     # 流程相关配置
