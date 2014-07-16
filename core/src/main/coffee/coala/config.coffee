@@ -64,15 +64,19 @@ defaultConfigure =
     #
     defaultOperators:
         add:
-            label: '添加', icon: 'icon-plus', group: '10-add', style: 'btn-success', show: 'always', order: 100
+            label: '添加', icon: 'icon-plus', group: '10-add', style: 'btn-success', show: 'unselected', order: 100
         show:
-            label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-primary', order: 100, show: 'single-selected'
+            label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-grey', show: 'single-selected', order: 100
         edit:
-            label: '编辑', icon: 'icon-edit', group: '20-selected', style: 'btn-primary', order: 200, show: 'single-selected'
+            label: '编辑', icon: 'icon-edit', group: '20-selected', style: 'btn-primary', show: 'single-selected', order: 200
         del:
             label: '删除', icon: 'icon-minus', group: '20-selected', style: 'btn-danger', order: 300
+        downloadModule:
+            label: '下载模板', icon: 'icon-cloud-download', group: '30-refresh', style: 'btn-info', show: 'unselected', order: 100
+        importXls:
+            label: '导入', icon: 'icon-download-alt', group: '30-refresh', style: 'btn-warning', show: 'unselected', order: 200
         refresh:
-            label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'always', order: 100
+            label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'unselected', order: 300
 
     # Default function to extract pagination info.
     #

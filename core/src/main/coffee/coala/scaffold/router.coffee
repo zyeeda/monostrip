@@ -1,21 +1,29 @@
 ###
 系统的总路由，会对系统中所有的 packages 进行解析并配置相应的访问路径
 ###
-{Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
-
-_ = require 'underscore'
-{type} = require 'coala/util/type'
-{createRouter} = require 'coala/router'
-{coala} = require 'coala/config'
-{json} = require 'coala/response'
-{generateForms} = require 'coala/scaffold/form-generator'
-{createService} = require 'coala/scaffold/service'
-objects = require 'coala/util/objects'
-{mark} = require 'coala/mark'
-{Authentication} = org.activiti.engine.impl.identity
-{ClassUtils} = org.springframework.util
+_                       = require 'underscore'
+{type}                  = require 'coala/util/type'
+{createRouter}          = require 'coala/router'
+{coala}                 = require 'coala/config'
+{json}                  = require 'coala/response'
+{generateForms}         = require 'coala/scaffold/form-generator'
+{createService}         = require 'coala/scaffold/service'
+objects                 = require 'coala/util/objects'
+{mark}                  = require 'coala/mark'
+{getOptionInProperties} = require 'coala/config'
+{join}                  = require 'coala/util/paths'
+response                = require 'ringo/jsgi/response'
 
 log = require('ringo/logging').getLogger module.id
+
+{Context}          = com.zyeeda.coala.web.SpringAwareJsgiServlet
+
+URLDecoder         = java.net.URLDecoder
+
+{Authentication}   = org.activiti.engine.impl.identity
+
+{ClassUtils}       = org.springframework.util
+
 entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
 
 router = exports.router = createRouter()
@@ -40,6 +48,28 @@ mountExtraRoutes = (r, meta, options) ->
         # 用户可以自定义操作， 在 operators 对象中定义即可
         ops = options.operators
         operators = objects.extend {}, coala.defaultOperators, ops
+
+        options.style = options.style or 'grid'
+
+        # change tree menu's operator show config
+        # because tree can't cancle select status
+        #
+        if options.style is 'tree'
+            operators['add'].show = 'always'
+            operators['refresh'].show = 'always'
+            operators['downloadModule'].show = 'always'
+            operators['importXls'].show = 'always'
+        else
+            operators['downloadModule'] = coala.defaultOperators['downloadModule']
+            operators['importXls'] = coala.defaultOperators['importXls']
+
+        # if enableImport is not true
+        #    then delete default import operators
+        #
+        if options.enableImport isnt true
+            delete operators['downloadModule']
+            delete operators['importXls']
+
         for k, v of operators
             if operators[k] is false
                 delete operators[k]
@@ -94,18 +124,30 @@ mountExtraRoutes = (r, meta, options) ->
         else
             json {}
     )
+
     r.get('configuration/export-module', (request) ->
-        if options.configs and options.configs.exportModule
-            json {exportModule: options.configs.exportModule}
+        if options.exportModule
+            json {exportModule: options.exportModule}
         else
             json {}
+    )
+
+    r.get('configuration/import-module', (request) ->
+        if options.enableImport and options.importModule
+            json {importModule: options.importModule}
+        else
+            json {}
+    )
+
+    router.get('/down-import-module/:filepath/:filename', (request, filepath, filename) ->
+        response["static"](join(getOptionInProperties('coala.webapp.path'), 'module/import', filepath, URLDecoder.decode(filename, 'utf-8')), 'application/vnd.ms-excel');
     )
 
     # 流程相关配置
     # taskType ，待办:waiting ，在办:doing ，已办: done ,全部: none
     r.get('configuration/process/operators/:taskType', (request, taskType) ->
-        
-        operators = 
+
+        operators =
             show:
                 label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-primary', order: 100, show: 'single-selected'
             refresh:
@@ -159,7 +201,7 @@ mountExtraRoutes = (r, meta, options) ->
                 ],
                 'task-info-group': [
                     # '_t_taskId',
-                    '_t_taskName', 
+                    '_t_taskName',
                     '_t_createTime',
                     '_t_assigneeName'
                 ],
@@ -178,7 +220,7 @@ mountExtraRoutes = (r, meta, options) ->
             forms.show =
                 size: options.forms?.show?.size or 'large',
                 groups: [
-                    {name: 'task-info-group', columns: 3, labelOnTop: true, label: '任务信息'}, 
+                    {name: 'task-info-group', columns: 3, labelOnTop: true, label: '任务信息'},
                     {name: 'process-info-group', columns: 2},
                     {name: 'history-group', columns: 5}
                 ],
@@ -203,19 +245,19 @@ mountExtraRoutes = (r, meta, options) ->
                 'task-reject-group': [
                     {name: '_t_reject_reason', type: 'textarea', colspan: 3, rowspan: 3, heigth: 80}
                 ]
-            forms.reject = 
+            forms.reject =
                 groups: [
                     {name: 'task-reject-group', columns: 1}
-                ]                
+                ]
         else if formName is 'recall'
             fieldGroups =
                 'task-recall-group': [
                     {name: '_t_recall_reason', type: 'textarea', colspan: 3, rowspan: 3, heigth: 80}
                 ]
-            forms.reject = 
+            forms.reject =
                 groups: [
                     {name: 'task-recall-group', columns: 1}
-                ] 
+                ]
         else
             forms = options.forms
             fieldGroups = options.fieldGroups
