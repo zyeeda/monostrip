@@ -24,8 +24,6 @@ paths = require 'coala/util/paths'
 {Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 {Create, Update} = com.zyeeda.coala.validation.group
 
-{Account} = com.zyeeda.coala.commons.organization.entity
-
 {SecurityUtils} = org.apache.shiro
 
 timeFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd HH:mm:ss'
@@ -131,7 +129,7 @@ attachDomain = (router, path, entityMeta, options = {}) ->
         router.get getUrl, handlers.get4ProcessHistory.bind handlers, options, service, entityMeta unless excludes.get
         router.get listUrl, handlers.list.bind handlers, doneListOptions, service, entityMeta
 
-        # 
+        #
         listUrl = createUrl = path + url_subfix + 'none'
         getUrl = updateUrl = path + url_subfix + 'none' + ID_SUFFIX
         options.taskType = 'none'
@@ -202,7 +200,7 @@ getService = (options, entityMeta) ->
     service = createService entityMeta.entityClass, entityMeta, options
     if options.service then options.service(service) else service
 getAccountService = ->
-    entityClass = ClassUtils.forName 'com.zyeeda.coala.commons.organization.entity.Account'    
+    entityClass = ClassUtils.forName 'com.zyeeda.coala.commons.organization.entity.Account'
     entityMeta = entityMetaResovler.resolveEntity entityClass
     createService entityMeta.entityClass, entityMeta
 
@@ -221,7 +219,7 @@ getJsonFilter = exports.getJsonFilter = (options, type) ->
 
 defaultHandlers = (path, options) ->
     o =
-        list: mark('managers', Account).on (accountMgr, options, service, entityMeta, request, taskType) ->
+        list: (options, service, entityMeta, request, taskType) ->
             entity = createEntity entityMeta.entityClass
             mergeEntityAndParameter options, request.params, entityMeta, 'list', entity
 
@@ -234,32 +232,6 @@ defaultHandlers = (path, options) ->
             config.appPath = appPath
 
             filters = coala.extractFilterInfo request.params
-            filters = filters or []
-
-            # if scaffold have setting: exports.haveDataLevel = true
-            #    then means this scaffold need to filter data with dataLevel
-            #
-            if options.haveDataLevel is true
-                currSessionUser = SecurityUtils.getSubject().getPrincipal()
-                currUser = accountMgr.find currSessionUser.id
-                if currUser.dataLevel isnt undefined and currUser.dataLevel isnt null and currUser.dataLevel isnt 1
-                    currDepartPath = currUser.department?.path or ''
-                    currDeptPathArr = currDepartPath.split '/'
-                    likeDeptPath = '/'
-
-                    # here department.path's array.length - 1 because the path have '/' in begin and end position
-                    # if department.path's level >= dataLevel
-                    #    then filter the data
-                    # if department.path's level < dataLevel
-                    #    then should return empty collection
-                    #
-                    if currDeptPathArr.length - 1 >= currUser.dataLevel
-                        for i in [0..currUser.dataLevel-1] by 1
-                            likeDeptPath += currDeptPathArr[i]
-                        if currUser.dataLevel > 1 then likeDeptPath += '/'
-                        filters.push(['like', 'createDeptPath', likeDeptPath, {mode: 'start'}])
-                    else
-                        filters.push(['eq', 'id', ''])
             config.filters = filters if filters
 
             style = options.style
@@ -294,7 +266,7 @@ defaultHandlers = (path, options) ->
             if options.style is 'process'
                 config.taskType = options.taskType
                 result.results = service.list4Process entity, config
-            else 
+            else
                 result.results = service.list entity, config
 
             o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
@@ -343,7 +315,7 @@ defaultHandlers = (path, options) ->
                 objects.extend config, paginationInfo
 
             # hts = htQuery.list()
-            # _.each hts.toArray(), (task) -> 
+            # _.each hts.toArray(), (task) ->
             #     task.startTime = timeFormat.format task.startTime
 
             # result.results = htQuery.list()
@@ -351,7 +323,7 @@ defaultHandlers = (path, options) ->
             result.results = process.history.getHistoricTasksByProcessInstanceId entity.processInstanceId
 
             o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
-            json o, 
+            json o,
                 include:
                     # '!historicTaskInstanceEntityFilter': ''
                     historicTaskFilter: ['id', 'name', 'assignee', 'assigneeName', 'startTime', 'claimTime', 'endTime', 'comment']
@@ -390,7 +362,7 @@ defaultHandlers = (path, options) ->
             for key, value of entity
                 e[key] = value if type(value) isnt 'function'
 
-            e = objects.extend e, 
+            e = objects.extend e,
                 _t_pass: '1'
                 _t_taskId: task?.id
                 _t_taskName: task?.name
@@ -417,7 +389,7 @@ defaultHandlers = (path, options) ->
 
             return notFound() if entity is null
 
-            json e, getJsonFilter(options, 'get')            
+            json e, getJsonFilter(options, 'get')
 
         # 获取实体及任务历史信息
         get4ProcessHistory: mark('process').on (process, options, service, entityMeta, request, id) ->
@@ -443,7 +415,7 @@ defaultHandlers = (path, options) ->
                 e[key] = value if type(value) isnt 'function'
 
 
-            e = objects.extend e, 
+            e = objects.extend e,
                 _t_pass: '1'
                 _t_taskId: historicTask.id
                 _t_taskName: historicTask.name
@@ -454,7 +426,7 @@ defaultHandlers = (path, options) ->
                 _t_rejectable: false
                 _t_recallable: false
                 _p_name: processDefinition.name
-                _p_description: processDefinition.description                
+                _p_description: processDefinition.description
                 _p_startTime: historicProcessInstance.startTime
                 _p_endTime: historicProcessInstance.endTime
                 _p_submitter: getAccountById(entity.submitter)?.accountName or entity.submitter if entity.submitter
@@ -469,10 +441,9 @@ defaultHandlers = (path, options) ->
 
             return notFound() if entity is null
 
-            json e, getJsonFilter(options, 'get')            
+            json e, getJsonFilter(options, 'get')
 
-
-        create: mark('managers', Account).on (accountMgr, options, service, entityMeta, request) ->
+        create: (options, service, entityMeta, request) ->
             entity = createEntity entityMeta.entityClass
             mergeEntityAndParameter options, request.params, entityMeta, 'create', entity
 
@@ -481,10 +452,6 @@ defaultHandlers = (path, options) ->
 
             result = callHook 'before', 'Create', options, entityMeta, request, entity
             return result if result isnt undefined
-
-            currSessionUser = SecurityUtils.getSubject().getPrincipal()
-            currUser = accountMgr.find currSessionUser.id
-            entity.createDeptPath = currUser.department?.path or ''
 
             entity = service.create(entity)
 
@@ -511,7 +478,7 @@ defaultHandlers = (path, options) ->
             # process.startProcess getCurrentUser(), options.processDefinitionKey, entity
             return result if result isnt undefined
 
-            json entity, objects.extend getJsonFilter(options, 'create'), { status: 201 }            
+            json entity, objects.extend getJsonFilter(options, 'create'), { status: 201 }
 
         update: (options, service, entityMeta, request, id) ->
             result = true
@@ -615,7 +582,7 @@ defaultHandlers = (path, options) ->
             pass = request.params._t_pass or '1'
             comment = request.params._t_comment or ''
             if pass is '1' then pass = true else pass = false
-            objects.extend variables, 
+            objects.extend variables,
                 '_t_pass': pass
                 '_t_comment': comment
 
@@ -639,7 +606,7 @@ defaultHandlers = (path, options) ->
             rejectReason = request.params._t_reject_reason
             if not _.isEmpty rejectReason
                 task = process.getTask taskId
-                process.task.addComment taskId, task.getProcessInstanceId(), rejectReason 
+                process.task.addComment taskId, task.getProcessInstanceId(), rejectReason
 
             process.task.reject taskId
             json taskId
@@ -680,7 +647,7 @@ getCurrentUser = ->
     currentUser
 taskToVo = (task) ->
     ps = [
-        'id', 'name', 'description', 'priority', 'assignee', 'processInstanceId', 
+        'id', 'name', 'description', 'priority', 'assignee', 'processInstanceId',
         'processDefinitionId', 'createTime', 'dueDate', 'startTime', 'endTime', 'executionId'
     ]
     vo = {}
