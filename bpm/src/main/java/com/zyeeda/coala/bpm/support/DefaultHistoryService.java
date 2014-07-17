@@ -29,11 +29,11 @@ import com.zyeeda.coala.bpm.mapper.HistoricTaskMapper;
 import com.zyeeda.coala.bpm.mapping.HistoricTask;
 
 public class DefaultHistoryService implements HistoryService{
-    
+
     private ProcessEngine processEngine;
-    private ManagementService managementService; 
+    private ManagementService managementService;
     private org.activiti.engine.HistoryService historyService;
-    
+
     public void setProcessEngine(ProcessEngine processEngine) {
         this.processEngine = processEngine;
         this.historyService = this.processEngine.getHistoryService();
@@ -128,34 +128,34 @@ public class DefaultHistoryService implements HistoryService{
 
 		};
 		List<Map<String, Object>> results = managementService.executeCustomSql(customSqlExecution);
-		
+
 		List<HistoricTask> historicTasks = new ArrayList<HistoricTask>(results.size());
 		HistoricTask historicTask = null;
-		
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"); 
+
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		for(Map<String, Object> entry: results){
 //			System.out.println("---map :" + entry);
 			historicTask = new HistoricTask();
 			historicTask.setId(entry.get("id").toString());
 			historicTask.setName(entry.get("name").toString());
-			
+
 			if(entry.get("assigneeName")!=null){
 				historicTask.setAssigneeName(entry.get("assigneeName").toString());
 			}
-			
+
 			if(entry.get("startTime")!=null){
 				try {
 					Date date = df.parse(entry.get("startTime").toString());
 					historicTask.setStartTime(date);
 				} catch (ParseException e) {
-				} 
+				}
 			}
 			if(entry.get("claimTime")!=null){
 				try {
 					Date date = df.parse(entry.get("claimTime").toString());
 					historicTask.setClaimTime(date);
 				} catch (ParseException e) {
-				} 
+				}
 			}
 			if(entry.get("endTime")!=null){
 				try {
@@ -167,7 +167,7 @@ public class DefaultHistoryService implements HistoryService{
 			if(entry.get("comment")!=null){
 				historicTask.setComment(entry.get("comment").toString());
 			}
-			
+
 			historicTasks.add(historicTask);
 		}
 		return historicTasks;

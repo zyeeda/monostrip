@@ -50,7 +50,7 @@ defaultConfigure =
     dateFormat: 'yyyy-MM-dd'
 
     # Default datetime display format.
-    dateTimeFormat: 'yyyy-MM-dd hh:mm:ss'
+    dateTimeFormat: 'yyyy-MM-dd HH:mm:ss'
 
     # When boolean field rendered as dropdown list, what default text will be
     # shown. `是` for `true` and `否` for `false`.
