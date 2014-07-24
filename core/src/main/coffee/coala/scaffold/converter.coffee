@@ -52,7 +52,7 @@ handleArray = (service, fieldType, targetType, value, converter) ->
                 o = targetType.newInstance()
                 for k, v of id
                     continue if not meta.hasField k
-                    o[k] = converter.convert v, meta.getField(k)
+                    o[k] = converter.convert v, meta.getField(k) if v != 'null'
                 list.add o
             else
                 entity = manager.find id
@@ -64,9 +64,13 @@ handleArray = (service, fieldType, targetType, value, converter) ->
 defaultConverter = (value, fieldMeta) ->
 
     if fieldMeta.isEntity()
-        service = serviceHost.createService()
-        manager = service.createManager fieldMeta.type
-        manager.find value
+        if value and value.id
+            service = serviceHost.createService()
+            manager = service.createManager fieldMeta.type
+            manager.find value.id
+        else
+            c = fieldMeta.type.getConstructor()
+            c.newInstance()
     else if fieldMeta.isManyToManyOwner()
         service = serviceHost.createService()
         handleArray service, fieldMeta.type, fieldMeta.manyToManyTargetType, value, @

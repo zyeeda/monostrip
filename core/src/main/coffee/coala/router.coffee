@@ -453,7 +453,7 @@ defaultHandlers = (path, options) ->
             result = callHook 'before', 'Create', options, entityMeta, request, entity
             return result if result isnt undefined
 
-            entity = service.create(entity)
+            entity = service.create(entity, request.params)
 
             result = callHook 'after', 'Create', options, entityMeta, request, entity
             return result if result isnt undefined
@@ -492,7 +492,7 @@ defaultHandlers = (path, options) ->
                 return false if result isnt undefined
                 result = true
 
-            entity = service.update id, updateIt
+            entity = service.update id, updateIt, request.params
             return result if result isnt true
 
             result = callHook 'after', 'Update', options, entityMeta, request, entity
@@ -659,7 +659,7 @@ validationGroupMapping =
 
 callValidation = (action, options, request, entity) ->
     context = createValidationContext()
-    formName = request.params['__formName__'] or 'defaults'
+    formName = request.params['__FORM_NAME__'] or 'defaults'
 
     customValidator = options.validators?[action]?[formName]
     if customValidator? and type(customValidator) is 'function'
@@ -680,7 +680,7 @@ callValidation = (action, options, request, entity) ->
 
 callHook = (hookType, action, options, meta, request, entity) ->
     hookName = hookType + action
-    formName = request.params['__formName__'] or 'defaults'
+    formName = request.params['__FORM_NAME__'] or 'defaults'
 
     hook = options.hooks?[hookName]?[formName]
     if hook? and type(hook) is 'function'

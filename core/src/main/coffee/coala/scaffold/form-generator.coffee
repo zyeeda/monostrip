@@ -68,6 +68,9 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
 
     result.entityLabel = options.entityLabel if options.entityLabel
 
+    fg = generateHiddenFields fg, formName, options
+    result.groups.push name: 'hiddenFields'
+
     result
 
 generateField = (config, meta, labels, groupName, group) ->
@@ -127,3 +130,18 @@ defineFieldType = (field, fieldMeta, entityMeta) ->
         return
 
     field.type = 'text'
+
+generateHiddenFields = (fieldGroups, formName, options) ->
+    hiddenFields = []
+    if formName == 'add'
+        hiddenFields.push name: 'id', type: 'hidden'
+        hiddenFields.push name: '__ID__', type: 'hidden', value: 'id'
+        hiddenFields.push name: '__FORM_TYPE__', type: 'hidden', defaultValue: 'create'
+        hiddenFields.push name: '__FORM_FLAG__', type: 'hidden', defaultValue: 'true'
+    else if formName == 'edit'
+        hiddenFields.push name: 'id', type: 'hidden'
+        hiddenFields.push name: '__ID__', type: 'hidden', value: 'id'
+        hiddenFields.push name: '__FORM_TYPE__', type: 'hidden', defaultValue: 'update'
+        hiddenFields.push name: '__FORM_FLAG__', type: 'hidden', defaultValue: 'true'
+    fieldGroups.hiddenFields = hiddenFields
+    fieldGroups

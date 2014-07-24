@@ -56,6 +56,85 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     values.add v for v in vs
         true
 
+    cascadeSave = (mgr, entity, data, etClass) ->
+        entityMeta = entityMetaResolver.resolveEntity etClass
+
+        for fieldMeta in entityMeta.getFields()
+            en = entity[fieldMeta.name]
+            da = data[fieldMeta.name]
+
+            if en and en instanceof Attachment
+                upload.commitAttachment en.id
+                continue
+
+            #多对一关联，Many处关联One
+            if fieldMeta.entity
+                if da
+                    if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
+                        fieldMgr = baseService.createManager fieldMeta.type
+                        mapped = cascadeSave(fieldMgr, en, da, fieldMeta.type) 
+                        en[fieldMeta.mappedBy] = mapped
+                    # 如果传了对象过来，但不是从表单过来的，也没有id，无效对象
+                    else if da.id == undefined
+                        entity[fieldMeta.name] = null
+
+            #一对多关联，One处关联Many
+            if fieldMeta.isOneToMany()
+                if en != undefined and en != null and en.isEmpty and not en.isEmpty()
+                    fieldMgr = baseService.createManager fieldMeta.manyType
+                    vs = en.toArray()
+                    en.clear()
+                    for e, i in vs
+                        d = da[i]
+                        # 此处已经删除全部关系再加入，若要真实删除，请修改以下逻辑
+                        if d and d['__FORM_TYPE__'] == 'delete'
+                            # fieldMgr.remove e
+                            e[fieldMeta.mappedBy] = null
+                            fieldMgr.merge e
+                            continue
+                        if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
+                            e[fieldMeta.mappedBy] = entity
+                            en.add cascadeSave(fieldMgr, e, d, fieldMeta.manyType)
+                        else
+                            en.add e
+            #多对多双向关联，Many、One处都有关联
+            else if fieldMeta.isManyToManyTarget()
+                if en != undefined and en != null and en.isEmpty and not en.isEmpty()
+                    type = fieldMeta.manyToManyTargetType
+                    type = fieldMeta.manyToManyOwnerType if type == null
+                    fieldMgr = baseService.createManager type
+                    vs = en.toArray()
+                    en.clear()
+                    for e, i in vs
+                        d = da[i]
+                        if d and d['__FORM_TYPE__'] == 'delete'
+                            e[fieldMeta.mappedBy] = null
+                            fieldMgr.merge e
+                            continue
+                        if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
+                            en.add cascadeSave(fieldMgr, e, d, type)
+                        else
+                            en.add e
+            #多对多单向关联，One处关联Many
+            else if fieldMeta.isManyToManyOwner()
+                if en != undefined and en != null and en.isEmpty and not en.isEmpty()
+                    type = fieldMeta.manyToManyOwnerType
+                    type = fieldMeta.manyToManyTargetType if type == null
+                    fieldMgr = baseService.createManager type
+                    vs = en.toArray()
+                    en.clear()
+                    for e, i in vs
+                        d = da[i]
+                        # 此处已经删除全部关系再加入，若要真实删除，请修改以下逻辑
+                        if d and d['__FORM_TYPE__'] == 'delete'
+                            # fieldMgr.remove e
+                            continue
+                        if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
+                            en.add cascadeSave(fieldMgr, e, d, type)
+                        else
+                            en.add e
+        mgr.merge entity
+
     startProcess = mark('beans', 'runtimeService').on (runtimeService, entity, manager) ->
         currentUser = 'tom'
         Authentication.setAuthenticatedUserId currentUser
@@ -124,7 +203,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             manager = baseService.createManager service.entityClass
             manager.find id
 
-        create: mark('tx').on (entity) ->
+        create_bak: mark('tx').on (entity) ->
             manager = baseService.createManager service.entityClass
             backup = {}
             for fm in entityMeta.getFields()
@@ -144,7 +223,30 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 processInstanceId = startProcess entity, manager
             entity
 
-        update: mark('tx', { needStatus: true }).on (txStatus, id, fn) ->
+        create: mark('tx').on (entity, data) ->
+            manager = baseService.createManager service.entityClass
+            entity = manager.save entity
+            entity = cascadeSave manager, entity, data, service.entityClass
+
+            # 启动流程
+            if scaffold.processDefinitionKey
+                processInstanceId = startProcess entity, manager
+
+            entity
+
+        update: mark('tx', { needStatus: true }).on (txStatus, id, fn, data) ->
+            manager = baseService.createManager service.entityClass
+            entity = manager.find id
+
+            if fn(entity, service) is false
+                txStatus.setRollbackOnly()
+                null
+
+            entity = cascadeSave manager, entity, data, service.entityClass
+
+            entity
+
+        update_bak: mark('tx', { needStatus: true }).on (txStatus, id, fn) ->
             manager = baseService.createManager service.entityClass
             entity = manager.find id
 
