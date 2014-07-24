@@ -603,6 +603,8 @@ defaultHandlers = (path, options) ->
 
         reject: mark('process').on (process, options, service, entityMeta, request, id) ->
             taskId = id.split('|')[1]
+
+            # 保存回退原因
             rejectReason = request.params._t_reject_reason
             if not _.isEmpty rejectReason
                 task = process.getTask taskId
@@ -612,16 +614,24 @@ defaultHandlers = (path, options) ->
             json taskId
 
         recall: mark('process').on (process, options, service, entityMeta, request, id) ->
+            entityId = id.split('|')[0]
             taskId = id.split('|')[1]
-            # recallReason = request.params._t_recall_reason
-            # if not _.isEmpty recallReason
-            #     # task = process.getTask taskId
-            #     historicTask = process.history.createHistoricTaskInstanceQuery()
-            #         .taskId(task)
-            #         .singleResult()
-            #     process.task.addComment taskId, historicTask.getProcessInstanceId(), recallReason
 
+            entity = service.get entityId
             process.task.recall taskId
+
+            # 保存召回原因
+            recallReason = request.params._t_recall_reason
+            if not _.isEmpty recallReason
+                tasks = process.task.createTaskQuery()
+                    .processInstanceId(entity.processInstanceId)
+                    .orderByTaskCreateTime()
+                    .desc()
+                    .list()
+                    .toArray()
+                task = tasks[0];
+                process.task.addComment task.id, task.processInstanceId, recallReason
+
             json taskId
 
     return o if options.disableAuthz is true or coala.disableAuthz is true
