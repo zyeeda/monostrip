@@ -192,7 +192,7 @@ exports.createManager = (entityClass, emfName) ->
             pageInfo = getPageInfo option
             fillPageInfo query, pageInfo
         query.setParameter key, value for key, value of params
-        if option.fetchCount then query.getSingleResult() else query.getResultList()        
+        if option.fetchCount then query.getSingleResult() else query.getResultList()
 
     # Get the Hibernate Search FullTextEntityManager.
     #
@@ -437,10 +437,12 @@ generateSql4Process = (entityClass, option, filters, orders) ->
         sql += " and te.id = i.taskId "
         sql += " and te.assignee is null "
         sql += " and i.type = 'candidate' "
-        # sql += " and (i.userId='#{currentUser}' or (i.groupId in ('1','2')))"
-        groupIds = 'undefined'
         groupIds = option.groupIds.join ',' if option.groupIds.length isnt 0
-        sql += " and (i.userId='#{currentUser}' or (i.groupId in (#{groupIds})))"
+        if groupIds
+            sql += " and (i.userId='#{currentUser}' or (i.groupId in (#{groupIds}))) "
+        else
+            sql += " and i.userId='#{currentUser}' "
+
     else if option.taskType is 'doing'
         sql = if option.fetchCount then 'select count(ec) ' else 'select ec '
         sql += "from #{entityClass.name} ec, TaskEntity te"
