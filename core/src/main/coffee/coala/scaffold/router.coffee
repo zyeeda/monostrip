@@ -171,7 +171,7 @@ mountExtraRoutes = (r, meta, options) ->
                     '_p_submitter',
                     '_p_startTime',
                     '_p_endTime',
-                    {name: '_p_description', type: 'textarea', colspan: 2}
+                    {name: '_p_description', type: 'textarea'}
                 ],
                 'history-group': [
                     'name', 'description'
@@ -183,7 +183,8 @@ mountExtraRoutes = (r, meta, options) ->
                 groups: [
                     {name: 'task-info-group', columns: 3, labelOnTop: true, label: '任务信息'},
                     {name: 'process-info-group', columns: 2},
-                    {name: 'history-group', columns: 5}
+                    # {name: 'history-group', columns: 6}
+                    {name: 'history-group'}
                 ],
                 tabs: [
                     {id:'process-info-group', title: '流程信息', groups: ['process-info-group']},

@@ -31,7 +31,7 @@ public class DomainEntity implements Serializable {
     @Id
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "com.zyeeda.coala.commons.generator.FallbackUUIDHexGenerator")
-    //@GenericGenerator(name = "system-uuid", strategy = "uuid2")
+    // @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     @Column(name = "F_ID")
     public String getId() {
         return this.id;
