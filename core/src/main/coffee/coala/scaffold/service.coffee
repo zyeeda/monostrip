@@ -72,8 +72,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 if da
                     if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
                         fieldMgr = baseService.createManager fieldMeta.type
-                        mapped = cascadeSave(fieldMgr, en, da, fieldMeta.type) 
-                        en[fieldMeta.mappedBy] = mapped
+                        mapped = cascadeSave(fieldMgr, en, da, fieldMeta.type)
+                        en[fieldMeta.mappedBy] = mapped if fieldMeta.mappedBy
                     # 如果传了对象过来，但不是从表单过来的，也没有id，无效对象
                     else if da.id == undefined
                         entity[fieldMeta.name] = null
@@ -85,6 +85,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     vs = en.toArray()
                     en.clear()
                     for e, i in vs
+                        continue unless da
                         d = da[i]
                         # 此处已经删除全部关系再加入，若要真实删除，请修改以下逻辑
                         if d and d['__FORM_TYPE__'] == 'delete'
@@ -106,6 +107,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     vs = en.toArray()
                     en.clear()
                     for e, i in vs
+                        continue unless da
                         d = da[i]
                         if d and d['__FORM_TYPE__'] == 'delete'
                             e[fieldMeta.mappedBy] = null
@@ -124,6 +126,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     vs = en.toArray()
                     en.clear()
                     for e, i in vs
+                        continue unless da
                         d = da[i]
                         # 此处已经删除全部关系再加入，若要真实删除，请修改以下逻辑
                         if d and d['__FORM_TYPE__'] == 'delete'
