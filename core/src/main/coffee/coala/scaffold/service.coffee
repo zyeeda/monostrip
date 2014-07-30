@@ -97,6 +97,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                             e[fieldMeta.mappedBy] = entity
                             en.add cascadeSave(fieldMgr, e, d, fieldMeta.manyType)
                         else
+                            e[fieldMeta.mappedBy] = entity
+                            fieldMgr.merge e
                             en.add e
             #多对多双向关联，Many、One处都有关联
             else if fieldMeta.isManyToManyTarget()
