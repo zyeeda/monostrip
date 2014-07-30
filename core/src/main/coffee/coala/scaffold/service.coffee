@@ -62,8 +62,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
         for fieldMeta in entityMeta.getFields()
             en = entity[fieldMeta.name]
             da = data[fieldMeta.name]
-
-            if en and en instanceof Attachment
+            continue unless en
+            if en instanceof Attachment
                 upload.commitAttachment en.id
                 continue
 
