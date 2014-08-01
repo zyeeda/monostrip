@@ -11,7 +11,7 @@
 {Authentication} = org.activiti.engine.impl.identity
 
 {coala} = require 'coala/config'
-{type} = require 'coala/util/type'
+{type, typeOf} = require 'coala/util/type'
 {createConverter} = require 'coala/scaffold/converter'
 fs = require 'fs'
 
@@ -46,7 +46,7 @@ exports.createManager = (entityClass, emfName) ->
     #
     mixin: (mixins) ->
         for name, value of mixins
-            if type(value) is 'function'
+            if typeOf(value) is 'function'
                 @[name] = value.bind @, em
         @
 

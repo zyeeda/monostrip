@@ -39,3 +39,7 @@ classToType['[object JavaPackage]'] = 'package'
 exports.type = (obj) ->
     strType = Object::toString.call(obj)
     classToType[strType] or "object"
+
+exports.typeOf = (obj) ->
+    strType = Object::toString.call(obj)
+    classToType[strType] or "object"
