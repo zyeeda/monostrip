@@ -63,8 +63,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
         for fieldMeta in entityMeta.getFields()
             en = entity[fieldMeta.name]
             da = data[fieldMeta.name]
-
-            if en and en instanceof Attachment
+            continue unless en
+            if en instanceof Attachment
                 upload.commitAttachment en.id
                 continue
 
@@ -74,7 +74,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
                         fieldMgr = baseService.createManager fieldMeta.type
                         mapped = cascadeSave(fieldMgr, en, da, fieldMeta.type)
-                        en[fieldMeta.mappedBy] = mapped
+                        en[fieldMeta.mappedBy] = mapped if fieldMeta.mappedBy
                     # 如果传了对象过来，但不是从表单过来的，也没有id，无效对象
                     else if da.id == undefined
                         entity[fieldMeta.name] = null
@@ -86,6 +86,11 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     vs = en.toArray()
                     en.clear()
                     for e, i in vs
+                        continue unless da
+                        # 当前台没传入数据，原先的list属性保持
+                        if !da
+                            en.add e
+                            continue
                         d = da[i]
                         # 此处已经删除全部关系再加入，若要真实删除，请修改以下逻辑
                         if d and d['__FORM_TYPE__'] == 'delete'
@@ -97,6 +102,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                             e[fieldMeta.mappedBy] = entity
                             en.add cascadeSave(fieldMgr, e, d, fieldMeta.manyType)
                         else
+                            e[fieldMeta.mappedBy] = entity
+                            fieldMgr.merge e
                             en.add e
             #多对多双向关联，Many、One处都有关联
             else if fieldMeta.isManyToManyTarget()
@@ -107,6 +114,10 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     vs = en.toArray()
                     en.clear()
                     for e, i in vs
+                        # 当前台没传入数据，原先的list属性保持
+                        if !da
+                            en.add e
+                            continue
                         d = da[i]
                         if d and d['__FORM_TYPE__'] == 'delete'
                             e[fieldMeta.mappedBy] = null
@@ -125,6 +136,10 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     vs = en.toArray()
                     en.clear()
                     for e, i in vs
+                        # 当前台没传入数据，原先的list属性保持
+                        if !da
+                            en.add e
+                            continue
                         d = da[i]
                         # 此处已经删除全部关系再加入，若要真实删除，请修改以下逻辑
                         if d and d['__FORM_TYPE__'] == 'delete'
@@ -134,6 +149,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                             en.add cascadeSave(fieldMgr, e, d, type)
                         else
                             en.add e
+                else
+                    delete entity[fieldMeta.name]
         mgr.merge entity
 
     startProcess = mark('beans', 'runtimeService').on (runtimeService, entity, manager) ->
