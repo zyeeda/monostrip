@@ -79,5 +79,6 @@ exports.create = (module, mountDefaultRouters = true) ->
         router.mount '/helper', 'coala/frontend-helper' # this is useless
         router.mount '/scaffold', 'coala/scaffold/router'
         router.mount '/scaffold/tasks', 'coala/scaffold/task'
+        router.mount '/scaffold/bpm', 'coala/bpm'
 
     router

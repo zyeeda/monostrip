@@ -22,7 +22,7 @@ entityToVariables = (entity) ->
     meta = resolver.resolveEntity clazz
     result = {}
     for key, value of entity
-        result[key] = value if meta.hasField key
+        result['_e_' + key] = value if meta.hasField key
     result
 
 exports.createService = ->

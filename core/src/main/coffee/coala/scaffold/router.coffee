@@ -15,13 +15,10 @@ objects                 = require 'coala/util/objects'
 response                = require 'ringo/jsgi/response'
 
 log = require('ringo/logging').getLogger module.id
-
 {Context}          = com.zyeeda.coala.web.SpringAwareJsgiServlet
-
 URLDecoder         = java.net.URLDecoder
-
 {Authentication}   = org.activiti.engine.impl.identity
-
+{SecurityUtils}    = org.apache.shiro
 {ClassUtils}       = org.springframework.util
 
 entityMetaResolver = Context.getInstance(module).getBeanByClass(com.zyeeda.coala.web.scaffold.EntityMetaResolver)
@@ -251,8 +248,17 @@ getJsonFilter = exports.getJsonFilter = (options, type) ->
     options.filters[type] or options.filters.defaults or {}
 
 getCurrentUser = ->
-    currentUser = 'tom'
-    Authentication.setAuthenticatedUserId currentUser
+    p = SecurityUtils.getSubject().getPrincipal()
+    if Authentication.getAuthenticatedUserId()
+        if p and Authentication.getAuthenticatedUserId() isnt p.getAccountName()
+            currentUser = p.getAccountName()
+            Authentication.setAuthenticatedUserId currentUser
+        else
+            currentUser = Authentication.getAuthenticatedUserId()
+    else
+        currentUser = p?.getAccountName() or 'tom'
+        Authentication.setAuthenticatedUserId currentUser
+
     currentUser
 
 requireScaffoldConfig = exports.requireScaffoldConfig = (path) ->

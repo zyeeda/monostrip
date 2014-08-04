@@ -21,6 +21,7 @@ public interface HistoricTaskMapper {
     		+ " from act_hi_taskinst t"
     		+ " left outer join zda_account a on t.assignee_ = a.f_id  "
     		+ " left outer join act_hi_comment c on t.id_ = c.task_id_ "
-    		+ " where t.proc_inst_id_ = #{processInstanceId} ")
+    		+ " where t.proc_inst_id_ = #{processInstanceId} "
+    		+ " order by t.start_time_ ")
     List<Map<String, Object>> getHistoricTasksByProcessInstanceId(String processInstanceId);
 }

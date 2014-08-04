@@ -147,7 +147,7 @@ exports.json = (object, config) ->
             @_isStream = true
             log.debug "headers = #{JSON.stringify @headers}"
             exports.stream request,
-                headers: @headers 
+                headers: @headers
                 status: @status
                 body: (stream) =>
                     writer = getObjectWriter @_included, @_excluded

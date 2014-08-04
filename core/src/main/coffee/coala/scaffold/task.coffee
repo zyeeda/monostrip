@@ -37,8 +37,8 @@ mountExtraRoutes = (r, meta, options) ->
 
     # taskType ，待办:waiting ，在办:doing ，已办: done ,全部: none
     r.get('configuration/operators/:taskType', (request, taskType) ->
-        
-        operators = 
+
+        operators =
             show:
                 label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-primary', order: 100, show: 'single-selected'
             refresh:
@@ -83,8 +83,8 @@ mountExtraRoutes = (r, meta, options) ->
                     'name', 'age', 'sex', 'phone', 'address'
                 ],
                 'task-info-group': [
-                    'task-name', 
-                    'create-time', 
+                    'task-name',
+                    'create-time',
                     # {name: 'pass', type: 'dropdown', defaultValue: '1', source: [{id: '1', text: '是'}, {id: '0', text: '否'}]},
                     'pass',
                     {name: 'comment', type: 'textarea', colspan: 3}
@@ -104,8 +104,8 @@ mountExtraRoutes = (r, meta, options) ->
             # options.forms = {} unless options.forms
             forms.show =
                 groups: [
-                    {name: 'task-info-group', columns: 3, readOnly: false}, 
-                    {name: 'process-info-group', columns: 2}, 
+                    {name: 'task-info-group', columns: 3, readOnly: false},
+                    {name: 'process-info-group', columns: 2},
                     {name: 'process-map-group', columns: 2},
                     {name: 'history-group', columns: 2}
                 ],
@@ -137,7 +137,7 @@ mountPath = (path, meta) ->
         mountExtraRoutes r, meta, options, path
 
     router.attachDomain path, meta, options
-    
+
 # 遍历所有 package 中的实体, meta.path 即实体中 @Scaffold 注解中的参数值
 for meta in metas
     mountPath meta.path, meta
@@ -179,8 +179,9 @@ processDefinitionToVo = (process) ->
     vo
 
 getCurrentUser = ->
-    currentUser = 'tom'
-    Authentication.setAuthenticatedUserId currentUser
+    currentUser = Authentication.getAuthenticatedUserId() or 'tom'
+    if not Authentication.getAuthenticatedUserId()
+        Authentication.setAuthenticatedUserId currentUser
     currentUser
 
 taskQuery = (createQuery, request, process, resolver, noExtra) ->

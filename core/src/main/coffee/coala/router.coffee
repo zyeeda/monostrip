@@ -9,10 +9,13 @@ paths = require 'coala/util/paths'
 {mark} = require 'coala/mark'
 {json, html, notFound, internalServerError} = require 'coala/response'
 {Authentication} = org.activiti.engine.impl.identity
+{SecurityUtils} = org.apache.shiro
 {EventSubscriptionQueryImpl} = org.activiti.engine.impl
 {ClassUtils} = org.springframework.util
+{Arrays} = java.util
 
 {createService} = require 'coala/scaffold/service'
+baseService = require('coala/service').createService()
 {createConverter} = require 'coala/scaffold/converter'
 {createValidator} = require 'coala/validation/validator'
 {createValidationContext} = require 'coala/validation/validation-context'
@@ -23,8 +26,6 @@ paths = require 'coala/util/paths'
 
 {Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 {Create, Update} = com.zyeeda.coala.validation.group
-
-{SecurityUtils} = org.apache.shiro
 
 timeFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd HH:mm:ss'
 
@@ -292,8 +293,8 @@ defaultHandlers = (path, options) ->
             if style? and options[style]? and options[style].colModel?
                 config.fields= options[style].colModel
 
-            htQuery = process.history.createHistoricTaskInstanceQuery()
-                .processInstanceId(entity.processInstanceId)
+            # htQuery = process.history.createHistoricTaskInstanceQuery()
+            #     .processInstanceId(entity.processInstanceId)
             paginationInfo = coala.extractPaginationInfo request.params
             if paginationInfo?
                 paginationInfo.listType = config.listType
@@ -325,7 +326,6 @@ defaultHandlers = (path, options) ->
             o = coala.generateListResult result.results, config.currentPage, config.maxResults, result.recordCount, result.pageCount
             json o,
                 include:
-                    # '!historicTaskInstanceEntityFilter': ''
                     historicTaskFilter: ['id', 'name', 'assignee', 'assigneeName', 'startTime', 'claimTime', 'endTime', 'comment']
 
         get: (options, service, entityMeta, request, id) ->
@@ -337,13 +337,23 @@ defaultHandlers = (path, options) ->
         get4Process: mark('process').on (process, options, service, entityMeta, request, id) ->
             entity = service.get id
             currentUser = getCurrentUser()
-            # 查询待办任务
+            # 根据潜在用户查询待办任务
             task = process.task.createTaskQuery()
             .taskCandidateUser(currentUser)
             .processDefinitionKey(options.processDefinitionKey)
             .processInstanceId(entity.processInstanceId)
             .processVariableValueEquals('ENTITY', id)
             .singleResult()
+
+            # 根据潜在组查询待办任务
+            groupIds = getUserGroupIds()
+            if task is null and not groupIds.isEmpty()
+                task = process.task.createTaskQuery()
+                .taskCandidateGroupIn(getUserGroupIds())
+                .processDefinitionKey(options.processDefinitionKey)
+                .processInstanceId(entity.processInstanceId)
+                .processVariableValueEquals('ENTITY', id)
+                .singleResult()
 
             # 如果待办任务为空，查询在办任务
             if task is null
@@ -368,7 +378,7 @@ defaultHandlers = (path, options) ->
                 _t_taskName: task?.name
                 _t_createTime: task?.createTime
                 _t_assignee: task?.assignee
-                _t_assigneeName: getAccountById(task.assignee)?.accountName or task.assignee if task.assignee
+                _t_assigneeName: getAccountById(task.assignee)?.accountName or task.assignee if task?.assignee
                 _t_rejectable: false
                 _p_name: processDefinition.name
                 _p_description: processDefinition.description
@@ -391,7 +401,7 @@ defaultHandlers = (path, options) ->
 
             json e, getJsonFilter(options, 'get')
 
-        # 获取实体及任务历史信息
+        # 获取实体及任务历史信息 用于已完成任务
         get4ProcessHistory: mark('process').on (process, options, service, entityMeta, request, id) ->
             entity = service.get id
             currentUser = getCurrentUser()
@@ -408,6 +418,7 @@ defaultHandlers = (path, options) ->
                 .toArray()
 
             processDefinition = getProcessDefinition(historicProcessInstance.processDefinitionId)
+            # 最后一个历史任务才能进行召回
             historicTask = historicTasks[0]
             e = {}
 
@@ -422,7 +433,7 @@ defaultHandlers = (path, options) ->
                 _t_createTime: historicTask.startTime
                 _t_endTime: historicTask.endTime
                 _t_assignee: historicTask.assignee
-                _t_assigneeName: getAccountById(historicTask.assignee)?.accountName or historicTask.assignee if historicTask.assignee
+                _t_assigneeName: getAccountById(historicTask.assignee)?.accountName or historicTask.assignee if historicTask?.assignee
                 _t_rejectable: false
                 _t_recallable: false
                 _p_name: processDefinition.name
@@ -471,7 +482,7 @@ defaultHandlers = (path, options) ->
             return result if result isnt undefined
 
             # entity.processDefinitionId = options.processDefinitionKey
-            entity = service.create(entity)
+            entity = service.create(entity, request.params)
 
             result = callHook 'after', 'Create', options, entityMeta, request, entity
             # 启动流程
@@ -552,7 +563,7 @@ defaultHandlers = (path, options) ->
                 return false if result isnt undefined
                 result = true
 
-            entity = service.update entityId, updateIt
+            entity = service.update entityId, updateIt, request.params
 
             process.task.claim taskId, getCurrentUser()
             return result if result isnt true
@@ -576,7 +587,7 @@ defaultHandlers = (path, options) ->
                 return false if result isnt undefined
                 result = true
 
-            entity = service.update entityId, updateIt
+            entity = service.update entityId, updateIt, request.params
 
             variables = objects.extend {}, process.entityToVariables(entity)
             pass = request.params._t_pass or '1'
@@ -615,12 +626,12 @@ defaultHandlers = (path, options) ->
 
         recall: mark('process').on (process, options, service, entityMeta, request, id) ->
             entityId = id.split('|')[0]
-            taskId = id.split('|')[1]
+            historyTaskId = id.split('|')[1]
 
             entity = service.get entityId
-            process.task.recall taskId
+            process.task.recall historyTaskId
 
-            # 保存召回原因
+            # 保存召回原因，召回原因写入召回后的待办任务中
             recallReason = request.params._t_recall_reason
             if not _.isEmpty recallReason
                 tasks = process.task.createTaskQuery()
@@ -632,7 +643,7 @@ defaultHandlers = (path, options) ->
                 task = tasks[0];
                 process.task.addComment task.id, task.processInstanceId, recallReason
 
-            json taskId
+            json historyTaskId
 
     return o if options.disableAuthz is true or coala.disableAuthz is true
 
@@ -652,9 +663,48 @@ mergeEntityAndParameter = (options, params, entityMeta, type, entity) ->
     options.afterMerge? entity, type
     entity
 getCurrentUser = ->
-    currentUser = 'tom'
-    Authentication.setAuthenticatedUserId currentUser
+    p = SecurityUtils.getSubject().getPrincipal()
+    if Authentication.getAuthenticatedUserId()
+        if p and Authentication.getAuthenticatedUserId() isnt p.getAccountName()
+            currentUser = p.getAccountName()
+            Authentication.setAuthenticatedUserId currentUser
+        else
+            currentUser = Authentication.getAuthenticatedUserId()
+    else
+        currentUser = p?.getAccountName() or 'tom'
+        Authentication.setAuthenticatedUserId currentUser
+
     currentUser
+# 递归查询父部门
+# TODO 可能存在性能问题
+getParentDepatments = (department, parents = []) ->
+    parents.push department
+    if department.parent
+        getParentDepatments department.parent, parents
+
+    parents
+
+# 获取当前用户拥有的组（部门和角色）, return List<String>
+getUserGroupIds = ->
+    accountClass = ClassUtils.forName 'com.zyeeda.coala.commons.organization.entity.Account'
+    accountManager = baseService.createManager accountClass
+    account = accountManager.find getCurrentUser()
+
+    groupIds = []
+    departments = []
+    roles = []
+    # 处理任务参与者，将部门和角色映射为 group
+    departments = getParentDepatments account.department if account?.department
+    roles = account.roles.toArray() if account?.roles
+    departmentIds = _.map departments, (department) ->
+        department.id
+    roleIds = _.map roles, (role) ->
+        role.id
+    _.each departmentIds, (id) ->
+        groupIds.push id
+    _.each roleIds, (id) ->
+        groupIds.push id
+    Arrays.asList groupIds
 taskToVo = (task) ->
     ps = [
         'id', 'name', 'description', 'priority', 'assignee', 'processInstanceId',
