@@ -10,6 +10,7 @@ createProcessService = require('coala/scaffold/process-service').createService
 {Context} = com.zyeeda.coala.web.SpringAwareJsgiServlet
 {ProcessStatusAware} = com.zyeeda.coala.commons.annotation.scaffold
 {Authentication} = org.activiti.engine.impl.identity
+{SecurityUtils} = org.apache.shiro
 {ArrayList, HashSet} = java.util
 {ClassUtils} = org.springframework.util
 {Attachment} = com.zyeeda.coala.commons.resource.entity
@@ -152,8 +153,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
         mgr.merge entity
 
     startProcess = mark('beans', 'runtimeService').on (runtimeService, entity, manager) ->
-        currentUser = 'tom'
-        Authentication.setAuthenticatedUserId currentUser
+        currentUser = getCurrentUser()
 
         processDefinitionKey = scaffold.processDefinitionKey
         if type(processDefinitionKey) is 'function'
@@ -194,15 +194,16 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             manager = baseService.createManager service.entityClass
             if options.taskType is 'waiting'
                 currentUser = getCurrentUser()
-                accountClass = ClassUtils.forName 'com.zyeeda.coala.commons.organization.entity.Account'   
+                accountClass = ClassUtils.forName 'com.zyeeda.coala.commons.organization.entity.Account'
                 accountManager = baseService.createManager accountClass
                 account = accountManager.find currentUser
 
                 groupIds = []
                 departments = []
                 roles = []
-                departments = getParentDepatments account.department if account.department
-                roles = account.roles.toArray() if account.roles
+                # 处理任务参与者，将部门和角色映射为 group
+                departments = getParentDepatments account.department if account?.department
+                roles = account.roles.toArray() if account?.roles
                 departmentIds = _.map departments, (department) ->
                     "'" + department.id + "'"
                 roleIds = _.map roles, (role) ->
@@ -295,8 +296,17 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
 
     service
 getCurrentUser = ->
-    currentUser = 'tom'
-    Authentication.setAuthenticatedUserId currentUser
+    p = SecurityUtils.getSubject().getPrincipal()
+    if Authentication.getAuthenticatedUserId()
+        if p and Authentication.getAuthenticatedUserId() isnt p.getAccountName()
+            currentUser = p.getAccountName()
+            Authentication.setAuthenticatedUserId currentUser
+        else
+            currentUser = Authentication.getAuthenticatedUserId()
+    else
+        currentUser = p?.getAccountName() or 'tom'
+        Authentication.setAuthenticatedUserId currentUser
+
     currentUser
 
 # 递归查询父部门
@@ -306,4 +316,4 @@ getParentDepatments = (department, parents = []) ->
     if department.parent
         getParentDepatments department.parent, parents
 
-    parents        
+    parents

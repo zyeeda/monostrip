@@ -9,6 +9,7 @@
 {FieldMeta} = com.zyeeda.coala.web.scaffold
 {Search} = org.hibernate.search.jpa
 {Authentication} = org.activiti.engine.impl.identity
+{SecurityUtils} = org.apache.shiro
 
 {coala} = require 'coala/config'
 {type, typeOf} = require 'coala/util/type'
@@ -533,6 +534,15 @@ operators =
         '(' + terms.join(' or ') + ')'
 
 getCurrentUser = ->
-    currentUser = 'tom'
-    Authentication.setAuthenticatedUserId currentUser
+    p = SecurityUtils.getSubject().getPrincipal()
+    if Authentication.getAuthenticatedUserId()
+        if p and Authentication.getAuthenticatedUserId() isnt p.getAccountName()
+            currentUser = p.getAccountName()
+            Authentication.setAuthenticatedUserId currentUser
+        else
+            currentUser = Authentication.getAuthenticatedUserId()
+    else
+        currentUser = p?.getAccountName() or 'tom'
+        Authentication.setAuthenticatedUserId currentUser
+
     currentUser
