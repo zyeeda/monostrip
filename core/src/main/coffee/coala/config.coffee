@@ -72,7 +72,7 @@ defaultConfigure =
         del:
             label: '删除', icon: 'icon-minus', group: '20-selected', style: 'btn-danger', order: 300
         refresh:
-            label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'always', order: 300
+            label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'always', order: 100
 
     # Default function to extract pagination info.
     #
