@@ -3,6 +3,7 @@
 package com.zyeeda.coala.commons.organization.entity;
 
 import java.util.Set;
+import java.util.HashSet;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -10,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.JoinTable;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -100,7 +102,7 @@ public class Account extends DomainEntity {
     /**
      * 帐号拥有的角色.
      */
-    private Set<Role> roles = null;
+    private Set<Role> roles = new HashSet<Role>();
 
     @Basic
     @Column(name = "F_ACCOUNT_NAME", length = 30)
@@ -221,7 +223,11 @@ public class Account extends DomainEntity {
         this.deleted = deleted;
     }
 
-    @ManyToMany(mappedBy = "accounts")
+    @ManyToMany
+    @JoinTable(
+            name = "ZDA_ROLE_ACCOUNT",
+            joinColumns = @JoinColumn(name = "F_ACCOUNT_ID"),
+            inverseJoinColumns = @JoinColumn(name = "F_ROLE_ID"))
     public Set<Role> getRoles() {
         return this.roles;
     }
