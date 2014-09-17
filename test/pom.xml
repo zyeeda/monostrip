@@ -19,7 +19,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     </parent>
 
     <artifactId>zyeeda-cdeio-runtime-test</artifactId>
-    <name>Zyeeda cdeio Test</name>
     <name>Zyeeda Cdeio Runtime Test Module</name>
     <packaging>jar</packaging>
 
