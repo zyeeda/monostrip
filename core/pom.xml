@@ -192,18 +192,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.cj.jshintmojo</groupId>
-                <artifactId>jshint-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>src/main/coffee</exclude>
-                        <exclude>src/main/packages</exclude>
-                        <exclude>src/main/resources</exclude>
-                    </excludes>
-                    <failOnError>true</failOnError>
-                </configuration>
-            </plugin>
         </plugins>
         <pluginManagement>
         	<plugins>
