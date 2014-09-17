@@ -86,7 +86,6 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     vs = en.toArray()
                     en.clear()
                     for e, i in vs
-                        continue unless da
                         # 当前台没传入数据，原先的list属性保持
                         if !da
                             en.add e

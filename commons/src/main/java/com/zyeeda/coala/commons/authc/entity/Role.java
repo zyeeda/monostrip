@@ -100,11 +100,7 @@ public class Role extends DomainEntity {
         this.department = department;
     }
 
-    @ManyToMany
-    @JoinTable(
-            name = "ZDA_ROLE_ACCOUNT",
-            joinColumns = @JoinColumn(name = "F_ROLE_ID"),
-            inverseJoinColumns = @JoinColumn(name = "F_ACCOUNT_ID"))
+    @ManyToMany(mappedBy = "roles")
     public List<Account> getAccounts() {
         return this.accounts;
     }
