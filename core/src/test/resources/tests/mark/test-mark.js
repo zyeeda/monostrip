@@ -2,7 +2,7 @@
 (function() {
   var mark, ok;
 
-  mark = require('coala/mark').mark;
+  mark = require('cdeio/mark').mark;
 
   ok = require('assert').ok;
 

@@ -2,7 +2,7 @@
 
 <configuration debug="true" >
 
-	<property name="applicationName" value="zyeeda-coala" />
+	<property name="applicationName" value="zyeeda-cdeio" />
 
     <contextName>${applicationName}</contextName>
 

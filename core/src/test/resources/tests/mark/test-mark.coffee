@@ -1,4 +1,4 @@
-{mark} = require 'coala/mark'
+{mark} = require 'cdeio/mark'
 {ok} = require 'assert'
 
 exports.testMark = ->

@@ -23,9 +23,9 @@ bin
 WEB-INF/classes
 WEB-INF/lib
 WEB-INF/app
-WEB-INF/modules/coala
-main/resources/coala/**.js
-main/coffee/coala/**.js
+WEB-INF/modules/cdeio
+main/resources/cdeio/**.js
+main/coffee/cdeio/**.js
 src/main/webapp/scripts/main-dist.js
 test-output
 

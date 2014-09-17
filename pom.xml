@@ -18,10 +18,10 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <version>3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-coala-framework</artifactId>
+    <artifactId>zyeeda-cdeio-framework</artifactId>
     <version>2.0.0-SNAPSHOT</version>
-    <name>Zyeeda Coala Framework (ZCF)</name>
-    <url>http://www.zyeeda.com/products/zyeeda-coala-framework</url>
+    <name>Zyeeda cdeio Framework (ZCF)</name>
+    <url>http://www.zyeeda.com/products/zyeeda-cdeio-framework</url>
     <packaging>pom</packaging>
 
     <repositories>

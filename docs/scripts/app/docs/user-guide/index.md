@@ -303,7 +303,7 @@ public class People extends DomainEntity {
     <!-- 定义 JSGI Filter -->
     <servlet>
         <servlet-name>jsgi</servlet-name>
-        <servlet-class>com.zyeeda.coala.web.SpringAwareJsgiServlet</servlet-class>
+        <servlet-class>com.zyeeda.cdeio.web.SpringAwareJsgiServlet</servlet-class>
         <init-param>
             <param-name>debug</param-name>
             <param-value>true</param-value>
@@ -360,7 +360,7 @@ JSGI servlet 在启动的时候会默认加载 WEB-INF/app 目录，并寻找名
 main.js 的内容通常来说只有一行，看上去是这个样子的：
 
 ```javascript
-exports.app = require('coala/router').createApplication(this);
+exports.app = require('cdeio/router').createApplication(this);
 ```
 
 <span class="label label-important">注意</span> exports.app 是 main.js 必须的。
@@ -388,8 +388,8 @@ exports.app = require('coala/router').createApplication(this);
 router 是用来分发和处理请求的，有些类似于 Spring 中的 DispatcherServlet。当有请求来到服务端的时候，router 会拦截所有请求，并根据其中定义的规则，分发请求到一个请求处理方法，该请求处理方法会调用 service（进而是 manager）来实现业务逻辑处理，并最终将响应返回给客户端。下面的代码实现了最简单的 Hello World 功能：
 
 ```javascript
-var {createRouter} = require('coala/router');
-var response = require('coala/response');
+var {createRouter} = require('cdeio/router');
+var response = require('cdeio/response');
 var router = createRouter();
 
 router.get('/greeting', function () {
@@ -399,7 +399,7 @@ router.get('/greeting', function () {
 exports.router = router;
 ```
 
-首先从 coala/router 模块中取出 createRouter 方法，这是创建 router 对象的入口方法；然后获取 coala/response 模块，用来为请求提供响应。调用 createRouter 方法创建一个 router，并调用 get 方法为所有访问到 /greeting 地址的请求输出一个 HTML 片段响应（不完全正确，见下文解释）。该程序运行效果如图所示：
+首先从 cdeio/router 模块中取出 createRouter 方法，这是创建 router 对象的入口方法；然后获取 cdeio/response 模块，用来为请求提供响应。调用 createRouter 方法创建一个 router，并调用 get 方法为所有访问到 /greeting 地址的请求输出一个 HTML 片段响应（不完全正确，见下文解释）。该程序运行效果如图所示：
 
 ![运行效果](assets/images/user-guide/3-hello-world.png)
 
@@ -490,7 +490,7 @@ router.get('/users/:userId', function (req, userId) {
 使用这种方式返回响应，需要对 HTTP 协议有深入的了解，尤其需要了解各请求和响应的头信息的含义。而且此处 body 字段的内容必须是静态的数据，如果需要返回流式数据的话，仅仅使用 body 就无能为力了。因此框架引入了更方便的方式对请求进行响应。
 
 ```javascript
-var response = require('coala/response');
+var response = require('cdeio/response');
 ```
 
 使用如上的方法获取 response 工具对象，该对象包含如下一些方法：
@@ -667,7 +667,7 @@ response.stream(request, {
 在开始介绍 service 和 manager 之前，需要先来了解一下 marker 的用法。marker 类似于 Java 中的 annotation，主要用来向方法中注入对象。基本用法类似这样：
 
 ```javascript
-var {mark} = require('coala/marker');
+var {mark} = require('cdeio/marker');
 
 mark('something').on(function () {
     ...
@@ -817,7 +817,7 @@ service 一般是在 router 中进行使用的，配合上面的例子，对应�
 ```javascript
 // system/__routers__/users.js
 
-var {createRouter} = require('coala/router');
+var {createRouter} = require('cdeio/router');
 var router = createRouter();
 
 router.post('/', mark('services', 'system:users').on(function (userService) { ... }));

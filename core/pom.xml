@@ -14,13 +14,13 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
     <parent>
         <groupId>com.zyeeda</groupId>
-        <artifactId>zyeeda-coala-framework</artifactId>
+        <artifactId>zyeeda-cdeio-framework</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-coala-core</artifactId>
-    <name>Zyeeda Coala Core</name>
-    <description>Zyeeda Coala Framework core components and libraries.</description>
+    <artifactId>zyeeda-cdeio-core</artifactId>
+    <name>Zyeeda cdeio Core</name>
+    <description>Zyeeda cdeio Framework core components and libraries.</description>
     <packaging>jar</packaging>
 
     <properties>
@@ -31,13 +31,13 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <dependencies>
         <dependency>
             <groupId>com.zyeeda</groupId>
-            <artifactId>zyeeda-coala-commons</artifactId>
+            <artifactId>zyeeda-cdeio-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.zyeeda</groupId>
-            <artifactId>zyeeda-coala-test</artifactId>
+            <artifactId>zyeeda-cdeio-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
@@ -177,7 +177,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
                 <artifactId>coffeescript-maven-plugin</artifactId>
                 <configuration>
                     <srcDir>${basedir}/src/main/coffee</srcDir>
-                    <outputDir>${project.build.outputDirectory}/coala-modules</outputDir>
+                    <outputDir>${project.build.outputDirectory}/cdeio-modules</outputDir>
                     <bare>false</bare>
                     <modifiedOnly>true</modifiedOnly>
                     <allowedDelete>true</allowedDelete>

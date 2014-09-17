@@ -14,13 +14,13 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
     <parent>
         <groupId>com.zyeeda</groupId>
-        <artifactId>zyeeda-coala-framework</artifactId>
+        <artifactId>zyeeda-cdeio-framework</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-coala-revision</artifactId>
-    <name>Zyeeda Coala Revision</name>
-    <description>Zyeeda Coala Framework revision entities.</description>
+    <artifactId>zyeeda-cdeio-revision</artifactId>
+    <name>Zyeeda cdeio Revision</name>
+    <description>Zyeeda cdeio Framework revision entities.</description>
     <packaging>jar</packaging>
 
     <properties>
@@ -30,7 +30,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <dependencies>
         <dependency>
             <groupId>com.zyeeda</groupId>
-            <artifactId>zyeeda-coala-commons</artifactId>
+            <artifactId>zyeeda-cdeio-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -144,5 +144,5 @@ Object.defineProperty(exports, 'cookies', {
  * @name tx
 **/
 Object.defineProperty(exports, 'tx', {
-   get: function() require('coala/tx')
+   get: function() require('cdeio/tx')
 });

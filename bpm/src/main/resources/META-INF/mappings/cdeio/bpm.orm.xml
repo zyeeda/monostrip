@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- $Id$ -->
+
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/persistence/orm_2_0.xsd"
+    version="2.0">
+    
+    <entity class="com.zyeeda.cdeio.bpm.mapping.HistoricProcess" metadata-complete="true">
+        <table name="ACT_HI_PROCINST"/>
+        <attributes>
+            <id name="id"><column name="ID_"/></id>
+            <basic name="processInstanceId"><column name="PROC_INST_ID_"/></basic>
+            <basic name="processDefinitionId"><column name="PROC_DEF_ID_"/></basic>
+            <basic name="startTime"><column name="START_TIME_"/></basic>
+            <basic name="endTime"><column name="END_TIME_"/></basic>
+            <basic name="durationInMillis"><column name="DURATION_"/></basic>
+            <basic name="deleteReason"><column name="DELETE_REASON_"/></basic>
+            <basic name="endActivityId"><column name="END_ACT_ID_"/></basic>
+            <basic name="businessKey"><column name="BUSINESS_KEY_"/></basic>
+            <basic name="startUserId"><column name="START_USER_ID_"/></basic>
+            <basic name="startActivityId"><column name="START_ACT_ID_"/></basic>
+            <basic name="superProcessInstanceId"><column name="SUPER_PROCESS_INSTANCE_ID_"/></basic>
+        </attributes>
+    </entity>
+    
+<!--     <entity class="com.zyeeda.cdeio.bpm.mapping.HistoricTask" metadata-complete="true"> -->
+<!--         <table name="ACT_HI_TASKINST"/> -->
+<!--         <attributes> -->
+<!--             <id name="id"><column name="ID_"/></id> -->
+<!--             <basic name="processInstanceId"><column name="PROC_INST_ID_"/></basic> -->
+<!--             <basic name="processDefinitionId"><column name="PROC_DEF_ID_"/></basic> -->
+<!--             <basic name="startTime"><column name="START_TIME_"/></basic> -->
+<!--             <basic name="endTime"><column name="END_TIME_"/></basic> -->
+<!--             <basic name="durationInMillis"><column name="DURATION_"/></basic> -->
+<!--             <basic name="deleteReason"><column name="DELETE_REASON_"/></basic> -->
+<!--             <basic name="executionId"><column name="EXECUTION_ID_"/></basic> -->
+<!--             <basic name="name"><column name="NAME_"/></basic> -->
+<!--             <basic name="parentTaskId"><column name="PARENT_TASK_ID_"/></basic> -->
+<!--             <basic name="description"><column name="DESCRIPTION_"/></basic> -->
+<!--             <basic name="owner"><column name="OWNER_"/></basic> -->
+<!--             <basic name="assignee"><column name="ASSIGNEE_"/></basic> -->
+<!--             <basic name="taskDefinitionKey"><column name="TASK_DEF_KEY_"/></basic> -->
+<!--             <basic name="priority"><column name="PRIORITY_"/></basic> -->
+<!--             <basic name="dueDate"><column name="DUE_DATE_"/></basic> -->
+<!--         </attributes> -->
+<!--     </entity> -->
+</entity-mappings>

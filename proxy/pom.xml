@@ -6,13 +6,13 @@
 
     <parent>
         <groupId>com.zyeeda</groupId>
-        <artifactId>zyeeda-coala-framework</artifactId>
+        <artifactId>zyeeda-cdeio-framework</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
     
-    <artifactId>zyeeda-coala-proxy</artifactId>
-    <name>Zyeeda Coala Proxy</name>
-    <description>Zyeeda coala proxy based on HTTP-Proxy-Servlet.</description>
+    <artifactId>zyeeda-cdeio-proxy</artifactId>
+    <name>Zyeeda cdeio Proxy</name>
+    <description>Zyeeda cdeio proxy based on HTTP-Proxy-Servlet.</description>
     <packaging>jar</packaging>
 
     <properties>
