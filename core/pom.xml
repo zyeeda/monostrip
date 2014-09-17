@@ -14,13 +14,12 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
     <parent>
         <groupId>com.zyeeda</groupId>
-        <artifactId>zyeeda-cdeio-framework</artifactId>
+        <artifactId>zyeeda-cdeio-runtime</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-cdeio-core</artifactId>
-    <name>Zyeeda cdeio Core</name>
-    <description>Zyeeda cdeio Framework core components and libraries.</description>
+    <artifactId>zyeeda-cdeio-runtime-core</artifactId>
+    <name>Zyeeda Cdeio Runtime Core Module</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -31,13 +30,13 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <dependencies>
         <dependency>
             <groupId>com.zyeeda</groupId>
-            <artifactId>zyeeda-cdeio-commons</artifactId>
+            <artifactId>zyeeda-cdeio-runtime-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.zyeeda</groupId>
-            <artifactId>zyeeda-cdeio-test</artifactId>
+            <artifactId>zyeeda-cdeio-runtime-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
@@ -192,6 +191,18 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.cj.jshintmojo</groupId>
+                <artifactId>jshint-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>src/main/coffee</exclude>
+                        <exclude>src/main/packages</exclude>
+                        <exclude>src/main/resources</exclude>
+                    </excludes>
+                    <failOnError>true</failOnError>
+                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>

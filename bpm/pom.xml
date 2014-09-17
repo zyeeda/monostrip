@@ -14,13 +14,12 @@ $License: Copyright &copyright 2014 Shenzhen Zyeeda Information Technology Co. L
 
     <parent>
         <groupId>com.zyeeda</groupId>
-        <artifactId>zyeeda-cdeio-framework</artifactId>
+        <artifactId>zyeeda-cdeio-runtime</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-cdeio-bpm</artifactId>
-    <name>Zyeeda cdeio BPM</name>
-    <description>Zyeeda cdeio Framework BPM libraries.</description>
+    <artifactId>zyeeda-cdeio-runtime-bpm</artifactId>
+    <name>Zyeeda Cdeio Runtime BPM Module</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -30,9 +29,10 @@ $License: Copyright &copyright 2014 Shenzhen Zyeeda Information Technology Co. L
     <dependencies>
     	<dependency>
     		<groupId>com.zyeeda</groupId>
-        	<artifactId>zyeeda-cdeio-commons</artifactId>
+        	<artifactId>zyeeda-cdeio-runtime-commons</artifactId>
         	<version>2.0.0-SNAPSHOT</version>
     	</dependency>
+
         <!-- slf4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -67,5 +67,4 @@ $License: Copyright &copyright 2014 Shenzhen Zyeeda Information Technology Co. L
 		  <version>${activiti.version}</version>
 		</dependency>
     </dependencies>
-
 </project>
