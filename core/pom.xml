@@ -42,6 +42,11 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         </dependency>
 
         <dependency>
+            <groupId>com.zyeeda</groupId>
+            <artifactId>cdeio-ringo</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
         </dependency>
@@ -94,12 +99,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-ehcache</artifactId>
-        </dependency>
-
-        <!-- ringojs -->
-        <dependency>
-            <groupId>org.ringojs</groupId>
-            <artifactId>ringojs</artifactId>
         </dependency>
 
         <!-- jackson -->

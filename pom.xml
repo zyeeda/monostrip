@@ -36,8 +36,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <commons.lang.version>2.6</commons.lang.version>
         <commons.collections.version>3.2.1</commons.collections.version>
         <jackson.version>2.1.0</jackson.version>
-        <ringo.version>0.10.0</ringo.version>
-        <jffi.version>1.0.10</jffi.version>
+        <ringo.version>0.10.0-SNAPSHOT</ringo.version>
         <quartz.version>2.2.1</quartz.version>
     </properties>
 
@@ -211,29 +210,13 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
             <!-- ringojs -->
             <dependency>
-                <groupId>org.ringojs</groupId>
-                <artifactId>ringojs</artifactId>
+                <groupId>com.zyeeda</groupId>
+                <artifactId>cdeio-ringo</artifactId>
                 <version>${ringo.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-client</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>junit</groupId>
-                        <artifactId>junit</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -276,5 +259,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <module>revision</module>
         <module>proxy</module>
         <module>sso</module>
+        <module>ringo</module>
     </modules>
 </project>
