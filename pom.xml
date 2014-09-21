@@ -275,5 +275,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <module>core</module>
         <module>revision</module>
         <module>proxy</module>
+        <module>sso</module>
     </modules>
 </project>
