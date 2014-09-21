@@ -14,18 +14,18 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
     <parent>
         <groupId>com.zyeeda</groupId>
-        <artifactId>zyeeda-cdeio-runtime</artifactId>
+        <artifactId>cdeio-runtime</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-cdeio-runtime-commons</artifactId>
-    <name>Zyeeda Cdeio Runtime Commons Module</name>
+    <artifactId>cdeio-commons</artifactId>
+    <name>Zyeeda Cdeio Commons Module</name>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.zyeeda</groupId>
-            <artifactId>zyeeda-cdeio-runtime-validation</artifactId>
+            <artifactId>cdeio-validation</artifactId>
             <version>${project.version}</version>
         </dependency>
 
