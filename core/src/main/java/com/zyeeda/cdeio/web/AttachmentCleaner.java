@@ -22,7 +22,7 @@ public class AttachmentCleaner {
 
     private EntityManager entityManager = null;
     private TransactionTemplate transactionTemplate = null;
-    private String path = null;
+    //private String path = null;
 
     @PersistenceContext
     public void setEntityManager(EntityManager entityManager) {
@@ -34,9 +34,9 @@ public class AttachmentCleaner {
         this.transactionTemplate = transactionTemplate;
     }
 
-    public void setPath(String path) {
+    /*public void setPath(String path) {
         this.path = path;
-    }
+    }*/
 
     public void execute() {
         transactionTemplate.execute(new TransactionCallback<Void>() {
