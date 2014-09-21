@@ -14,30 +14,15 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
     <parent>
         <groupId>com.zyeeda</groupId>
-        <artifactId>zyeeda-origin</artifactId>
+        <artifactId>origin</artifactId>
         <version>3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>zyeeda-cdeio-runtime</artifactId>
+    <artifactId>cdeio-runtime</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <name>Zyeeda Cdeio Runtime</name>
     <url>http://www.zyeeda.com</url>
     <packaging>pom</packaging>
-
-    <repositories>
-        <repository>
-            <id>JBoss Public Repository Group</id>
-            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
-        </repository>
-        <repository>
-            <id>JBoss Deprecated Repository Group</id>
-            <url>https://repository.jboss.org/nexus/content/repositories/deprecated/</url>
-        </repository>
-        <repository>
-            <id>Alfresco Maven Repository</id>
-            <url>https://maven.alfresco.com/nexus/content/groups/public/</url>
-        </repository>
-    </repositories>
 
     <properties>
         <servlet.api.version>2.5</servlet.api.version>
