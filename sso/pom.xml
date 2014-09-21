@@ -19,9 +19,9 @@ $License$
     </parent>
 
     <artifactId>cdeio-sso</artifactId>
-    <name>Zyeeda Cdeio SSO Module</name>
-    <url>http://www.zyeeda.com</url>
     <packaging>pom</packaging>
+    <name>Zyeeda Cdeio SSO Module</name>
+    <description>The SSO (Single Sign-On) libraries of Cdeio platform.</description>
 
     <properties>
         <spring.ldap.version>1.3.1.RELEASE</spring.ldap.version>

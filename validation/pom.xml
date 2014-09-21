@@ -19,8 +19,9 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     </parent>
 
     <artifactId>cdeio-validation</artifactId>
-    <name>Zyeeda Cdeio Validation Module</name>
     <packaging>jar</packaging>
+    <name>Zyeeda Cdeio Validation Module</name>
+    <description>The validation libraries of Cdeio platform.</description>
 
     <properties>
         <validation.api.version>1.0.0.GA</validation.api.version>

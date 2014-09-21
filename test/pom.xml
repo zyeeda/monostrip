@@ -19,8 +19,9 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     </parent>
 
     <artifactId>cdeio-test</artifactId>
-    <name>Zyeeda Cdeio Test Module</name>
     <packaging>jar</packaging>
+    <name>Zyeeda Cdeio Test Module</name>
+    <description>The test libraries of Cdeio platform.</description>
 
     <properties>
         <h2.version>1.3.170</h2.version>

@@ -19,8 +19,9 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     </parent>
 
     <artifactId>cdeio-core</artifactId>
-    <name>Zyeeda Cdeio Core Module</name>
     <packaging>jar</packaging>
+    <name>Zyeeda Cdeio Core Module</name>
+    <description>The core functions of Cdeio platform.</description>
 
     <properties>
         <aspectj.version>1.6.9</aspectj.version>

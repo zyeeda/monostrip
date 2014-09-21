@@ -20,9 +20,10 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
     <artifactId>cdeio-runtime</artifactId>
     <version>2.0.0-SNAPSHOT</version>
-    <name>Zyeeda Cdeio Runtime</name>
-    <url>http://www.zyeeda.com</url>
     <packaging>pom</packaging>
+    <name>Zyeeda Cdeio Runtime</name>
+    <description>The runtime of Cdeio platform.</description>
+    <url>http://www.zyeeda.com/platform</url>
 
     <properties>
         <servlet.api.version>2.5</servlet.api.version>
@@ -42,6 +43,19 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
     <dependencyManagement>
         <dependencies>
+            <!-- ringojs -->
+            <dependency>
+                <groupId>com.zyeeda</groupId>
+                <artifactId>cdeio-ringo</artifactId>
+                <version>${ringo.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <!-- servlet api -->
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -206,19 +220,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-joda</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-
-            <!-- ringojs -->
-            <dependency>
-                <groupId>com.zyeeda</groupId>
-                <artifactId>cdeio-ringo</artifactId>
-                <version>${ringo.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>

@@ -20,8 +20,9 @@ $License$
     </parent>
 
     <artifactId>cdeio-sso-openid-consumer</artifactId>
-    <name>Zyeeda Cdeio SSO OpenID Consumer Module (Standalone)</name>
     <packaging>jar</packaging>
+    <name>Zyeeda Cdeio SSO OpenID Consumer Module (Standalone)</name>
+    <description>The standalone OpenID based SSO consumer, without extra dependences.</description>
 
     <dependencies>
         <dependency>

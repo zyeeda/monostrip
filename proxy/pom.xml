@@ -11,8 +11,9 @@
     </parent>
 
     <artifactId>cdeio-proxy</artifactId>
-    <name>Zyeeda Cdeio Proxy Module</name>
     <packaging>jar</packaging>
+    <name>Zyeeda Cdeio Proxy Module</name>
+    <description>A simple reverse proxy implementation.</description>
 
     <properties>
         <httpproxy.version>1.3</httpproxy.version>

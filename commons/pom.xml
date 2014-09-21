@@ -19,8 +19,9 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     </parent>
 
     <artifactId>cdeio-commons</artifactId>
-    <name>Zyeeda Cdeio Commons Module</name>
     <packaging>jar</packaging>
+    <name>Zyeeda Cdeio Commons Module</name>
+    <description>Make Cdeio have small footprint for other projects to refer.</description>
 
     <dependencies>
         <dependency>

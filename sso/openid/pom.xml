@@ -20,8 +20,9 @@ $License$
     </parent>
 
     <artifactId>cdeio-sso-openid</artifactId>
-    <name>Zyeeda SSO OpenID Provider &amp; Consumer (Shiro)</name>
     <packaging>jar</packaging>
+    <name>Zyeeda SSO OpenID Provider &amp; Consumer (Shiro)</name>
+    <description>The OpenID based SSO consumer and provider, built upon Apache Shiro.</description>
 
     <dependencies>
         <dependency>

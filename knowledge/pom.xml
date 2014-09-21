@@ -19,8 +19,9 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     </parent>
 
     <artifactId>cdeio-knowledge</artifactId>
-    <name>Zyeeda Cdeio Knowledge Module</name>
     <packaging>jar</packaging>
+    <name>Zyeeda Cdeio Knowledge Module</name>
+    <description>The BRM (Business Rule Management) libraries of Cdeio platform, based on Drools knowledge base.</description>
 
     <properties>
         <drools.version>5.4.0.Final</drools.version>
