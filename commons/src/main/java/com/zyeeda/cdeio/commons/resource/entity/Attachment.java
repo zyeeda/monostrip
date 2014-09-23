@@ -17,7 +17,7 @@ import com.zyeeda.cdeio.commons.hibernate.listeners.DeleteAttachmentFileEventLis
  *
  */
 @Entity
-@Table(name = "ZDA_ATTACHMENT")
+@Table(name = "CDE_ATTACHMENT")
 @EntityListeners(DeleteAttachmentFileEventListener.class)
 public class Attachment extends DomainEntity {
 

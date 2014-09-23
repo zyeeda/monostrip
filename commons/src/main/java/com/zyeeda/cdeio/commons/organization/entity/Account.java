@@ -35,7 +35,7 @@ import com.zyeeda.cdeio.validation.group.Update;
  *
  */
 @Entity
-@Table(name = "ZDA_ACCOUNT")
+@Table(name = "CDE_ACCOUNT")
 @Scaffold("/system/accounts")
 @Unique.List({
         @Unique(groups = { Create.class }, namedQuery = "findDuplicateUsernameCountOnCreate", bindingProperties = "userName"),
@@ -225,7 +225,7 @@ public class Account extends DomainEntity {
 
     @ManyToMany
     @JoinTable(
-            name = "ZDA_ROLE_ACCOUNT",
+            name = "CDE_ROLE_ACCOUNT",
             joinColumns = @JoinColumn(name = "F_ACCOUNT_ID"),
             inverseJoinColumns = @JoinColumn(name = "F_ROLE_ID"))
     public Set<Role> getRoles() {

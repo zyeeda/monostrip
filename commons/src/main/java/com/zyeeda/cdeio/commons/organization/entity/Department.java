@@ -30,7 +30,7 @@ import com.zyeeda.cdeio.validation.group.Update;
  *
  */
 @Entity
-@Table(name = "ZDA_DEPARTMENT")
+@Table(name = "CDE_DEPARTMENT")
 @Scaffold("/system/departments")
 //@Audited
 @Unique.List({

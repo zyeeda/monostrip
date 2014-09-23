@@ -30,7 +30,7 @@ import com.zyeeda.cdeio.commons.organization.entity.Department;
  *
  */
 @Entity
-@Table(name = "ZDA_ROLE")
+@Table(name = "CDE_ROLE")
 @Scaffold("/system/roles")
 public class Role extends DomainEntity {
 
@@ -111,7 +111,7 @@ public class Role extends DomainEntity {
 
     @ManyToMany
     @JoinTable(
-            name = "ZDA_ROLE_PERMISSION",
+            name = "CDE_ROLE_PERMISSION",
             joinColumns = @JoinColumn(name = "F_ROLE_ID"),
             inverseJoinColumns = @JoinColumn(name = "F_PERMISSION_ID"))
     public Set<Permission> getPermissions() {

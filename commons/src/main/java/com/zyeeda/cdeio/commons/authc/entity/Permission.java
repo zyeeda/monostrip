@@ -23,7 +23,7 @@ import com.zyeeda.cdeio.commons.base.entity.DomainEntity;
  *
  */
 @Entity
-@Table(name = "ZDA_PERMISSION")
+@Table(name = "CDE_PERMISSION")
 @Scaffold("/system/permissions")
 public class Permission extends DomainEntity {
 

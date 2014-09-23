@@ -214,7 +214,7 @@ RevisionDomainEntity 继承自 SimpleDomainEntity，并且扩展了 creator，cr
 
 ```java
 @Entity
-@Table(name="ZDA_PEOPLE")
+@Table(name="CDE_PEOPLE")
 public class People extends DomainEntity {
 
     private static final long serialVersionUID = 2338396716859666598L;

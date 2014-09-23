@@ -20,7 +20,7 @@ import com.zyeeda.cdeio.commons.base.entity.DomainEntity;
  *
  */
 @Entity
-@Table(name = "ZDA_MENUITEM")
+@Table(name = "CDE_MENUITEM")
 @Scaffold("/system/menu")
 public class MenuItem extends DomainEntity implements TreeNode<MenuItem> {
 

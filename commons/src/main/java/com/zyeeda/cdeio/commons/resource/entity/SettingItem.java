@@ -14,7 +14,7 @@ import com.zyeeda.cdeio.commons.base.entity.DomainEntity;
  *
  */
 @Entity
-@Table(name = "ZDA_SETTINGITEM")
+@Table(name = "CDE_SETTINGITEM")
 @Scaffold("/system/settings")
 public class SettingItem extends DomainEntity {
 
