@@ -15,7 +15,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <parent>
         <groupId>com.zyeeda</groupId>
         <artifactId>origin</artifactId>
-        <version>3-SNAPSHOT</version>
+        <version>3</version>
     </parent>
 
     <artifactId>cdeio-runtime</artifactId>
@@ -37,7 +37,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <commons.lang.version>2.6</commons.lang.version>
         <commons.collections.version>3.2.1</commons.collections.version>
         <jackson.version>2.1.0</jackson.version>
-        <ringo.version>0.10.0-SNAPSHOT</ringo.version>
+        <ringo.version>0.10.0</ringo.version>
         <quartz.version>2.2.1</quartz.version>
     </properties>
 
