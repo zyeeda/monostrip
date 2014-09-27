@@ -113,9 +113,9 @@ exports.middleware = function route(next, app) {
     function calcWeight(path) {
         var result = 0;
         var step = 1;
-        // trim leading and trailing slashes
         if (path instanceof RegExp) return result;
         
+        // trim leading and trailing slashes
         path = path.replace(/^\/+|\/+$/g, '');
         var elements = path.split('/').reverse();
         elements.forEach(function(elem, index) {

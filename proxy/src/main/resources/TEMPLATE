@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    id="WebApp_ID" version="2.5">
+
+    <display-name>Zyeeda cdeio Proxy</display-name>
+  
+    <filter>
+        <filter-name>proxyFilter</filter-name>
+        <filter-class>com.zyeeda.proxy.filter.ProxyFilter</filter-class>
+        <init-param>
+            <param-name>proxyUrl</param-name>
+            <param-value>http://localhost:8080/zyeeda-drivebox</param-value>
+        </init-param>
+        <init-param>
+            <param-name>reverseCookie</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>proxyFilter</filter-name>
+        <url-pattern>/frameset/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>proxyFilter</filter-name>
+        <url-pattern>/run/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>proxyFilter</filter-name>
+        <url-pattern>/preview/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>proxyFilter</filter-name>
+        <url-pattern>/download/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>proxyFilter</filter-name>
+        <url-pattern>/parameter/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>proxyFilter</filter-name>
+        <url-pattern>/document/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>proxyFilter</filter-name>
+        <url-pattern>/output/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>proxyFilter</filter-name>
+        <url-pattern>/extract/*</url-pattern>
+    </filter-mapping>
+    
+    <!-- 
+    <servlet>
+        <servlet-name>frameset</servlet-name>
+        <servlet-class>org.mitre.dsmiley.httpproxy.ProxyServlet</servlet-class>
+        <init-param>
+            <param-name>targetUri</param-name>
+            <param-value>http://localhost:8080/zyeeda-drivebox/frameset</param-value>
+        </init-param>
+        <init-param>
+            <param-name>log</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>frameset</servlet-name>
+        <url-pattern>/frameset/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>run</servlet-name>
+        <servlet-class>org.mitre.dsmiley.httpproxy.ProxyServlet</servlet-class>
+        <init-param>
+            <param-name>targetUri</param-name>
+            <param-value>http://localhost:8080/zyeeda-drivebox/run</param-value>
+        </init-param>
+        <init-param>
+            <param-name>log</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>run</servlet-name>
+        <url-pattern>/run/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>preview</servlet-name>
+        <servlet-class>org.mitre.dsmiley.httpproxy.ProxyServlet</servlet-class>
+        <init-param>
+            <param-name>targetUri</param-name>
+            <param-value>http://localhost:8080/zyeeda-drivebox/preview</param-value>
+        </init-param>
+        <init-param>
+            <param-name>log</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>preview</servlet-name>
+        <url-pattern>/preview/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>download</servlet-name>
+        <servlet-class>org.mitre.dsmiley.httpproxy.ProxyServlet</servlet-class>
+        <init-param>
+            <param-name>targetUri</param-name>
+            <param-value>http://localhost:8080/zyeeda-drivebox/download</param-value>
+        </init-param>
+        <init-param>
+            <param-name>log</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>download</servlet-name>
+        <url-pattern>/download/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>parameter</servlet-name>
+        <servlet-class>org.mitre.dsmiley.httpproxy.ProxyServlet</servlet-class>
+        <init-param>
+            <param-name>targetUri</param-name>
+            <param-value>http://localhost:8080/zyeeda-drivebox/parameter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>log</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>parameter</servlet-name>
+        <url-pattern>/parameter/*</url-pattern>
+    </servlet-mapping>  
+
+    <servlet>
+        <servlet-name>document</servlet-name>
+        <servlet-class>org.mitre.dsmiley.httpproxy.ProxyServlet</servlet-class>
+        <init-param>
+            <param-name>targetUri</param-name>
+            <param-value>http://localhost:8080/zyeeda-drivebox/document</param-value>
+        </init-param>
+        <init-param>
+            <param-name>log</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>document</servlet-name>
+        <url-pattern>/document/*</url-pattern>
+    </servlet-mapping>  
+
+    <servlet>
+        <servlet-name>output</servlet-name>
+        <servlet-class>org.mitre.dsmiley.httpproxy.ProxyServlet</servlet-class>
+        <init-param>
+            <param-name>targetUri</param-name>
+            <param-value>http://localhost:8080/zyeeda-drivebox/output</param-value>
+        </init-param>
+        <init-param>
+            <param-name>log</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>output</servlet-name>
+        <url-pattern>/output/*</url-pattern>
+    </servlet-mapping>  
+   
+   <servlet>
+        <servlet-name>extract</servlet-name>
+        <servlet-class>org.mitre.dsmiley.httpproxy.ProxyServlet</servlet-class>
+        <init-param>
+            <param-name>targetUri</param-name>
+            <param-value>http://localhost:8080/zyeeda-drivebox/extract</param-value>
+        </init-param>
+        <init-param>
+            <param-name>log</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>extract</servlet-name>
+        <url-pattern>/extract/*</url-pattern>
+    </servlet-mapping>
+    -->
+</web-app>
