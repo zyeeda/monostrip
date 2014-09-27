@@ -6,9 +6,7 @@
 $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. Ltd. All rights reserved. $
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,7 +17,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     </parent>
 
     <artifactId>cdeio-runtime</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0</version>
     <packaging>pom</packaging>
     <name>Zyeeda Cdeio Runtime</name>
     <description>The runtime of Cdeio platform.</description>
@@ -37,25 +35,11 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <commons.lang.version>2.6</commons.lang.version>
         <commons.collections.version>3.2.1</commons.collections.version>
         <jackson.version>2.1.0</jackson.version>
-        <ringo.version>0.10.0</ringo.version>
         <quartz.version>2.2.1</quartz.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- ringojs -->
-            <dependency>
-                <groupId>com.zyeeda</groupId>
-                <artifactId>cdeio-ringo</artifactId>
-                <version>${ringo.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
             <!-- servlet api -->
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -247,7 +231,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <connection>scm:hg:http://bitbucket.org/zyeeda/cdeio-runtime</connection>
         <developerConnection>scm:hg:${basedir}/../${project.artifactId}</developerConnection>
         <url>http://bitbucket.org/zyeeda/cdeio-runtime</url>
-        <tag>HEAD</tag>
+        <tag>v2.0.0</tag>
     </scm>
 
     <modules>
