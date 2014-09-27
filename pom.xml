@@ -37,25 +37,11 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <commons.lang.version>2.6</commons.lang.version>
         <commons.collections.version>3.2.1</commons.collections.version>
         <jackson.version>2.1.0</jackson.version>
-        <ringo.version>0.10.0</ringo.version>
         <quartz.version>2.2.1</quartz.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- ringojs -->
-            <dependency>
-                <groupId>com.zyeeda</groupId>
-                <artifactId>cdeio-ringo</artifactId>
-                <version>${ringo.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
             <!-- servlet api -->
             <dependency>
                 <groupId>javax.servlet</groupId>

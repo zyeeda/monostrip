@@ -98,6 +98,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <dependency>
             <groupId>com.zyeeda</groupId>
             <artifactId>cdeio-ringo</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

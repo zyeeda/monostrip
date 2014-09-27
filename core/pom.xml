@@ -31,6 +31,12 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <dependencies>
         <dependency>
             <groupId>com.zyeeda</groupId>
+            <artifactId>cdeio-ringo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zyeeda</groupId>
             <artifactId>cdeio-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -40,11 +46,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
             <artifactId>cdeio-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.zyeeda</groupId>
-            <artifactId>cdeio-ringo</artifactId>
         </dependency>
 
         <dependency>
