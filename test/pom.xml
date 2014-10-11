@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <!-- $Id: pom.xml,v 11f877759a9a 2013/01/11 07:53:12 tangrui $ -->
 
@@ -22,7 +22,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <description>The test libraries of Cdeio platform.</description>
 
     <properties>
-        <h2.version>1.3.170</h2.version>
+        <h2.version>1.4.181</h2.version>
         <btm.version>2.1.1</btm.version>
     </properties>
 
@@ -50,11 +50,11 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         </dependency>
 
         <!-- testng -->
-        <dependency>
+        <!-- <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>compile</scope>
-        </dependency>
+        </dependency> -->
 
         <!-- spring -->
         <dependency>
@@ -98,20 +98,24 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
             <artifactId>cdeio-ringo</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+        </dependency>
+
     </dependencies>
 
     <build>
+        <resources>
+            <!-- <resource>
+                <directory>src/test/javascript</directory>
+                <filtering>true</filtering>
+            </resource> -->
+        </resources>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <suiteXmlFiles>
-                        <suiteXmlFile>src/test/testng/default-test-suite.xml</suiteXmlFile>
-                    </suiteXmlFiles>
-                </configuration>
-            </plugin>
-            <plugin>
+            <!-- <plugin>
                 <groupId>com.github.iron9light</groupId>
                 <artifactId>coffeescript-maven-plugin</artifactId>
                 <configuration>
@@ -131,12 +135,12 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
         </plugins>
         <pluginManagement>
             <plugins>
                 <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-                <plugin>
+                <!-- <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
                     <version>1.0.0</version>
@@ -165,7 +169,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
-                </plugin>
+                </plugin> -->
             </plugins>
         </pluginManagement>
     </build>
