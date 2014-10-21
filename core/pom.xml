@@ -41,7 +41,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
         <dependency>
             <groupId>com.zyeeda</groupId>
-            <artifactId>cdeio-test</artifactId>
+            <artifactId>cdeio-testbone</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
@@ -160,6 +160,12 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
                 <targetPath>packages</targetPath>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/javascript</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>com.github.iron9light</groupId>

@@ -1,9 +1,8 @@
 package com.zyeeda.cdeio.tests;
 
-import com.zyeeda.cdeio.test.AbstractJunitRingoTest;
+import com.zyeeda.cdeio.testbone.AbstractJunitRingoSupport;
 
-
-public class CdeioTest extends AbstractJunitRingoTest {
+public class CdeioTest extends AbstractJunitRingoSupport {
  
   
 }
