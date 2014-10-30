@@ -70,7 +70,7 @@ defaultConfigure =
         edit:
             label: '编辑', icon: 'icon-edit', group: '20-selected', style: 'btn-warning', show: 'single-selected', order: 200
         del:
-            label: '删除', icon: 'icon-minus', group: '20-selected', style: 'btn-danger', order: 300
+            label: '删除', icon: 'icon-minus', group: '20-selected', style: 'btn-danger', show: 'single-selected', order: 300
         refresh:
             label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'always', order: 100
 
