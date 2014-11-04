@@ -1,6 +1,6 @@
-{SimpleDateFormat} = java.text
 {Calendar, Date, ArrayList, HashSet} = java.util
 {ClassUtils} = org.springframework.util
+{DateUtils} = org.apache.http.impl.cookie
 {EntityMetaResolver} = com.zyeeda.cdeio.web.scaffold
 
 {cdeio} = require 'cdeio/config'
@@ -12,15 +12,13 @@ serviceHost = require 'cdeio/service'
 
 parseDate = (pattern, desiredType, stringDate) ->
     return null if not stringDate
-    format = new SimpleDateFormat pattern
-    date = format.parse stringDate
-    if desiredType is Calendar then format.getCalendar() else date
+    DateUtils.parseDate stringDate, pattern
 
 innerConverters =
     'java.util.Date': (value, fieldMeta) ->
-        parseDate.apply null, [cdeio.dateFormat, Date, value]
+        parseDate.apply null, [cdeio.freeDateFormat, Date, value]
     'java.util.Calendar': (value, fieldMeta) ->
-        parseDate.apply null, [cdeio.dateFormat, Calendar, value]
+        parseDate.apply null, [cdeio.freeDateFormat, Calendar, value]
     'java.lang.Integer': (value, fieldMeta) ->
         if value is null or value.length is 0 then null else new java.lang.Integer(value)
     'java.lang.Long': (value, fieldMeta) ->

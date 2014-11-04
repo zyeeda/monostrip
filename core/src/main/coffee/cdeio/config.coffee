@@ -52,6 +52,10 @@ defaultConfigure =
     # Default datetime display format.
     dateTimeFormat: 'yyyy-MM-dd HH:mm:ss'
 
+    # DateUtils free format.
+    freeDateFormat: ["yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH", "yyyy-MM-dd"]
+
+
     # When boolean field rendered as dropdown list, what default text will be
     # shown. `是` for `true` and `否` for `false`.
     #
