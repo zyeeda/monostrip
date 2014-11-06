@@ -24,6 +24,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <properties>
         <aspectj.version>1.6.9</aspectj.version>
         <xjc.version>2.2.5-2</xjc.version>
+        <shiro.version>1.2.3</shiro.version>
     </properties>
 
     <dependencies>
@@ -146,6 +147,41 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
             <artifactId>jaxb-xjc</artifactId>
             <version>${xjc.version}</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- apache shiro -->
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>${shiro.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-web</artifactId>
+            <version>${shiro.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring</artifactId>
+            <version>${shiro.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
