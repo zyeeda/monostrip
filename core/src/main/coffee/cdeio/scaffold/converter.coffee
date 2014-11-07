@@ -1,6 +1,6 @@
 {Calendar, Date, ArrayList, HashSet, TimeZone} = java.util
 {ClassUtils} = org.springframework.util
-{DateUtils} = org.apache.http.impl.cookie
+{DateUtils} = org.apache.commons.lang.time
 {EntityMetaResolver} = com.zyeeda.cdeio.web.scaffold
 
 {cdeio} = require 'cdeio/config'
@@ -12,7 +12,6 @@ serviceHost = require 'cdeio/service'
 
 parseDate = (pattern, desiredType, stringDate) ->
     return null if not stringDate
-    DateUtils.GMT.setDefault TimeZone.getTimeZone('GMT+0')
     DateUtils.parseDate stringDate, pattern
 
 innerConverters =
