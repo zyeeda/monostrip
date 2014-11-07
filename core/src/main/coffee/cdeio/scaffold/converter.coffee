@@ -12,7 +12,7 @@ serviceHost = require 'cdeio/service'
 
 parseDate = (pattern, desiredType, stringDate) ->
     return null if not stringDate
-    DateUtils.parseDate stringDate, pattern
+    DateUtils.parseDate stringDate.trim(), pattern
 
 innerConverters =
     'java.util.Date': (value, fieldMeta) ->
