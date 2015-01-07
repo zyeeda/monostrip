@@ -52,6 +52,10 @@ defaultConfigure =
     # Default datetime display format.
     dateTimeFormat: 'yyyy-MM-dd HH:mm:ss'
 
+    # DateUtils free format.
+    freeDateFormat: ["yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH", "yyyy-MM-dd"]
+
+
     # When boolean field rendered as dropdown list, what default text will be
     # shown. `是` for `true` and `否` for `false`.
     #
@@ -66,11 +70,11 @@ defaultConfigure =
         add:
             label: '添加', icon: 'icon-plus', group: '10-add', style: 'btn-success', show: 'always', order: 100
         show:
-            label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-grey', show: 'single-selected', order: 100
+            label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-info', show: 'single-selected', order: 100
         edit:
-            label: '编辑', icon: 'icon-edit', group: '20-selected', style: 'btn-primary', show: 'single-selected', order: 200
+            label: '编辑', icon: 'icon-edit', group: '20-selected', style: 'btn-warning', show: 'single-selected', order: 200
         del:
-            label: '删除', icon: 'icon-minus', group: '20-selected', style: 'btn-danger', order: 300
+            label: '删除', icon: 'icon-minus', group: '20-selected', style: 'btn-danger', show: 'single-selected', order: 300
         refresh:
             label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'always', order: 100
 

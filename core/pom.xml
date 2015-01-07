@@ -13,7 +13,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <parent>
         <groupId>com.zyeeda</groupId>
         <artifactId>cdeio-runtime</artifactId>
-        <version>2.0.0</version>
+        <version>2.5.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>cdeio-core</artifactId>
@@ -24,6 +24,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <properties>
         <aspectj.version>1.6.9</aspectj.version>
         <xjc.version>2.2.5-2</xjc.version>
+        <shiro.version>1.2.3</shiro.version>
     </properties>
 
     <dependencies>
@@ -41,7 +42,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
         <dependency>
             <groupId>com.zyeeda</groupId>
-            <artifactId>cdeio-test</artifactId>
+            <artifactId>cdeio-testbone</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
@@ -147,6 +148,41 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
             <version>${xjc.version}</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- apache shiro -->
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>${shiro.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-web</artifactId>
+            <version>${shiro.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring</artifactId>
+            <version>${shiro.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>
@@ -160,22 +196,19 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
                 <targetPath>packages</targetPath>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/javascript</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <suiteXmlFiles>
-                        <suiteXmlFile>src/test/testng/default-test-suite.xml</suiteXmlFile>
-                    </suiteXmlFiles>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>com.github.iron9light</groupId>
                 <artifactId>coffeescript-maven-plugin</artifactId>
                 <configuration>
                     <srcDir>${basedir}/src/main/coffee</srcDir>
-                    <outputDir>${project.build.outputDirectory}/cdeio-modules</outputDir>
+                    <outputDir>${project.build.outputDirectory}/packages</outputDir>
                     <bare>false</bare>
                     <modifiedOnly>true</modifiedOnly>
                     <allowedDelete>true</allowedDelete>
