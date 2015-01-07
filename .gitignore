@@ -1,20 +1,16 @@
-syntax: glob
-
 *.
-*.class
-.classpath
-.project
-.settings
 *.swp
 *.bak
 *~
 *.~ml
 *.orig
-*.tlog
+*.msi
 .DS_Store
-*.h2.db
 
-.DS_Store
+.settings
+.project
+
+*.h2.db
 
 work
 target
@@ -24,9 +20,7 @@ WEB-INF/classes
 WEB-INF/lib
 WEB-INF/app
 WEB-INF/modules/cdeio
-main/resources/cdeio/**.js
-main/coffee/cdeio/**.js
+core/src/main/resources/cdeio/**/*.js
+core/src/main/coffee/cdeio/**/*.js
 src/main/webapp/scripts/main-dist.js
 test-output
-
-syntax: regexp
