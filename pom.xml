@@ -24,7 +24,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <url>http://www.zyeeda.com/platform</url>
 
     <properties>
-        <servlet.api.version>2.5</servlet.api.version>
+        <servlet.api.version>3.1.0</servlet.api.version>
         <transaction.api.version>1.1</transaction.api.version>
         <spring.version>3.2.8.RELEASE</spring.version>
         <hibernate.jpa2.api.version>1.0.1.Final</hibernate.jpa2.api.version>
@@ -43,7 +43,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
             <!-- servlet api -->
             <dependency>
                 <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
+                <artifactId>javax.servlet-api</artifactId>
                 <version>${servlet.api.version}</version>
                 <scope>provided</scope>
             </dependency>
