@@ -7,10 +7,7 @@ import java.util.Map;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.apache.shiro.web.servlet.AdviceFilter;
-
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import com.zyeeda.cdeio.sso.openid.BaseFilter;
 
 /**
  * Callback filter.
@@ -18,26 +15,14 @@ import freemarker.template.Template;
  * @author $Author$
  *
  */
-public class CallbackFilter extends AdviceFilter {
-
-    /**
-     * FreeMarker 配置对象.
-     */
-    private Configuration configuration;
-
-    public void setConfiguration(final Configuration configuration) {
-        this.configuration = configuration;
-    }
+public class CallbackFilter extends BaseFilter {
 
     @Override
     protected boolean preHandle(final ServletRequest request, final ServletResponse response) throws Exception {
-        Map<String, String> args = new HashMap<String, String>(2);
+        Map<String, Object> args = new HashMap<String, Object>(2);
         args.put("url", request.getParameter("_url"));
         args.put("method", request.getParameter("_method"));
-        response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
-        Template template = this.configuration.getTemplate("callback.ftl");
-        template.process(args, response.getWriter());
+        this.paintTemplate(response, "callback.ftl", args);
         return false;
     }
 }

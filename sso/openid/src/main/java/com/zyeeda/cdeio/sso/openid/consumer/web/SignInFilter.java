@@ -13,15 +13,13 @@ import org.openid4java.message.AuthRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import freemarker.template.Template;
-
 /**
  * Sign-in filter.
  *
  * @author $Author$
  *
  */
-public class SignInFilter extends BaseFilter {
+public class SignInFilter extends ConsumerBaseFilter {
 
     /**
      * 日志对象.
@@ -49,10 +47,7 @@ public class SignInFilter extends BaseFilter {
         args.put("signOutUrl", this.getOpenIdConsumer().getSignOutUrl());
         args.put("indexUrl", this.getOpenIdConsumer().getIndexUrl());
 
-        Template template = this.getConfiguration().getTemplate("signin.ftl");
-        response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
-        template.process(args, response.getWriter());
+        this.paintTemplate(response, "signin.ftl", args);
         return false;
     }
 }

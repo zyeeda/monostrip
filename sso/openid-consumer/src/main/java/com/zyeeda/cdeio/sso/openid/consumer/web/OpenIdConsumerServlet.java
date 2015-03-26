@@ -218,7 +218,7 @@ public abstract class OpenIdConsumerServlet extends HttpServlet {
      * @return 为空则返回 true，否则返回 false
      */
     private boolean isBlank(final String str) {
-        if (str == null || "".equals(str)) {
+        if (str == null || "".equals(str.trim())) {
             return true;
         }
 

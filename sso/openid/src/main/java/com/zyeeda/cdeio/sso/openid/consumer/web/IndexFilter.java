@@ -1,4 +1,4 @@
-package com.zyeeda.cdeio.sso.openid.provider.web;
+package com.zyeeda.cdeio.sso.openid.consumer.web;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,8 +6,6 @@ import java.util.Map;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +28,7 @@ public class IndexFilter extends BaseFilter {
     protected boolean preHandle(final ServletRequest request, final ServletResponse response) throws Exception {
         LOGGER.debug("Show index page.");
 
-        Map<String, Object> args = new HashMap<String, Object>(1);
-        Subject subject = SecurityUtils.getSubject();
-        args.put("account", subject.getPrincipal());
-
-        this.paintTemplate(response, "index.ftl", args);
+        this.paintTemplate(response, "index.ftl");
         return false;
     }
 

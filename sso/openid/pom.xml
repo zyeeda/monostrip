@@ -6,7 +6,8 @@
 $License$
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -18,7 +19,7 @@ $License$
 
     <artifactId>cdeio-sso-openid</artifactId>
     <packaging>jar</packaging>
-    <name>Zyeeda SSO OpenID Provider &amp; Consumer (Shiro)</name>
+    <name>Zyeeda CDE.IO SSO OpenID Provider &amp; Consumer (Shiro)</name>
     <description>The OpenID based SSO consumer and provider, built upon Apache Shiro.</description>
 
     <dependencies>

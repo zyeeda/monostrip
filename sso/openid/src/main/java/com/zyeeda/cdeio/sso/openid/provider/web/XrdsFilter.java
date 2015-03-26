@@ -18,7 +18,7 @@ import freemarker.template.Template;
  * @author $Author$
  *
  */
-public class XrdsFilter extends OpenIdProviderAwareBaseFilter implements ServletContextAware {
+public class XrdsFilter extends ProviderBaseFilter implements ServletContextAware {
 
     /**
      * 获取模板路劲.

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author $Author$
  *
  */
-public class SignOutFilter extends OpenIdProviderAwareBaseFilter {
+public class SignOutFilter extends ProviderBaseFilter {
 
     /**
      * 日志对象.
@@ -39,10 +39,6 @@ public class SignOutFilter extends OpenIdProviderAwareBaseFilter {
             WebUtils.issueRedirect(request, response, returnTo);
         } else {
             WebUtils.issueRedirect(request, response, this.getOpenIdProvider().getSignInPath());
-            /*Template template = this.getConfiguration().getTemplate("signout.ftl");
-            response.setContentType("text/html");
-            response.setCharacterEncoding("UTF-8");
-            template.process(null, response.getWriter());*/
         }
         return false;
     }

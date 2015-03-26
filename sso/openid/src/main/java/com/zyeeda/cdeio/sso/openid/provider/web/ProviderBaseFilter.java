@@ -3,6 +3,7 @@
 package com.zyeeda.cdeio.sso.openid.provider.web;
 
 import com.zyeeda.cdeio.sso.openid.provider.OpenIdProvider;
+import com.zyeeda.cdeio.sso.openid.BaseFilter;
 
 /**
  * 携带 OpenIdProvider 的 BaseFilter.
@@ -10,7 +11,7 @@ import com.zyeeda.cdeio.sso.openid.provider.OpenIdProvider;
  * @author $Author$
  *
  */
-public class OpenIdProviderAwareBaseFilter extends BaseFilter {
+public class ProviderBaseFilter extends BaseFilter {
 
     /**
      * OpenID provider.

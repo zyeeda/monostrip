@@ -2,19 +2,27 @@
 
 package com.zyeeda.cdeio.sso.openid.consumer.web;
 
-import org.apache.shiro.web.servlet.AdviceFilter;
+import java.io.IOException;
+import java.util.Map;
+
+import javax.servlet.ServletResponse;
 
 import com.zyeeda.cdeio.sso.openid.consumer.OpenIdConsumer;
+import com.zyeeda.cdeio.sso.openid.TemplateUtil;
+import com.zyeeda.cdeio.sso.openid.BaseFilter;
 
+import freemarker.core.ParseException;
 import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateNotFoundException;
 
 /**
  * Base filter.
  *
  * @author $Author$
- *
  */
-public class BaseFilter extends AdviceFilter {
+public class ConsumerBaseFilter extends BaseFilter {
 
     /**
      * FreeMarker 配置对象.

@@ -22,7 +22,7 @@ import freemarker.template.Template;
  * @author $Author$
  *
  */
-public class SignOutFilter extends BaseFilter {
+public class SignOutFilter extends ConsumerBaseFilter {
 
     /**
      * 日志对象.

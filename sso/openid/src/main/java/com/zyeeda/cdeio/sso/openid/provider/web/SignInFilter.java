@@ -13,7 +13,7 @@ import org.openid4java.message.ParameterList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import freemarker.template.Template;
+import com.zyeeda.cdeio.sso.openid.BaseFilter;
 
 /**
  * Sign-in filter.
@@ -39,10 +39,7 @@ public class SignInFilter extends BaseFilter {
             args.put("applicationName", params.getParameterValue("applicationName"));
         }
 
-        Template template = this.getConfiguration().getTemplate("signin.ftl");
-        response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
-        template.process(args, response.getWriter());
+        this.paintTemplate(response, "signin.ftl", args);
         return false;
     }
 }
