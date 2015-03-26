@@ -5,11 +5,15 @@
 *.~ml
 *.orig
 *.msi
+*.iml
+*.ipr
+*.iws
 .DS_Store
 
 .settings
 .project
 .classpath
+.idea
 
 *.h2.db
 
