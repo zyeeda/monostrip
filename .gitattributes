@@ -1,0 +1,5 @@
+*.js filter=rcs-keywords
+*.java filter=rcs-keywords
+*.xml filter=rcs-keywords
+*.ftl filter=rcs-keywords
+*.properties filter=rcs-keywords
