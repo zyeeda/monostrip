@@ -246,5 +246,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <module>sso</module>
         <module>ringo</module>
         <module>testringo</module>
+        <module>btm-jetty9-lifecycle</module>
     </modules>
 </project>
