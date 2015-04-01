@@ -68,15 +68,15 @@ defaultConfigure =
     #
     defaultOperators:
         add:
-            label: '添加', icon: 'icon-plus', group: '10-add', style: 'btn-success', show: 'always', order: 100
+            label: '添加', icon: 'icon-plus', group: '10-add', style: 'btn-info', show: 'always', order: 100
         show:
-            label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-info', show: 'single-selected', order: 100
+            label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-primary', show: 'single-selected', order: 100
         edit:
-            label: '编辑', icon: 'icon-edit', group: '20-selected', style: 'btn-warning', show: 'single-selected', order: 200
+            label: '编辑', icon: 'icon-edit', group: '20-selected', style: 'btn-primary', show: 'single-selected', order: 200
         del:
             label: '删除', icon: 'icon-minus', group: '20-selected', style: 'btn-danger', show: 'single-selected', order: 300
         refresh:
-            label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'always', order: 100
+            label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-primary', show: 'always', order: 100
 
     # Default function to extract pagination info.
     #
