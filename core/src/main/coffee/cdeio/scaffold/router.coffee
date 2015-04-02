@@ -109,7 +109,7 @@ mountExtraRoutes = (r, meta, options) ->
             show:
                 label: '查看', icon: 'icon-eye-open', group: '20-selected', style: 'btn-primary', order: 100, show: 'single-selected'
             refresh:
-                label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-purple', show: 'always', order: 100
+                label: '刷新', icon: 'icon-refresh', group: '30-refresh', style: 'btn-primary', show: 'always', order: 100
 
         if taskType is 'none'
             ops = options.operators
