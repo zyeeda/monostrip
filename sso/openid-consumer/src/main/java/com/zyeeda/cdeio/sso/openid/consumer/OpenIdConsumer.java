@@ -39,25 +39,11 @@ public interface OpenIdConsumer {
     void setServerProtocol(String serverProtocol);
 
     /**
-     * 设置 OP 端服务器协议.
-     *
-     * @param providerServerProtocol OP 端服务器协议
-     */
-    void setProviderServerProtocol(String providerServerProtocol);
-
-    /**
      * 设置服务器地址.
      *
      * @param serverAddress 服务器地址.
      */
     void setServerAddress(String serverAddress);
-
-    /**
-     * 设置 OP 端服务器地址.
-     *
-     * @param providerServerAddress OP 端服务器地址
-     */
-    void setProviderServerAddress(String providerServerAddress);
 
     /**
      * 设置服务器端口.
@@ -67,32 +53,11 @@ public interface OpenIdConsumer {
     void setServerPort(int serverPort);
 
     /**
-     * 设置 OP 端服务器端口.
-     *
-     * @param providerServerPort OP 端服务器端口
-     */
-    void setProviderServerPort(int providerServerPort);
-
-    /**
      * 设置首页路径.
      *
      * @param indexPath 首页路径
      */
     void setIndexPath(String indexPath);
-
-    /**
-     * 设置 base 路径.
-     *
-     * @param basePath base 路径
-     */
-    void setBasePath(String basePath);
-
-    /**
-     * 设置 OP 端的 base 路径.
-     *
-     * @param providerBasePath OP 端的 base 路径
-     */
-    void setProviderBasePath(String providerBasePath);
 
     /**
      * 获取首页路径.
@@ -109,6 +74,13 @@ public interface OpenIdConsumer {
     String getIndexUrl();
 
     /**
+     * 设置登录路径.
+     *
+     * @param signInPath 登录路径
+     */
+    void setSignInPath(String signInPath);
+
+    /**
      * 获取登录路径.
      *
      * @return 登录路径
@@ -121,6 +93,13 @@ public interface OpenIdConsumer {
      * @return 登录 URL
      */
     String getSignInUrl();
+
+    /**
+     * 设置登出路径.
+     *
+     * @param signOutPath 登出路径
+     */
+    void setSignOutPath(String signOutPath);
 
     /**
      * 获取登出路径.
@@ -137,6 +116,13 @@ public interface OpenIdConsumer {
     String getSignOutUrl();
 
     /**
+     * 设置返回路径.
+     *
+     * @param returnToPath 返回路径
+     */
+    void setReturnToPath(String returnToPath);
+
+    /**
      * 获取 OP 端认证后的返回路径.
      *
      * @return OP 端认证后的返回路径
@@ -149,6 +135,13 @@ public interface OpenIdConsumer {
      * @return OP 端认证后的返回 URL
      */
     String getReturnToUrl();
+
+    /**
+     * 设置回调路径.
+     *
+     * @param callbackPath 回调路径
+     */
+    void setCallbackPath(String callbackPath);
 
     /**
      * 获取上下文登录后的回调路径.
@@ -165,6 +158,34 @@ public interface OpenIdConsumer {
     String getCallbackUrl();
 
     /**
+     * 设置 OP 端服务器协议.
+     *
+     * @param providerServerProtocol OP 端服务器协议
+     */
+    void setProviderServerProtocol(String providerServerProtocol);
+
+    /**
+     * 设置 OP 端服务器地址.
+     *
+     * @param providerServerAddress OP 端服务器地址
+     */
+    void setProviderServerAddress(String providerServerAddress);
+
+    /**
+     * 设置 OP 端服务器端口.
+     *
+     * @param providerServerPort OP 端服务器端口
+     */
+    void setProviderServerPort(int providerServerPort);
+
+    /**
+     * 设置 OP 端 XRDS 路径.
+     *
+     * @param providerXrdsPath OP 端 XRDS 路径
+     */
+    void setProviderXrdsPath(String providerXrdsPath);
+
+    /**
      * 获取 OP 端 XRDS 路径.
      *
      * @return OP 端 XRDS 路径
@@ -179,6 +200,13 @@ public interface OpenIdConsumer {
     String getProviderXrdsUrl();
 
     /**
+     * 设置 OP 端登录路径.
+     *
+     * @param providerSignInPath OP 端登录路径
+     */
+    void setProviderSignInPath(String providerSignInPath);
+
+    /**
      * 获取 OP 端登录路径.
      *
      * @return OP 端登录路径
@@ -191,6 +219,13 @@ public interface OpenIdConsumer {
      * @return OP 端登录 URL
      */
     String getProviderSignInUrl();
+
+    /**
+     * 设置 OP 端登出路径.
+     *
+     * @param providerSignOutPath OP 端登出路径
+     */
+    void setProviderSignOutPath(String providerSignOutPath);
 
     /**
      * 获取 OP 端登出路径.
