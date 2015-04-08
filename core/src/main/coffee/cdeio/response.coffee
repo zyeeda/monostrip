@@ -1,4 +1,3 @@
-
 fs          = require 'fs'
 handlebars  = require 'handlebars'
 
@@ -171,6 +170,15 @@ exports.json = (object, config) ->
         # result.dateFormat = config.dateFormat
 
     result.body = result
+    result
+
+exports.jsonp = (callback, object, config) ->
+    result = exports.json object, config
+    result.headers['Content-Type'] = "application/javascript;charset=#{charset}"
+    jsonStr = ''
+    result.forEach (_jsonStr) ->
+        jsonStr = _jsonStr
+    result.body = [callback, "(", jsonStr, ");"]
     result
 
 getObjectWriter = (included, excluded, result) ->
