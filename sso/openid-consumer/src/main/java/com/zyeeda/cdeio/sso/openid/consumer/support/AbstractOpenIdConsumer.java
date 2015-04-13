@@ -64,16 +64,6 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     private static final int DEFAULT_NONCE_MAX_AGE = 60000;
 
     /**
-     * 默认服务器端口.
-     */
-    private static final int DEFAULT_SERVER_PORT = 80;
-
-    /**
-     * 默认 OP 端服务器端口.
-     */
-    private static final int DEFAULT_PROVIDER_SERVER_PORT = 9100;
-
-    /**
      * ConsumerManager 对象.
      */
     private ConsumerManager manager;
@@ -94,29 +84,14 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     private String serverProtocol;
 
     /**
-     * OP 端服务器协议.
-     */
-    private String providerServerProtocol;
-
-    /**
      * 服务器地址.
      */
     private String serverAddress;
 
     /**
-     * OP 端服务器地址.
-     */
-    private String providerServerAddress;
-
-    /**
      * 服务器端口.
      */
-    private int serverPort = DEFAULT_SERVER_PORT;
-
-    /**
-     * OP 端服务器端口.
-     */
-    private int providerServerPort = DEFAULT_PROVIDER_SERVER_PORT;
+    private int serverPort;
 
     /**
      * 首页路径.
@@ -124,14 +99,54 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     private String indexPath;
 
     /**
-     * Base 路径.
+     * 登录路径.
      */
-    private String basePath;
+    private String signInPath;
 
     /**
-     * OP 端 base 路径.
+     * 登出路径.
      */
-    private String providerBasePath;
+    private String signOutPath;
+
+    /**
+     * 返回路径.
+     */
+    private String returnToPath;
+
+    /**
+     * 回调路径.
+     */
+    private String callbackPath;
+
+    /**
+     * OP 端服务器协议.
+     */
+    private String providerServerProtocol;
+
+    /**
+     * OP 端服务器地址.
+     */
+    private String providerServerAddress;
+
+    /**
+     * OP 端服务器端口.
+     */
+    private int providerServerPort;
+
+    /**
+     * OP 端 XRDS 路径.
+     */
+    private String providerXrdsPath;
+
+    /**
+     * OP 端登录路径.
+     */
+    private String providerSignInPath;
+
+    /**
+     * OP 端登出路径.
+     */
+    private String providerSignOutPath;
 
     /**
      * 默认构造方法.
@@ -168,21 +183,9 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     }
 
     @Override
-    public void setProviderServerProtocol(final String providerServerProtocol) {
-        LOGGER.debug("provider server protocol = {}", providerServerProtocol);
-        this.providerServerProtocol = providerServerProtocol;
-    }
-
-    @Override
     public void setServerAddress(final String serverAddress) {
         LOGGER.debug("server address = {}", serverAddress);
         this.serverAddress = serverAddress;
-    }
-
-    @Override
-    public void setProviderServerAddress(final String providerServerAddress) {
-        LOGGER.debug("provider server address = {}", providerServerAddress);
-        this.providerServerAddress = providerServerAddress;
     }
 
     @Override
@@ -192,27 +195,9 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     }
 
     @Override
-    public void setProviderServerPort(final int providerServerPort) {
-        LOGGER.debug("provider server port = {}", providerServerPort);
-        this.providerServerPort = providerServerPort;
-    }
-
-    @Override
     public void setIndexPath(final String indexPath) {
         LOGGER.debug("index path = {}", indexPath);
         this.indexPath = indexPath;
-    }
-
-    @Override
-    public void setBasePath(final String basePath) {
-        LOGGER.debug("base path = {}", basePath);
-        this.basePath = basePath;
-    }
-
-    @Override
-    public void setProviderBasePath(final String providerBasePath) {
-        LOGGER.debug("provider base path = {}", providerBasePath);
-        this.providerBasePath = providerBasePath;
     }
 
     @Override
@@ -226,8 +211,14 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     }
 
     @Override
+    public void setSignInPath(final String signInPath) {
+        LOGGER.debug("sign in path = {}", signInPath);
+        this.signInPath = signInPath;
+    }
+
+    @Override
     public String getSignInPath() {
-        return this.basePath + "/signin";
+        return this.signInPath;
     }
 
     @Override
@@ -236,8 +227,14 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     }
 
     @Override
+    public void setSignOutPath(final String signOutPath) {
+        LOGGER.debug("sign out path = {}", signOutPath);
+        this.signOutPath = signOutPath;
+    }
+
+    @Override
     public String getSignOutPath() {
-        return this.basePath + "/signout";
+        return this.signOutPath;
     }
 
     @Override
@@ -246,8 +243,14 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     }
 
     @Override
+    public void setReturnToPath(final String returnToPath) {
+        LOGGER.debug("return to path = {}", returnToPath);
+        this.returnToPath = returnToPath;
+    }
+
+    @Override
     public String getReturnToPath() {
-        return this.basePath + "/verify";
+        return this.returnToPath;
     }
 
     @Override
@@ -256,8 +259,14 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     }
 
     @Override
+    public void setCallbackPath(final String callbackPath) {
+        LOGGER.debug("callback path = {}", callbackPath);
+        this.callbackPath = callbackPath;
+    }
+
+    @Override
     public String getCallbackPath() {
-        return this.basePath + "/callback";
+        return this.callbackPath;
     }
 
     @Override
@@ -266,8 +275,32 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     }
 
     @Override
+    public void setProviderServerProtocol(final String providerServerProtocol) {
+        LOGGER.debug("provider server protocol = {}", providerServerProtocol);
+        this.providerServerProtocol = providerServerProtocol;
+    }
+
+    @Override
+    public void setProviderServerAddress(final String providerServerAddress) {
+        LOGGER.debug("provider server address = {}", providerServerAddress);
+        this.providerServerAddress = providerServerAddress;
+    }
+
+    @Override
+    public void setProviderServerPort(final int providerServerPort) {
+        LOGGER.debug("provider server port = {}", providerServerPort);
+        this.providerServerPort = providerServerPort;
+    }
+
+    @Override
+    public void setProviderXrdsPath(final String providerXrdsPath) {
+        LOGGER.debug("provider xrds path = {}", providerXrdsPath);
+        this.providerXrdsPath = providerXrdsPath;
+    }
+
+    @Override
     public String getProviderXrdsPath() {
-        return this.providerBasePath + "/xrds";
+        return this.providerXrdsPath;
     }
 
     @Override
@@ -276,8 +309,15 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     }
 
     @Override
+    public void setProviderSignInPath(final String providerSignInPath) {
+        LOGGER.debug("provider sign in path = {}", providerSignInPath);
+        this.providerSignInPath = providerSignInPath;
+    }
+
+    @Override
     public String getProviderSignInPath() {
-        return this.providerBasePath + "/signin";
+        return this.providerSignInPath;
+        //return this.providerBasePath + "/signin";
     }
 
     @Override
@@ -286,8 +326,14 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
     }
 
     @Override
+    public void setProviderSignOutPath(final String providerSignOutPath) {
+        LOGGER.debug("provider sign out path = {}", providerSignOutPath);
+        this.providerSignOutPath = providerSignOutPath;
+    }
+
+    @Override
     public String getProviderSignOutPath() {
-        return this.providerBasePath + "/signout";
+        return this.providerSignOutPath;
     }
 
     @Override
@@ -337,9 +383,7 @@ public abstract class AbstractOpenIdConsumer implements OpenIdConsumer {
         List<?> discos = this.manager.discover(userSuppliedId);
         DiscoveryInformation discovered = this.manager.associate(discos);
         this.storeDiscoveryInfo(httpReq, discovered);
-        AuthRequest authReq = this.manager.authenticate(discovered, this.getReturnToUrl());
-
-        return authReq;
+        return this.manager.authenticate(discovered, this.getReturnToUrl());
     }
 
     @Override

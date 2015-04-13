@@ -64,9 +64,24 @@ public abstract class OpenIdConsumerServlet extends HttpServlet {
     private static final String INDEX_PATH_KEY = "indexPath";
 
     /**
-     * basePath 键.
+     * signInPath 键.
      */
-    private static final String BASE_PATH_KEY = "basePath";
+    private static final String SIGN_IN_PATH_KEY = "signInPath";
+
+    /**
+     * signOutPath 键.
+     */
+    private static final String SIGN_OUT_PATH_KEY = "signOutPath";
+
+    /**
+     * returnToPath 键.
+     */
+    private static final String RETURN_TO_PATH_KEY = "returnToPath";
+
+    /**
+     * callbackPath 键.
+     */
+    private static final String CALLBACK_PATH_KEY = "callbackPath";
 
     /**
      * providerServerProtocol 键.
@@ -82,6 +97,21 @@ public abstract class OpenIdConsumerServlet extends HttpServlet {
      * providerServerPort 键.
      */
     private static final String PROVIDER_SERVER_PORT_KEY = "providerServerPort";
+
+    /**
+     * providerXrdsPath 键.
+     */
+    private static final String PROVIDER_XRDS_PATH_KEY = "providerXrdsPath";
+
+    /**
+     * providerSignInPath 键.
+     */
+    private static final String PROVIDER_SIGN_IN_PATH_KEY = "providerSignInPath";
+
+    /**
+     * providerSignOutPath 键.
+     */
+    private static final String PROVIDER_SIGN_OUT_PATH_KEY = "providerSignOutPath";
 
     /**
      * providerBasePath 键.
@@ -128,7 +158,10 @@ public abstract class OpenIdConsumerServlet extends HttpServlet {
                 int serverPort = Integer.parseInt(serverPortString);
                 this.openIdConsumer.setServerPort(serverPort);
                 this.openIdConsumer.setIndexPath(this.getParameter(config, INDEX_PATH_KEY));
-                this.openIdConsumer.setBasePath(this.getParameter(config, BASE_PATH_KEY));
+                this.openIdConsumer.setSignInPath(this.getParameter(config, SIGN_IN_PATH_KEY));
+                this.openIdConsumer.setSignOutPath(this.getParameter(config, SIGN_OUT_PATH_KEY));
+                this.openIdConsumer.setReturnToPath(this.getParameter(config, RETURN_TO_PATH_KEY));
+                this.openIdConsumer.setCallbackPath(this.getParameter(config, CALLBACK_PATH_KEY));
 
                 String providerServerProtocol = config.getInitParameter(PROVIDER_SERVER_PROTOCOL_KEY);
                 if (this.isBlank(providerServerProtocol)) {
@@ -143,7 +176,9 @@ public abstract class OpenIdConsumerServlet extends HttpServlet {
                 }
                 int providerServerPort = Integer.parseInt(providerServerPortString);
                 this.openIdConsumer.setProviderServerPort(providerServerPort);
-                this.openIdConsumer.setProviderBasePath(this.getParameter(config, PROVIDER_BASE_PATH_KEY));
+                this.openIdConsumer.setProviderXrdsPath(this.getParameter(config, PROVIDER_XRDS_PATH_KEY));
+                this.openIdConsumer.setProviderSignInPath(this.getParameter(config, PROVIDER_SIGN_IN_PATH_KEY));
+                this.openIdConsumer.setProviderSignOutPath(this.getParameter(config, PROVIDER_SIGN_OUT_PATH_KEY));
 
                 this.getServletContext().setAttribute(OPENID_CONSUMER_KEY, this.openIdConsumer);
             } catch (ConsumerException e) {
