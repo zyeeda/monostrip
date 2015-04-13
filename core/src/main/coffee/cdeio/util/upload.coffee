@@ -8,7 +8,9 @@ response = require 'ringo/jsgi/response'
 {parseFileUpload, BufferFactory} = require 'ringo/utils/http'
 
 {UUID} = java.util
+{String} = java.lang
 {Attachment} = com.zyeeda.cdeio.commons.resource.entity
+
 
 CONFIG_KEY = 'cdeio.upload.path'
 
@@ -89,7 +91,14 @@ createViewer = exports.createViewer =  ->
         return notFound 'attchment is not exist' if not attachment
 
         path = join getOptionInProperties(CONFIG_KEY), attachment.path
-        response.static path, attachment.contentType
+        res = response.static path, attachment.contentType
+
+        # 处理文件名乱码问题
+        filename = new String(new String(attachment.filename).bytes, 'ISO8859-1');
+
+        # 按上传时的文件名输出文件
+        res.headers['Content-Disposition'] = 'attachment;filename=' + filename;
+        res
 
 exports.copy = mark('managers', Attachment).mark('tx').on (am, id) ->
     attachment = am.find id
