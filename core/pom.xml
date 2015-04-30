@@ -22,7 +22,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <description>The core functions of Cdeio platform.</description>
 
     <properties>
-        <aspectj.version>1.6.9</aspectj.version>
+        <aspectj.version>1.8.5</aspectj.version>
         <xjc.version>2.2.5-2</xjc.version>
         <shiro.version>1.2.3</shiro.version>
     </properties>

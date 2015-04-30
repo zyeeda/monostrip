@@ -9,15 +9,20 @@
  * that will be matched against the URI path and `Host` header of incoming requests.
  * _Note that virtual host based mounting has not been tested so far._
  *
+ * The `mount` method accepts an optional third boolean `noRedirect` argument.
+ * If set to `true` it will disable redirecting GET requests to the mount base
+ * URL without a trailing slash to the same URL with trailing slash. By default,
+ * mount middleware will send a redirect to the mount URL with trailing slash.
+ *
  * Mounting one application within another causes the `scriptName` and `pathInfo`
  * properties in the request object to be adjusted so that the mounted application
  * receives the same pathInfo as if it was the main application. This means
  * that forward and reverse request routing will usually work as expected.
  *
  * This middleware maintains an index mapping applications to mount points which
- * can be accessed using the [lookup](#lookup) function. The [stick/helpers] module
- * provides higher level functions for this which include support for the route
- * middleware.
+ * can be accessed using the [lookup](#lookup) function. The [stick/helpers][helpers]
+ * module provides higher level functions for this which include support for the
+ * route middleware.
  *
  * @example
  * app.configure("mount");
@@ -39,7 +44,7 @@ exports.middleware = function Mount(next, app) {
     var mounts = [];
 
     // define mount() method on application object
-    app.mount = function(spec, target, useRestUrls) {
+    app.mount = function(spec, target, noRedirect) {
         if (typeof spec === "string") {
             spec = {path: spec};
         } else if (!spec) {
@@ -75,7 +80,7 @@ exports.middleware = function Mount(next, app) {
             },
             path: spec.path,
             canonicalPath: spec.canonicalPath,
-            useRestUrls: useRestUrls === false ? false : true,
+            redirect: !noRedirect,
             app: resolved
         });
         mounts.sort(mostSpecificPathFirst);
@@ -105,7 +110,7 @@ exports.middleware = function Mount(next, app) {
             if (mount.match(req)) {
 
                 // if trailing slash is missing redirect to canonical path
-                if (!mount.useRestUrls && req.pathInfo === mount.path && req.method === "GET") {
+                if (mount.redirect && req.pathInfo === mount.path && req.method === "GET") {
                     var location = req.scriptName + mount.canonicalPath;
                     if (req.queryString) location += "?" + req.queryString;
                     return {

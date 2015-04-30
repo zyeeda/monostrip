@@ -1,7 +1,7 @@
 /**
  * @fileOverview Middleware for HTTP method based local request routing.
  *
- * This installs `get`, `post`, `put`, and `del` methods in the application
+ * This installs `get`, `post`, `put`, `del` and `options` methods in the application
  * object for routing requests with the corresponding HTTP methods. These
  * methods take a path spec as first argument and a function as second argument.
  *
@@ -29,7 +29,8 @@
  * The route middleware supports generating URLs from route names and parameters
  * required by the route.
  *
- * Routes names are derived from the route's path spec by stripping
+ * Routes names can either be defined explicitly by passing the route name
+ * as third argument, or are derived from the route's path spec by stripping
  * out all placeholders and removing a leading slash. For example, a path
  * spec `/post/:id.html` results in route name "post.html". If a path spec
  * does not contain any static part, its route name is "index".
@@ -39,12 +40,13 @@
  * with a route spec `/post/:id.html`, calling `app.route.reverse({action: "post.html", id: 5})`
  * will return the string "/post/5.html".
  *
- * The [stick/helpers] module provides higher level helpers for reverse routing including
- * support for mounted applications. 
+ * The [stick/helpers][helpers] module provides higher level helpers for reverse
+ * routing including support for mounted applications.
  *
  * @example
  * app.configure("route")
  * app.get("/", function() {...})
+ * app.get("/", function() {...}, "index")
  * app.post("/", function(req) {...})
  * app.get("/:id.:format?", function(req, id, format) {...})
  * app.del("/:id", function(req, id) {...})
@@ -64,7 +66,7 @@ exports.middleware = function route(next, app) {
     var routes = {},
         reverse = {};
 
-    function addRoute(method, path, fn) {
+    function addRoute(method, path, fn, name) {
         var keys = [];
         var spec = {keys: keys, fn: fn};
         spec.pattern = path instanceof RegExp ? path : normalizePath(path, keys);
@@ -73,10 +75,14 @@ exports.middleware = function route(next, app) {
 
         // register name -> route lookup
         var rev = {path: path, keys: keys};
-        // extract literal path components as route name, or "index" if none is found
-        var name = "", re = /([\/\.])(\w+)/g, match;
-        for (match = re.exec(path); match != null; match = re.exec(path)) {
-            name += name || match[1] == "." ? match[1] + match[2] : match[2];
+        if (typeof(name) !== "string" || name.length < 1) {
+            // extract literal path components as route name, or "index"
+            // if none is found
+            name = "";
+            var re = /([\/\.])(\w+)/g, match;
+            for (match = re.exec(path); match != null; match = re.exec(path)) {
+                name += name || match[1] == "." ? match[1] + match[2] : match[2];
+            }
         }
         name = spec.name = name || "index";
         if (!reverse[name]) {
@@ -113,8 +119,6 @@ exports.middleware = function route(next, app) {
     function calcWeight(path) {
         var result = 0;
         var step = 1;
-        if (path instanceof RegExp) return result;
-        
         // trim leading and trailing slashes
         path = path.replace(/^\/+|\/+$/g, '');
         var elements = path.split('/').reverse();
@@ -170,7 +174,7 @@ exports.middleware = function route(next, app) {
     };
 
     // Preconfigure standard HTTP methods
-    app.route.use("get", "post", "put", "delete");
+    app.route.use("get", "post", "put", "delete", "options");
 
     // This was gratefully and repeatedly stolen from connect
     function normalizePath(path, keys) {
@@ -198,8 +202,6 @@ exports.middleware = function route(next, app) {
         var method = req.method;
         if (method === "HEAD") method = "GET";
 
-        req.pathInfo = req.pathInfo || '/';
-        
         var list = routes[method];
         if (Array.isArray(list)) {
             for (var i = 0, l = list.length; i < l; i++) {
@@ -221,6 +223,6 @@ exports.middleware = function route(next, app) {
             }
         }
 
-        return next(app);
+        return next(req);
     };
 };

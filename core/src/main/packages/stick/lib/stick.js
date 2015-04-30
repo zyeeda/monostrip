@@ -8,22 +8,16 @@
  *
  */
 
-/**
- * Shortcut to the `stick/helpers` module.
- */
-var helpers = exports.helpers = require("./helpers");
-
-/**
- * Shortcut to the `stick/middleware` module.
- */
-var stickware = exports.middleware = require("./middleware");
+var helpers = require("./helpers");
+var stickware = require("./middleware");
 
 /**
  * The application object is a JSGI application that wraps a middleware chain.
  *
  * When invoked without arguments, the `Application` constructor returns
  * an application that wraps an `unhandled` middleware that throws an Error
- * when called. Use `[configure](#Application.prototype.configure)`.
+ * when called. Use [configure][#Application.prototype.configure] to add
+ * middleware modules to the application.
  *
  * When invoked with an argument, it is used as initial value for the
  * application's middleware chain. 
@@ -188,7 +182,7 @@ var Application = exports.Application = function Application() {
  * Unhandled request handler.
  */
 function unhandled(req) {
-    var error = new Error("Unhandled request");
+    var error = new Error("Unhandled request: " + req.pathInfo);
     error.notfound = true;
     throw error;
 }

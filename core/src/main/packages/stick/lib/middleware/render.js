@@ -8,7 +8,8 @@
  *
  *  - `render.base` - the base path or repository to look for templates
  *  - `render.helpers` - helper functions that will be merged in the context
- *  - `render.master`  - master template to apply to every page
+ *  - `render.master`  - master template which is applied on the top of
+ *     processing the page with template given in the .render function.
  *  - `render.contentType` - MIME type to use for HTTP response
  *  - `render.charset` - charset name to use for HTTP response
  *
@@ -55,7 +56,7 @@ exports.middleware = function render(next, app) {
 
         return {
             status: 200,
-            headers: {"Content-Type": contentType + "; charset=" + charset},
+            headers: {"content-type": contentType + "; charset=" + charset},
             body: [content]
         };
     };

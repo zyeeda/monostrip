@@ -140,9 +140,25 @@ Object.defineProperty(exports, 'cookies', {
 });
 
 /**
- * Middleware for [transaction]
- * @name tx
-**/
-Object.defineProperty(exports, 'tx', {
-   get: function() require('cdeio/tx')
+ * Middleware for [CORS support](./cors/index.html).
+ * @name cookies
+ */
+Object.defineProperty(exports, 'cors', {
+    get: function() require('./middleware/cors')
+});
+
+/**
+ * Middleware for [CSRF support](./csrf/index.html).
+ * @name csrf
+ */
+Object.defineProperty(exports, 'csrf', {
+    get: function() require('./middleware/csrf')
+});
+
+/**
+ * Middleware for [HTTP content negotiation](./accept/index.html).
+ * @name accept
+ */
+Object.defineProperty(exports, 'accept', {
+    get: function() require('./middleware/accept')
 });

@@ -60,6 +60,8 @@ exports.middleware = function session(next, app) {
 var ServletSession = exports.ServletSession = function(request) {
 
     var data;
+    var volatileData;
+
     var servletRequest = request instanceof javax.servlet.ServletRequest ?
             request : request.env.servletRequest;
 
@@ -80,12 +82,16 @@ var ServletSession = exports.ServletSession = function(request) {
                         getSession().setAttribute(name, value);
                     },
                     get: function(name, start) {
+                        if (Object.prototype[name]) {
+                           return Object.prototype[name];
+                        }
                         return getSession().getAttribute(name);
                     }
                 });
             }
             return data;
-        }
+        },
+        enumerable: true
     });
 
     /**
@@ -96,7 +102,67 @@ var ServletSession = exports.ServletSession = function(request) {
     Object.defineProperty(this, "isNew", {
         get: function() {
             return getSession().isNew();
-        }
-    })
+        },
+        enumerable: true
+    });
 
+    /**
+     * Createtime of the current session.
+     */
+    Object.defineProperty(this, "creationTime", {
+        get: function() {
+            return getSession().getCreationTime();
+        },
+        enumerable: true
+    });
+
+    /**
+     * A time interval in seconds, which the session will be open.
+     * If the interval is exceeded, the session gets invalidated.
+     */
+    Object.defineProperty(this, "maxInactiveInterval", {
+        get: function() {
+            return getSession().getMaxInactiveInterval();
+        },
+        set: function(interval) {
+            return getSession().setMaxInactiveInterval(interval);
+        },
+        enumerable: true
+    });
+
+    /**
+     * Time in Unix epoch milliseconds since the last client access.
+     */
+    Object.defineProperty(this, "lastAccessedTime", {
+        get: function() {
+            return getSession().getLastAccessedTime();
+        },
+        enumerable: true
+    });
+
+    /**
+     * Destroys the current session and any data bound to it.
+     */
+    this.invalidate = function() {
+        getSession().invalidate();
+    };
+
+    // save and reset the volatile session object
+    volatileData = getSession().getAttribute("__volatileData__");
+    getSession().setAttribute("__volatileData__", null);
+
+    /**
+     * A volatile property which survives a HTTP redirect and can be used
+     * for warnings or error messages in forms. After a requests was handled,
+     * the property is reset to null.
+     */
+    Object.defineProperty(this, "volatile", {
+        get: function() {
+            return volatileData;
+        },
+        set: function(value) {
+            getSession().setAttribute("__volatileData__", value);
+        },
+        enumerable: true
+    });
 };

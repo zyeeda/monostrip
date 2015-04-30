@@ -3,12 +3,13 @@
  * HTTP parameters from the query string and request body.
  *
  * It does not parse multipart MIME data such as file uploads which are handled
- * by the [upload] module.
+ * by the [upload][middleware/upload] module.
  */
 var {isFileUpload, isUrlEncoded, parseFileUpload, parseParameters,
     mergeParameter, BufferFactory} = require("ringo/utils/http");
 var objects = require("ringo/utils/objects");
 var strings = require("ringo/utils/strings");
+var response = require("ringo/jsgi/response");
 
 /**
  * Middleware for parsing HTTP parameters.
@@ -20,6 +21,13 @@ var strings = require("ringo/utils/strings");
  * @returns {Function} a JSGI middleware function
  */
 exports.middleware = function params(next, app) {
+
+    // Custom Error
+    function ParamsParseException (message) {
+        this.name = 'ParamsParseException';
+        this.message = message;
+        this.stack = (new Error()).stack;
+    };
 
     return function(req) {
 
@@ -37,7 +45,7 @@ exports.middleware = function params(next, app) {
                     params = objects.merge(this.postParams, this.queryParams);
                 }
                 return params;
-            }, configurable: true
+            }, configurable: true, enumerable: true
         });
 
         /**
@@ -52,11 +60,13 @@ exports.middleware = function params(next, app) {
                     parseParameters(this.queryString, queryParams, encoding);
                 }
                 return queryParams;
-            }, configurable: true
+            }, configurable: true, enumerable: true
         });
 
         /**
          * An object containing the parsed HTTP POST parameters sent with this request.
+         * If the content type of the request is <code>application/json</code>, the middleware
+         * parses the body and stores the in <code>request.postParams</code>.
          * @name request.postParams
          */
         Object.defineProperty(req, "postParams", {
@@ -86,7 +96,11 @@ exports.middleware = function params(next, app) {
                             }
                         } else if (strings.startsWith(contentType, "application/json")) {
                             input = req.input.read();
-                            postParams = JSON.parse(input.decodeToString(encoding));
+                            try {
+                                postParams = JSON.parse(input.decodeToString(encoding));
+                            } catch (e) {
+                                throw new ParamsParseException();
+                            }
                         }
                     }
                     // query previous postParams property descriptor in case
@@ -96,10 +110,14 @@ exports.middleware = function params(next, app) {
                     }
                 }
                 return postParams;
-            }, configurable: true
+            }, configurable: true, enumerable: true
         });
 
-        return next(req);
+        try {
+            return next(req);
+        } catch (e if e instanceof ParamsParseException) {
+            return response.bad();
+        }
     };
 
 };
