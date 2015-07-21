@@ -22,7 +22,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <description>The core functions of Cdeio platform.</description>
 
     <properties>
-        <aspectj.version>1.8.5</aspectj.version>
+        <aspectj.version>1.8.6</aspectj.version>
         <xjc.version>2.2.5-2</xjc.version>
         <shiro.version>1.2.3</shiro.version>
     </properties>
@@ -44,13 +44,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
             <artifactId>rhino</artifactId>
             <version>1.7R5</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.zyeeda</groupId>
-            <artifactId>cdeio-ringo</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
 
         <dependency>
             <groupId>com.zyeeda</groupId>
@@ -73,6 +66,10 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <!-- slf4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <!--<dependency>
+            <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
         <dependency>
@@ -90,7 +87,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- spring -->
         <dependency>

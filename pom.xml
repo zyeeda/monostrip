@@ -24,11 +24,10 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <url>http://www.zyeeda.com/platform</url>
 
     <properties>
-        <servlet.api.version>3.1.0</servlet.api.version>
         <transaction.api.version>1.1</transaction.api.version>
-        <spring.version>3.2.13.RELEASE</spring.version>
+        <spring.version>3.2.14.RELEASE</spring.version>
         <hibernate.jpa2.api.version>1.0.1.Final</hibernate.jpa2.api.version>
-        <hibernate.version>4.3.9.Final</hibernate.version>
+        <hibernate.version>4.3.10.Final</hibernate.version>
         <hibernate.validator.version>5.1.3.Final</hibernate.validator.version>
         <validation.api.version>1.0.0.GA</validation.api.version>
         <commons.beanutils.version>1.9.2</commons.beanutils.version>
@@ -40,14 +39,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
 
     <dependencyManagement>
         <dependencies>
-            <!-- servlet api -->
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${servlet.api.version}</version>
-                <scope>provided</scope>
-            </dependency>
-
             <dependency>
                 <groupId>javax.transaction</groupId>
                 <artifactId>jta</artifactId>
@@ -220,13 +211,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-    </dependencies>
-
     <scm>
         <connection>scm:hg:http://bitbucket.org/zyeeda/cdeio-runtime</connection>
         <developerConnection>scm:hg:${basedir}/../${project.artifactId}</developerConnection>
@@ -235,17 +219,17 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     </scm>
 
     <modules>
-        <module>validation</module>
-        <module>commons</module>
-        <module>knowledge</module>
         <module>bpm</module>
-        <module>testbone</module>
-        <module>core</module>
-        <module>revision</module>
-        <module>proxy</module>
-        <module>sso</module>
-        <module>ringo</module>
-        <module>testringo</module>
         <module>btm-jetty9-lifecycle</module>
+        <module>commons</module>
+        <module>core</module>
+        <module>knowledge</module>
+        <module>proxy</module>
+        <module>revision</module>
+        <module>ringo</module>
+        <module>sso</module>
+        <module>testbone</module>
+        <module>testringo</module>
+        <module>validation</module>
     </modules>
 </project>

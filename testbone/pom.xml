@@ -22,15 +22,19 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <description>The test libraries of Cdeio platform.</description>
 
     <properties>
-        <h2.version>1.4.181</h2.version>
-        <btm.version>2.1.1</btm.version>
-        <junit.version>4.11</junit.version>
-        <mockito.version>1.10.8</mockito.version>
+        <h2.version>1.4.187</h2.version>
+        <btm.version>2.1.4</btm.version>
+        <junit.version>4.12</junit.version>
+        <mockito.version>1.10.19</mockito.version>
     </properties>
 
     <dependencies>
         <!-- slf4j -->
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <!--<dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
@@ -49,7 +53,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- spring -->
         <dependency>
@@ -104,13 +108,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
             <artifactId>rhino</artifactId>
             <version>1.7R5</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.zyeeda</groupId>
-            <artifactId>cdeio-ringo</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
 
         <dependency>
             <groupId>junit</groupId>
@@ -123,7 +120,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
             <artifactId>mockito-all</artifactId>
             <version>${mockito.version}</version>
         </dependency>
-
     </dependencies>
 
 </project>

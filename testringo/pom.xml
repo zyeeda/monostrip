@@ -34,7 +34,6 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
         <testResources>
             <testResource>
                 <directory>src/test/javascript</directory>
-                <filtering>true</filtering>
             </testResource>
         </testResources>
     </build>

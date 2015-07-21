@@ -86,7 +86,7 @@ $License$
         </dependency>
 
         <dependency>
-            <groupId>com.github.axet</groupId>
+            <groupId>com.github.penggle</groupId>
             <artifactId>kaptcha</artifactId>
         </dependency>
     </dependencies>
