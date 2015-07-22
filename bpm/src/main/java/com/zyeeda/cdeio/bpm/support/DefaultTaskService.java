@@ -421,5 +421,20 @@ public class DefaultTaskService implements TaskService {
 			boolean localScope) {
 		taskService.complete(taskId, variables, localScope);
 	}
+
+	@Override
+	public List<Comment> getProcessInstanceComments(String processInstanceId, String type) {
+		return taskService.getProcessInstanceComments(processInstanceId, type);
+	}
+
+	@Override
+	public <T> T getVariable(String taskId, String variableName, Class<T> variableClass) {
+		return taskService.getVariable(taskId, variableName, variableClass);
+	}
+
+	@Override
+	public <T> T getVariableLocal(String taskId, String variableName, Class<T> variableClass) {
+		return taskService.getVariableLocal(taskId, variableName, variableClass);
+	}
     
 }

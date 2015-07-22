@@ -3,7 +3,7 @@
 {stream} = require 'cdeio/response'
 
 {IOUtils} = org.apache.commons.io
-diagram = org.activiti.engine.impl.bpmn.diagram.ProcessDiagramGenerator
+diagram = new org.activiti.image.impl.DefaultProcessDiagramGenerator()
 
 log = require('ringo/logging').getLogger module.id
 router = exports.router = createRouter()

@@ -22,7 +22,7 @@ $License: Copyright &copyright 2014 Shenzhen Zyeeda Information Technology Co. L
     <description>The BPM (Business Process Management) libraries of Cdeio platform.</description>
 
     <properties>
-        <activiti.version>5.15.1</activiti.version>
+        <activiti.version>5.17.0</activiti.version>
     </properties>
 
     <dependencies>
