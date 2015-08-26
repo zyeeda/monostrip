@@ -10,7 +10,7 @@ import org.hibernate.validator.internal.util.logging.LoggerFactory;
 public class NullableSizeConstraintValidator {
 
 	private static final Log log = LoggerFactory.make();
-	
+
 	private int min;
 	private int max;
 
@@ -21,7 +21,7 @@ public class NullableSizeConstraintValidator {
 	}
 
 	public boolean isValid(CharSequence charSequence, ConstraintValidatorContext constraintValidatorContext) {
-		if ( charSequence == null || charSequence == "" ) {
+		if ( charSequence == null || charSequence.length() == 0 ) {
 			return true;
 		}
 		int length = charSequence.length();
