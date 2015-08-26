@@ -78,7 +78,10 @@ exports.create = (module, mountDefaultRouters = true) ->
     if mountDefaultRouters
         router.mount '/helper', 'cdeio/frontend-helper' # this is useless
         router.mount '/scaffold', 'cdeio/scaffold/router'
-        router.mount '/scaffold/tasks', 'cdeio/scaffold/task'
-        router.mount '/scaffold/bpm', 'cdeio/bpm'
+        # 判断是否引入工作流组件
+        activiti = java.lang.Package.getPackage('org.activiti.engine');
+        if activiti
+            router.mount '/scaffold/tasks', 'cdeio/scaffold/task'
+            router.mount '/scaffold/bpm', 'cdeio/bpm'
 
     router
