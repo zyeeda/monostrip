@@ -140,11 +140,13 @@ public class OpenIdProviderAuthenticationFilter extends FormAuthenticationFilter
 
         if (e instanceof IncorrectCredentialsException) {
             SignInToken signInToken = (SignInToken) request.getAttribute(Constants.SIGN_IN_TOKEN_ATTRIBUTE_NAME);
-            signInToken.updateTimestamp();
-            signInToken.increaseAttempts();
-            LOGGER.debug("sign in attemtps = {}/{}", signInToken.getAttempts(), this.maxSignInAttempts);
-            if (signInToken.getAttempts() >= this.maxSignInAttempts) {
-                signInToken.setCaptchaRequired(true);
+            if (signInToken != null) {
+            	signInToken.updateTimestamp();
+                signInToken.increaseAttempts();
+                LOGGER.debug("sign in attemtps = {}/{}", signInToken.getAttempts(), this.maxSignInAttempts);
+                if (signInToken.getAttempts() >= this.maxSignInAttempts) {
+                    signInToken.setCaptchaRequired(true);
+                }
             }
         }
 
@@ -178,7 +180,9 @@ public class OpenIdProviderAuthenticationFilter extends FormAuthenticationFilter
         LOGGER.debug("remove sign-in token.");
         SignInToken token = (SignInToken) httpReq.getAttribute(Constants.SIGN_IN_TOKEN_ATTRIBUTE_NAME);
         httpReq.removeAttribute(Constants.SIGN_IN_TOKEN_ATTRIBUTE_NAME);
-        this.cache.remove(token.getNonce());
+        if (token != null) {
+        	this.cache.remove(token.getNonce());
+        }
 
         CookieGenerator cg = new CookieGenerator();
         cg.setCookieName(Constants.COOKIE_NAME);
