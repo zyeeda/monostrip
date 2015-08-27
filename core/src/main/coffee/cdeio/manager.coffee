@@ -18,10 +18,8 @@ fs = require 'fs'
 
 # Specify date and time format.
 #
-# @todo These format pattern should use global cdeio configuration.
-#
-dateFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd'
-timeFormat = new java.text.SimpleDateFormat 'yyyy-MM-dd HH:mm:ss'
+dateFormat = new java.text.SimpleDateFormat cdeio.dateFormat
+timeFormat = new java.text.SimpleDateFormat cdeio.dateTimeFormat
 
 context = Context.getInstance(module)
 
