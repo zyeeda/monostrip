@@ -20,7 +20,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.zyeeda.cdeio.commons.annotation.scaffold.Scaffold;
-import com.zyeeda.cdeio.commons.authc.entity.Role;
+import com.zyeeda.cdeio.commons.authz.entity.Role;
 import com.zyeeda.cdeio.commons.base.entity.DomainEntity;
 import com.zyeeda.cdeio.validation.constraint.Matches;
 import com.zyeeda.cdeio.validation.constraint.NullableSize;

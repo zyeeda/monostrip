@@ -16,8 +16,8 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.zyeeda.cdeio.commons.authc.entity.Permission;
-import com.zyeeda.cdeio.commons.authc.entity.Role;
+import com.zyeeda.cdeio.commons.authz.entity.Permission;
+import com.zyeeda.cdeio.commons.authz.entity.Role;
 import com.zyeeda.cdeio.commons.organization.entity.Account;
 
 /**
