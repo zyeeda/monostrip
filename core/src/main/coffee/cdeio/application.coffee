@@ -76,7 +76,6 @@ exports.create = (module, mountDefaultRouters = true) ->
 
     # 配置了三个默认的路径,前端可以直接调用
     if mountDefaultRouters
-        router.mount '/helper', 'cdeio/frontend-helper' # this is useless
         router.mount '/scaffold', 'cdeio/scaffold/router'
         # 判断是否引入工作流组件
         activiti = java.lang.Package.getPackage('org.activiti.engine');
