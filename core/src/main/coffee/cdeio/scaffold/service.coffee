@@ -232,26 +232,6 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             manager = baseService.createManager service.entityClass
             manager.find id
 
-        create_bak: mark('tx').on (entity) ->
-            manager = baseService.createManager service.entityClass
-            backup = {}
-            for fm in entityMeta.getFields()
-                if fm.isManyToManyTarget() or fm.isOneToMany() or fm.isManyToManyOwner()
-                    backup[fm.name] = entity[fm.name]
-                    entity[fm.name] = null
-                if entity[fm.name] and entity[fm.name] instanceof Attachment
-                    upload.commitAttachment entity[fm.name].id
-
-            entity = manager.save entity
-
-            entity[key] = value for key, value of backup
-            manySideUpdate entity
-
-            # 启动流程
-            if scaffold.processDefinitionKey
-                processInstanceId = startProcess entity, manager
-            entity
-
         create: mark('tx').on (entity, data) ->
             manager = baseService.createManager service.entityClass
             entity = manager.save entity
@@ -278,34 +258,6 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
 
             entity = cascadeSave manager, entity, data, service.entityClass, preAttachment
 
-            entity
-
-        update_bak: mark('tx', { needStatus: true }).on (txStatus, id, fn) ->
-            manager = baseService.createManager service.entityClass
-            entity = manager.find id
-
-            preAttachment = {}
-            attachments = {}
-            for fieldMeta in entityMeta.getFields()
-                if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget() or fieldMeta.isManyToManyOwner()
-                    preAttachment[fieldMeta.name] = entity[fieldMeta.name].toArray()
-                if entity[fieldMeta.name] and entity[fieldMeta.name] instanceof Attachment
-                    attachments[fieldMeta.name] = entity[fieldMeta.name].id
-
-            if fn(entity, service) is false
-                txStatus.setRollbackOnly()
-                null
-
-            for key, value of attachments
-                if value
-                    if not entity[key]
-                        upload.remove value
-                    else if value isnt entity[key].id
-                        upload.commitAttachment entity[key].id
-                        upload.remove value
-                    else
-                        upload.commitAttachment entity[key].id
-            manySideUpdate entity, preAttachment
             entity
 
         remove: mark('tx').on (entities...) ->
