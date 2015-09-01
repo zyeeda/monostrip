@@ -78,6 +78,8 @@ exports.commitAttachment = mark('managers', Attachment).mark('tx').on (am, ids..
         attachment = am.find id
         attachment.draft = false
 
+exports.deleteAttachment = mark('managers', Attachment).mark('tx').on (am, id) ->
+    am.removeById id
 
 createDeleteHandler = exports.createDeleteHandler = ->
 

@@ -57,15 +57,25 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     values.add v for v in vs
         true
 
-    cascadeSave = (mgr, entity, data, etClass) ->
+    cascadeSave = (mgr, entity, data, etClass, preAttachment) ->
         entityMeta = entityMetaResolver.resolveEntity etClass
 
         for fieldMeta in entityMeta.getFields()
             en = entity[fieldMeta.name]
             da = data[fieldMeta.name]
+
             continue unless en
+
             if en instanceof Attachment
-                upload.commitAttachment en.id
+
+                #如果编辑操作之前有附件，并且跟编辑之后的附件不一致，则删除原附件
+                if preAttachment[fieldMeta.name] && en.id != preAttachment[fieldMeta.name]
+                    upload.deleteAttachment preAttachment[fieldMeta.name]
+
+                if en.id
+                    upload.commitAttachment en.id
+                else
+                    entity[fieldMeta.name] = null
                 continue
 
             #多对一关联，Many处关联One
@@ -104,6 +114,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                             e[fieldMeta.mappedBy] = entity
                             fieldMgr.merge e
                             en.add e
+
             #多对多双向关联，Many、One处都有关联
             else if fieldMeta.isManyToManyTarget()
                 if en != undefined and en != null and en.isEmpty and not en.isEmpty()
@@ -126,6 +137,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                             en.add cascadeSave(fieldMgr, e, d, type)
                         else
                             en.add e
+
             #多对多单向关联，One处关联Many
             else if fieldMeta.isManyToManyOwner()
                 if en != undefined and en != null and en.isEmpty and not en.isEmpty()
@@ -255,11 +267,16 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             manager = baseService.createManager service.entityClass
             entity = manager.find id
 
+            preAttachment = {}
+            for fieldMeta in entityMeta.getFields()
+                if entity[fieldMeta.name] and entity[fieldMeta.name] instanceof Attachment
+                    preAttachment[fieldMeta.name] = entity[fieldMeta.name].id
+
             if fn(entity, service) is false
                 txStatus.setRollbackOnly()
                 null
 
-            entity = cascadeSave manager, entity, data, service.entityClass
+            entity = cascadeSave manager, entity, data, service.entityClass, preAttachment
 
             entity
 
@@ -267,17 +284,18 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             manager = baseService.createManager service.entityClass
             entity = manager.find id
 
-            pre = {}
+            preAttachment = {}
             attachments = {}
             for fieldMeta in entityMeta.getFields()
                 if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget() or fieldMeta.isManyToManyOwner()
-                    pre[fieldMeta.name] = entity[fieldMeta.name].toArray()
+                    preAttachment[fieldMeta.name] = entity[fieldMeta.name].toArray()
                 if entity[fieldMeta.name] and entity[fieldMeta.name] instanceof Attachment
                     attachments[fieldMeta.name] = entity[fieldMeta.name].id
 
             if fn(entity, service) is false
                 txStatus.setRollbackOnly()
                 null
+
             for key, value of attachments
                 if value
                     if not entity[key]
@@ -287,7 +305,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                         upload.remove value
                     else
                         upload.commitAttachment entity[key].id
-            manySideUpdate entity, pre
+            manySideUpdate entity, preAttachment
             entity
 
         remove: mark('tx').on (entities...) ->
