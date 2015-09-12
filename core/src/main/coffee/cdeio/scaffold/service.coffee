@@ -107,11 +107,15 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                             e[fieldMeta.mappedBy] = null
                             fieldMgr.merge e
                             continue
-                        if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
-                            e[fieldMeta.mappedBy] = entity
+                        if d and (_.isUndefined(d['__FORM_FLAG__']) || d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
+                            if fieldMeta.mappedBy
+                                e[fieldMeta.mappedBy] = entity
+
                             en.add cascadeSave(fieldMgr, e, d, fieldMeta.manyType)
                         else
-                            e[fieldMeta.mappedBy] = entity
+                            if fieldMeta.mappedBy
+                                e[fieldMeta.mappedBy] = entity
+
                             fieldMgr.merge e
                             en.add e
 
