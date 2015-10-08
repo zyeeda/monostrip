@@ -49,6 +49,11 @@ exports.buildValidateRules = (fields, entityClass, group) ->
         annos2 = m.annotations
         newAnnos = annos.concat annos2
         for a in newAnnos
+            # 判断如果在属性或者 get 方法上有配置 @DateTime 则使用 datetime 的验证规则替换 date
+            if field.type == Date and a instanceof com.zyeeda.cdeio.commons.annotation.scaffold.DateTime
+                delete rules[name].date
+                rules[name].datetime = true
+
             map = AnnotationUtils.getAnnotationAttributes a
             groups = map.get 'groups'
             continue unless groups

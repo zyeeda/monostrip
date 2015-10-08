@@ -8,6 +8,7 @@ _ = require 'underscore'
 {Create, Update} = com.zyeeda.cdeio.validator.group
 {TreeNode} = com.zyeeda.cdeio.commons.base.data
 {ClassUtils} = org.springframework.util
+{FieldUtils} = org.apache.commons.lang.reflect
 
 exports.generateForms = (meta, labels = {}, forms, groups, formName, options) ->
     return null if not groups
@@ -60,7 +61,7 @@ generateForm = (form, meta, labels, fieldGroups, formName, options) ->
 
     if formName isnt 'filter'
         result.validation = buildValidateRules allFields, meta.entityClass, validateGroup
-        if options.validation 
+        if options.validation
             result.validation.rules = _.extend (result.validation.rules || {}), options.validation.rules if options.validation.rules
             result.validation.messages = _.extend (result.validation.messages || {}), options.validation.messages if options.validation.messages
             result.validation.ignore = options.validation.ignore if options.validation.ignore
@@ -123,6 +124,28 @@ defineFieldType = (field, fieldMeta, entityMeta) ->
         return
     if fieldMeta.getType() is java.util.Date
         field.type = 'datepicker'
+
+        entityClass = entityMeta.getEntityClass()
+
+        # 判断如果在属性或者 get 方法上有配置 @DateTime 则使用 datetimepicker
+        upperCaseName = field.name.substring(0, 1).toUpperCase() + field.name.substring 1, field.name.length
+        try
+            m = entityClass.getMethod 'get' + upperCaseName
+        catch e
+            try
+                m = entityClass.getMethod 'is' + upperCaseName
+            catch ex
+                throw new Error "property #{field.name} is not found"
+
+        f = FieldUtils.getField entityClass, field.name, true
+        annos = f.annotations || []
+        annos2 = m.annotations
+        newAnnos = annos.concat annos2
+        for a in newAnnos
+            if a instanceof com.zyeeda.cdeio.commons.annotation.scaffold.DateTime
+                field.type = 'datetimepicker'
+                break
+
         return
     if fieldMeta.isEntity()
         field.type = if ClassUtils.isAssignable(TreeNode, fieldMeta.getType()) then 'tree-picker' else 'grid-picker'
