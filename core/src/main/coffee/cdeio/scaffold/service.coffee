@@ -6,6 +6,7 @@ fs = require 'fs'
 _ = require 'underscore'
 {cdeio} = require 'cdeio/config'
 createProcessService = require('cdeio/scaffold/process-service').createService
+logger = require('ringo/logging').getLogger module.id
 
 {Context} = com.zyeeda.cdeio.web.SpringAwareJsgiServlet
 {ProcessStatusAware} = com.zyeeda.cdeio.commons.annotation.scaffold
@@ -61,111 +62,128 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
         entityMeta = entityMetaResolver.resolveEntity etClass
 
         for fieldMeta in entityMeta.getFields()
-            en = entity[fieldMeta.name]
-            da = data[fieldMeta.name]
+            fieldName = fieldMeta.name
 
-            continue unless en
+            dbEntityFieldValue = entity[fieldName]
+            reqEntityFieldValue = data[fieldMeta.name]
 
-            if en instanceof Attachment
+            continue if not reqEntityFieldValue or not dbEntityFieldValue
+
+            if dbEntityFieldValue instanceof Attachment
 
                 #如果编辑操作之前有附件，并且跟编辑之后的附件不一致，则删除原附件
-                if preAttachment[fieldMeta.name] && en.id != preAttachment[fieldMeta.name]
+                if preAttachment[fieldMeta.name] && dbEntityFieldValue.id != preAttachment[fieldMeta.name]
                     upload.deleteAttachment preAttachment[fieldMeta.name]
 
-                if en.id
-                    upload.commitAttachment en.id
+                if dbEntityFieldValue.id
+                    upload.commitAttachment dbEntityFieldValue.id
                 else
                     entity[fieldMeta.name] = null
                 continue
 
             #多对一关联，Many处关联One
             if fieldMeta.entity
-                if da
-                    if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
-                        fieldMgr = baseService.createManager fieldMeta.type
-                        mapped = cascadeSave(fieldMgr, en, da, fieldMeta.type)
-                        en[fieldMeta.mappedBy] = mapped if fieldMeta.mappedBy
-                    # 如果传了对象过来，但不是从表单过来的，也没有id，无效对象
-                    else if da.id == undefined
-                        entity[fieldMeta.name] = null
+                if _.isUndefined(reqEntityFieldValue['__FORM_FLAG__']) || reqEntityFieldValue['__FORM_FLAG__'] == '' || reqEntityFieldValue['__FORM_FLAG__'] == 'true'
+                    fieldMgr = baseService.createManager fieldMeta.type
+                    mapped = cascadeSave(fieldMgr, dbEntityFieldValue, reqEntityFieldValue, fieldMeta.type)
+                    dbEntityFieldValue[fieldMeta.mappedBy] = mapped if fieldMeta.mappedBy
+                # 如果传了对象过来，但不是从表单过来的，也没有id，无效对象
+                else if reqEntityFieldValue.id == undefined
+                    entity[fieldMeta.name] = null
 
             #一对多关联，One处关联Many
             if fieldMeta.isOneToMany()
-                if en != undefined and en != null and en.isEmpty and not en.isEmpty()
-                    fieldMgr = baseService.createManager fieldMeta.manyType
-                    vs = en.toArray()
-                    en.clear()
-                    for e, i in vs
-                        # 当前台没传入数据，原先的list属性保持
-                        if !da
-                            en.add e
-                            continue
-                        d = da[i]
-                        # 此处已经删除全部关系再加入，若要真实删除，请修改以下逻辑
-                        if d and d['__FORM_TYPE__'] == 'delete'
-                            # fieldMgr.remove e
-                            e[fieldMeta.mappedBy] = null
-                            fieldMgr.merge e
-                            continue
-                        if d and (_.isUndefined(d['__FORM_FLAG__']) || d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
-                            if fieldMeta.mappedBy
-                                e[fieldMeta.mappedBy] = entity
+                continue if dbEntityFieldValue.isEmpty?()
 
-                            en.add cascadeSave(fieldMgr, e, d, fieldMeta.manyType)
-                        else
-                            if fieldMeta.mappedBy
-                                e[fieldMeta.mappedBy] = entity
+                type = fieldMeta.manyType
+                fieldMgr = baseService.createManager type
 
-                            fieldMgr.merge e
-                            en.add e
+                dbEntityFieldValueList = dbEntityFieldValue.toArray()
+                dbEntityFieldValue.clear()
+
+                for dbEntityFieldValueItem, i in dbEntityFieldValueList
+                    if !reqEntityFieldValue
+                        dbEntityFieldValue.add dbEntityFieldValueItem
+                        continue
+
+                    reqEntityFieldValueItem = reqEntityFieldValue[i]
+                    continue unless reqEntityFieldValueItem
+
+                    if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_TYPE__'] == 'delete'
+                        if fieldMeta.mappedBy
+                            dbEntityFieldValueItem[fieldMeta.mappedBy] = null
+                        dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
+                        continue
+
+                    if fieldMeta.mappedBy
+                        dbEntityFieldValueItem[fieldMeta.mappedBy] = entity
+
+                    if reqEntityFieldValueItem and (_.isUndefined(reqEntityFieldValueItem['__FORM_FLAG__']) || reqEntityFieldValueItem['__FORM_FLAG__'] == '' || reqEntityFieldValueItem['__FORM_FLAG__'] == 'true')
+                        dbEntityFieldValue.add cascadeSave(fieldMgr, dbEntityFieldValueItem, reqEntityFieldValueItem, type)
+                    else
+                        dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
+                        dbEntityFieldValue.add dbEntityFieldValueItem
 
             #多对多双向关联，Many、One处都有关联
             else if fieldMeta.isManyToManyTarget()
-                if en != undefined and en != null and en.isEmpty and not en.isEmpty()
-                    type = fieldMeta.manyToManyTargetType
-                    type = fieldMeta.manyToManyOwnerType if type == null
-                    fieldMgr = baseService.createManager type
-                    vs = en.toArray()
-                    en.clear()
-                    for e, i in vs
-                        # 当前台没传入数据，原先的list属性保持
-                        if !da
-                            en.add e
-                            continue
-                        d = da[i]
-                        if d and d['__FORM_TYPE__'] == 'delete'
-                            e[fieldMeta.mappedBy] = null
-                            fieldMgr.merge e
-                            continue
-                        if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
-                            en.add cascadeSave(fieldMgr, e, d, type)
-                        else
-                            en.add e
+                continue if dbEntityFieldValue.isEmpty?()
+
+                type = fieldMeta.manyToManyTargetType
+                type = fieldMeta.manyToManyOwnerType if type == null
+                fieldMgr = baseService.createManager type
+
+                dbEntityFieldValueList = dbEntityFieldValue.toArray()
+                dbEntityFieldValue.clear()
+
+                for dbEntityFieldValueItem, i in dbEntityFieldValueList
+                    if !reqEntityFieldValue
+                        dbEntityFieldValue.add dbEntityFieldValueItem
+                        continue
+
+                    reqEntityFieldValueItem = reqEntityFieldValue[i]
+                    continue unless reqEntityFieldValueItem
+
+                    if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_TYPE__'] == 'delete'
+                        if fieldMeta.mappedBy
+                            dbEntityFieldValueItem[fieldMeta.mappedBy] = null
+                        dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
+                        continue
+
+                    if reqEntityFieldValueItem and (_.isUndefined(reqEntityFieldValueItem['__FORM_FLAG__']) || reqEntityFieldValueItem['__FORM_FLAG__'] == '' || reqEntityFieldValueItem['__FORM_FLAG__'] == 'true')
+                        dbEntityFieldValue.add cascadeSave(fieldMgr, dbEntityFieldValueItem, reqEntityFieldValueItem, type)
+                    else
+                        dbEntityFieldValue.add dbEntityFieldValueItem
 
             #多对多单向关联，One处关联Many
             else if fieldMeta.isManyToManyOwner()
-                if en != undefined and en != null and en.isEmpty and not en.isEmpty()
-                    type = fieldMeta.manyToManyOwnerType
-                    type = fieldMeta.manyToManyTargetType if type == null
-                    fieldMgr = baseService.createManager type
-                    vs = en.toArray()
-                    en.clear()
-                    for e, i in vs
-                        # 当前台没传入数据，原先的list属性保持
-                        if !da
-                            en.add e
-                            continue
-                        d = da[i]
-                        # 此处已经删除全部关系再加入，若要真实删除，请修改以下逻辑
-                        if d and d['__FORM_TYPE__'] == 'delete'
-                            # fieldMgr.remove e
-                            continue
-                        if d and (d['__FORM_FLAG__'] == '' || d['__FORM_FLAG__'] == 'true')
-                            en.add cascadeSave(fieldMgr, e, d, type)
-                        else
-                            en.add e
-                else
+                if dbEntityFieldValue.isEmpty?()
                     delete entity[fieldMeta.name]
+                    continue
+
+                type = fieldMeta.manyToManyOwnerType
+                type = fieldMeta.manyToManyTargetType if type == null
+                fieldMgr = baseService.createManager type
+
+                dbEntityFieldValueList = dbEntityFieldValue.toArray()
+                dbEntityFieldValue.clear()
+
+                for dbEntityFieldValueItem, i in dbEntityFieldValueList
+                    if !reqEntityFieldValue
+                        dbEntityFieldValue.add dbEntityFieldValueItem
+                        continue
+
+                    reqEntityFieldValueItem = reqEntityFieldValue[i]
+                    continue unless reqEntityFieldValueItem
+
+                    if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_TYPE__'] == 'delete'
+                        if fieldMeta.mappedBy
+                            dbEntityFieldValueItem[fieldMeta.mappedBy] = null
+                        continue
+
+                    if reqEntityFieldValueItem and (_.isUndefined(reqEntityFieldValueItem['__FORM_FLAG__']) || reqEntityFieldValueItem['__FORM_FLAG__'] == '' || reqEntityFieldValueItem['__FORM_FLAG__'] == 'true')
+                        dbEntityFieldValue.add cascadeSave(fieldMgr, dbEntityFieldValueItem, reqEntityFieldValueItem, type)
+                    else
+                        dbEntityFieldValue.add dbEntityFieldValueItem
         mgr.merge entity
 
     startProcess = mark('beans', 'runtimeService').on (runtimeService, entity, manager) ->
@@ -238,7 +256,17 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
 
         create: mark('tx').on (entity, data) ->
             manager = baseService.createManager service.entityClass
-            entity = manager.save entity
+
+            # 判断当前实体是不是多对多单向关联维护关联关系的一方
+            hasManyToManyOwnerField = false
+            entityMeta = entityMetaResolver.resolveEntity service.entityClass
+            for fieldMeta in entityMeta.getFields()
+                hasManyToManyOwnerField = true if fieldMeta.isManyToManyOwner()
+
+            # 多对多单向关联时不能先调用 save 方法
+            if hasManyToManyOwnerField is false
+                entity = manager.save entity
+
             entity = cascadeSave manager, entity, data, service.entityClass
 
             # 启动流程
