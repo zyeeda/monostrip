@@ -87,6 +87,8 @@ generateField = (config, meta, labels, groupName, group) ->
     field
 
 defineFieldType = (field, fieldMeta, entityMeta) ->
+    throw new Error "there is no getter method for property #{field.name}" if _.isNull fieldMeta
+
     if field.type is 'multi-picker' or field.type is 'multi-tree-picker'
         field.type = 'multi-tree-picker' if ClassUtils.isAssignable(TreeNode, fieldMeta.getType())
         if not field.source and (fieldMeta.isManyToManyTarget() or fieldMeta.isOneToMany())
