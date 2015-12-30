@@ -13,17 +13,17 @@ import createApplication from '../application'
 import createLogger from '../logger'
 import createProxy from './proxy'
 import config from '../config'
-import {ServerAgent} from '../helpers/api-agent'
-import getStatusFromRoutes from '../helpers/get-status-from-routes'
-import createStore from '../redux/create-store'
-import getRoutes from '../get-routes'
-import Html from '../helpers/html'
+import {ServerAgent} from '../../helpers/api-agent'
+import getStatusFromRoutes from '../../helpers/get-status-from-routes'
+import createStore from '../../redux/create-store'
+import getRoutes from '../../get-routes'
+import Html from '../../helpers/html'
 
 const pretty = new PrettyError()
 const app = createApplication(config.web)
 
 const logger = app.logger = createLogger(config.web.key)
-app.use(staticServe(path.join(__dirname, '..', '..', 'static')))
+app.use(staticServe(path.join(__dirname, '..', '..', '..', 'static')))
 
 app.use(createProxy(config.web.apiServerPrefix))
 

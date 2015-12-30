@@ -21,7 +21,7 @@ export default (config) => {
   // i18n
   locale(app)
   app.use(i18n(app, {
-    directory: path.join(__dirname, 'locales'),
+    directory: path.join(__dirname, '..', 'locales'),
     locales: ['en', 'zh-CN'],
     extension: '.json',
     modes: [

@@ -40,7 +40,7 @@ export default ({getState, dispatch}) => next => action => {
       })
   })
 
-  if (__SERVER__) getState().router = promise
+  if (!__CLIENT__) getState().router = promise
 
   return promise
 }

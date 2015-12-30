@@ -1,6 +1,6 @@
 import superagent from 'superagent'
 
-import config from '../config'
+import config from '../server/config'
 
 class ApiAgent {
   constructor(req) {
@@ -10,7 +10,7 @@ class ApiAgent {
           const request = superagent[method](this.formatUrl(path))
 
           if (options.params) request.query(options.params)
-          if (__SERVER__ && req.get('cookie')) request.set('cookie', req.get('cookie'))
+          if (!__CLIENT__ && req.get('cookie')) request.set('cookie', req.get('cookie'))
           if (options.data) request.send(options.data)
           request.end((err, res) => {
             if (err) {

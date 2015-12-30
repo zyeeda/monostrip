@@ -4,12 +4,12 @@ import fs from 'fs-plus'
 
 import config from './config'
 
-const {name: defaultName} = require('../package.json')
+const {name: defaultName} = require('../../package.json')
 
 export default (name = defaultName) => {
   const streams = []
 
-  const rootDir = path.join(__dirname, '..')
+  const rootDir = path.join(__dirname, '../..')
   const logFile = path.join(rootDir, 'logs', `${name}.log`)
 
   if (__DEVELOPMENT__) {

@@ -17,7 +17,7 @@ const bootstrap = () => {
     }
   }
 
-  require('../src/api/server')
+  require('../src/server/api/server')
 }
 
 bootstrap()
