@@ -19,8 +19,8 @@ module.exports = {
   entry: {
     'main': [
       'bootstrap-loader/extractStyles',
-      'font-awesome-webpack!./src/themes/default/font-awesome.config.prod.js',
-      './src/client.js'
+      'font-awesome-webpack!./lib/themes/default/font-awesome.config.prod.js',
+      './lib/client.js'
     ]
   },
   output: {
@@ -69,7 +69,7 @@ module.exports = {
   progress: true,
   resolve: {
     modulesDirectories: [
-      'src',
+      'lib',
       'node_modules'
     ],
     extensions: ['', '.json', '.js']
