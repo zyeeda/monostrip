@@ -87,15 +87,17 @@ generateField = (config, meta, labels, groupName, group) ->
     field
 
 defineFieldType = (field, fieldMeta, entityMeta) ->
-    throw new Error "there is no getter method for property #{field.name}" if _.isNull fieldMeta
-
     if field.type is 'multi-picker' or field.type is 'multi-tree-picker'
+        throw new Error "there is no getter method for property #{field.name}" if _.isNull fieldMeta
+
         field.type = 'multi-tree-picker' if ClassUtils.isAssignable(TreeNode, fieldMeta.getType())
         if not field.source and (fieldMeta.isManyToManyTarget() or fieldMeta.isOneToMany())
             field.source = fieldMeta.getPath()
             return
 
     if field.type is 'inline-grid'
+        throw new Error "there is no getter method for property #{field.name}" if _.isNull fieldMeta
+
         field.source = field.source or fieldMeta.getPath()
         field.oneToMany = fieldMeta.oneToMany
         field.manyToManyOwner = fieldMeta.manyToManyOwner
@@ -119,6 +121,8 @@ defineFieldType = (field, fieldMeta, entityMeta) ->
 
     return if field.type
     return field.type = 'text' if not fieldMeta
+
+    throw new Error "there is no getter method for property #{field.name}" if _.isNull fieldMeta
 
     if fieldMeta.getType() is java.lang.Boolean
         field.type = 'dropdown'
