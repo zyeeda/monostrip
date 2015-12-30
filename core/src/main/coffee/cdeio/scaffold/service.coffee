@@ -65,37 +65,54 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             fieldName = fieldMeta.name
 
             dbEntityFieldValue = entity[fieldName]
-            reqEntityFieldValue = data[fieldMeta.name]
+            reqEntityFieldValue = data[fieldName]
+
+            logger.debug "before continue with entity = #{entity} fieldName = #{fieldName} dbEntityFieldValue = #{dbEntityFieldValue} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)}"
+
+            logger.debug "before continue if condition result #{not reqEntityFieldValue}  #{not dbEntityFieldValue}"
 
             continue if not reqEntityFieldValue or not dbEntityFieldValue
 
-            if dbEntityFieldValue instanceof Attachment
+            logger.debug "after continue with entity = #{entity} fieldName = #{fieldName}"
 
+            if dbEntityFieldValue instanceof Attachment
                 #如果编辑操作之前有附件，并且跟编辑之后的附件不一致，则删除原附件
-                if preAttachment[fieldMeta.name] && dbEntityFieldValue.id != preAttachment[fieldMeta.name]
-                    upload.deleteAttachment preAttachment[fieldMeta.name]
+                if preAttachment[fieldName] && dbEntityFieldValue.id != preAttachment[fieldName]
+                    upload.deleteAttachment preAttachment[fieldName]
 
                 if dbEntityFieldValue.id
                     upload.commitAttachment dbEntityFieldValue.id
                 else
-                    entity[fieldMeta.name] = null
+                    entity[fieldName] = null
                 continue
 
             #多对一关联，Many处关联One
             if fieldMeta.entity
-                if _.isUndefined(reqEntityFieldValue['__FORM_FLAG__']) || reqEntityFieldValue['__FORM_FLAG__'] == '' || reqEntityFieldValue['__FORM_FLAG__'] == 'true'
-                    fieldMgr = baseService.createManager fieldMeta.type
-                    mapped = cascadeSave(fieldMgr, dbEntityFieldValue, reqEntityFieldValue, fieldMeta.type)
+                logger.debug "into cascadeSave fieldMeta.entity with entity = #{entity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{fieldMeta.type} reqEntityFieldValueId = #{reqEntityFieldValue.id}"
+
+                if reqEntityFieldValue['__FORM_FLAG__'] is 'true'
+                    fieldType = fieldMeta.type
+
+                    logger.debug "into fieldMeta.entity if"
+
+                    fieldMgr = baseService.createManager fieldType
+                    mapped = cascadeSave(fieldMgr, dbEntityFieldValue, reqEntityFieldValue, fieldType)
                     dbEntityFieldValue[fieldMeta.mappedBy] = mapped if fieldMeta.mappedBy
                 # 如果传了对象过来，但不是从表单过来的，也没有id，无效对象
                 else if reqEntityFieldValue.id == undefined
-                    entity[fieldMeta.name] = null
+
+                    logger.debug "into fieldMeta.entity else"
+
+                    entity[fieldName] = null
 
             #一对多关联，One处关联Many
             if fieldMeta.isOneToMany()
                 continue if dbEntityFieldValue.isEmpty?()
 
                 type = fieldMeta.manyType
+
+                logger.debug "into cascadeSave fieldMeta.isOneToMany with entity = #{entity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{type}"
+
                 fieldMgr = baseService.createManager type
 
                 dbEntityFieldValueList = dbEntityFieldValue.toArray()
@@ -118,7 +135,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     if fieldMeta.mappedBy
                         dbEntityFieldValueItem[fieldMeta.mappedBy] = entity
 
-                    if reqEntityFieldValueItem and (_.isUndefined(reqEntityFieldValueItem['__FORM_FLAG__']) || reqEntityFieldValueItem['__FORM_FLAG__'] == '' || reqEntityFieldValueItem['__FORM_FLAG__'] == 'true')
+                    if reqEntityFieldValueItem['__FORM_FLAG__'] is 'true'
                         dbEntityFieldValue.add cascadeSave(fieldMgr, dbEntityFieldValueItem, reqEntityFieldValueItem, type)
                     else
                         dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
@@ -129,6 +146,9 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 continue if dbEntityFieldValue.isEmpty?()
 
                 type = fieldMeta.manyToManyTargetType
+
+                logger.debug "into cascadeSave fieldMeta.isManyToManyTarget with entity = #{entity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{type}"
+
                 type = fieldMeta.manyToManyOwnerType if type == null
                 fieldMgr = baseService.createManager type
 
@@ -149,18 +169,27 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                         dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
                         continue
 
-                    if reqEntityFieldValueItem and (_.isUndefined(reqEntityFieldValueItem['__FORM_FLAG__']) || reqEntityFieldValueItem['__FORM_FLAG__'] == '' || reqEntityFieldValueItem['__FORM_FLAG__'] == 'true')
+                    if reqEntityFieldValueItem['__FORM_FLAG__'] is 'true'
+
+                        logger.debug "into cascadeSave fieldMeta.isManyToManyTarget if __FORM_FLAG__ with entity = #{entity} fieldName = #{fieldName} reqEntityFieldValueItem = #{JSON.stringify(reqEntityFieldValueItem)} fieldType = #{type}"
+
                         dbEntityFieldValue.add cascadeSave(fieldMgr, dbEntityFieldValueItem, reqEntityFieldValueItem, type)
-                    else
+                    else if _.isUndefined(reqEntityFieldValueItem.id) # 如果传了对象过来，但不是从表单过来的，也没有id，无效对象
+
+                        logger.debug "into cascadeSave fieldMeta.isManyToManyTarget else __FORM_FLAG__ with entity = #{entity} fieldName = #{fieldName} reqEntityFieldValueItem = #{JSON.stringify(reqEntityFieldValueItem)} fieldType = #{type}"
+
                         dbEntityFieldValue.add dbEntityFieldValueItem
 
             #多对多单向关联，One处关联Many
             else if fieldMeta.isManyToManyOwner()
                 if dbEntityFieldValue.isEmpty?()
-                    delete entity[fieldMeta.name]
+                    delete entity[fieldName]
                     continue
 
                 type = fieldMeta.manyToManyOwnerType
+
+                logger.debug "into cascadeSave fieldMeta.isManyToManyOwner with entity = #{entity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{type}"
+
                 type = fieldMeta.manyToManyTargetType if type == null
                 fieldMgr = baseService.createManager type
 
@@ -180,7 +209,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                             dbEntityFieldValueItem[fieldMeta.mappedBy] = null
                         continue
 
-                    if reqEntityFieldValueItem and (_.isUndefined(reqEntityFieldValueItem['__FORM_FLAG__']) || reqEntityFieldValueItem['__FORM_FLAG__'] == '' || reqEntityFieldValueItem['__FORM_FLAG__'] == 'true')
+                    if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_FLAG__'] is 'true'
                         dbEntityFieldValue.add cascadeSave(fieldMgr, dbEntityFieldValueItem, reqEntityFieldValueItem, type)
                     else
                         dbEntityFieldValue.add dbEntityFieldValueItem
@@ -258,14 +287,15 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
             manager = baseService.createManager service.entityClass
 
             # 判断当前实体是不是多对多单向关联维护关联关系的一方
-            hasManyToManyOwnerField = false
-            entityMeta = entityMetaResolver.resolveEntity service.entityClass
-            for fieldMeta in entityMeta.getFields()
-                hasManyToManyOwnerField = true if fieldMeta.isManyToManyOwner()
+            # hasManyToManyOwnerField = false
+            # entityMeta = entityMetaResolver.resolveEntity service.entityClass
+            # for fieldMeta in entityMeta.getFields()
+            #     hasManyToManyOwnerField = true if fieldMeta.isManyToManyOwner()
 
-            # 多对多单向关联时不能先调用 save 方法
-            if hasManyToManyOwnerField is false
-                entity = manager.save entity
+            # # 多对多单向关联时不能先调用 save 方法
+            # if hasManyToManyOwnerField is false
+
+            entity = manager.save entity
 
             entity = cascadeSave manager, entity, data, service.entityClass
 
