@@ -4,7 +4,6 @@ objects = require 'cdeio/util/objects'
 _ = require 'underscore'
 {buildValidateRules} = require 'cdeio/validation/validator'
 scaffoldRouter = require 'cdeio/scaffold/router'
-_ = require 'underscore'
 {Create, Update} = com.zyeeda.cdeio.validator.group
 {TreeNode} = com.zyeeda.cdeio.commons.base.data
 {ClassUtils} = org.springframework.util
