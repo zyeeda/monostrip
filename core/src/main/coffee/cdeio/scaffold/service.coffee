@@ -108,14 +108,29 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
 
                     databaseEntity[fieldName] = null
 
-            # fieldMeta 与 databaseEntity 一对多关联，One处关联Many
-            else if fieldMeta.isOneToMany()
-                fieldType = fieldMeta.manyType
+            if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget() or fieldMeta.isManyToManyOwner()
+                if fieldMeta.isOneToMany() # fieldMeta 与 databaseEntity 一对多关联，One处关联Many
+                    continue if dbEntityFieldValue.isEmpty?()
+
+                    fieldType = fieldMeta.manyType
+
+                    logger.debug "into cascadeSave fieldMeta.isOneToMany with databaseEntity = #{databaseEntity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{fieldType}"
+                else if fieldMeta.isManyToManyTarget() # fieldMeta 与 databaseEntity 多对多双向关联，Many、One处都有关联
+                    continue if dbEntityFieldValue.isEmpty?()
+
+                    fieldType = fieldMeta.manyToManyOwnerType
+
+                    logger.debug "into cascadeSave fieldMeta.isManyToManyTarget with databaseEntity = #{databaseEntity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{fieldType}"
+                else if fieldMeta.isManyToManyOwner() # fieldMeta 与 databaseEntity 多对多单向关联，One处关联Many
+                    if dbEntityFieldValue.isEmpty?()
+                        delete databaseEntity[fieldName]
+                        continue
+
+                    fieldType = fieldMeta.manyToManyTargetType
+
+                    logger.debug "into cascadeSave fieldMeta.isManyToManyOwner with databaseEntity = #{databaseEntity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{fieldType}"
+
                 fieldMgr = baseService.createManager fieldType
-
-                continue if dbEntityFieldValue.isEmpty?()
-
-                logger.debug "into cascadeSave fieldMeta.isOneToMany with databaseEntity = #{databaseEntity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{fieldType}"
 
                 dbEntityFieldValueList = dbEntityFieldValue.toArray()
                 dbEntityFieldValue.clear()
@@ -129,97 +144,26 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     continue unless reqEntityFieldValueItem
 
                     # 如果是删除操作则解除关联关系即可
-                    if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_TYPE__'] == 'delete'
+                    if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_TYPE__'] is 'delete'
                         if fieldMeta.mappedBy
                             dbEntityFieldValueItem[fieldMeta.mappedBy] = null
-                        dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
+
+                        if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget()
+                            dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
                         continue
 
-                    # 如果不是删除操作，则说明关联关系还存在，需要保存此关系
-                    if fieldMeta.mappedBy
-                        dbEntityFieldValueItem[fieldMeta.mappedBy] = databaseEntity
 
-                    # 由页面操作的数据在出现关联时继续深入级联保存
-                    if reqEntityFieldValueItem['__FORM_FLAG__'] is 'true'
-                        dbEntityFieldValue.add cascadeSave(fieldMgr, dbEntityFieldValueItem, reqEntityFieldValueItem, fieldType)
-                    # 不是由表单操作而来，说明数据原本就有关联关系
-                    else
-                        dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
-                        dbEntityFieldValue.add dbEntityFieldValueItem
-
-            # fieldMeta 与 databaseEntity 多对多双向关联，Many、One处都有关联
-            else if fieldMeta.isManyToManyTarget()
-                fieldType = fieldMeta.manyToManyOwnerType
-                fieldMgr = baseService.createManager fieldType
-
-                continue if dbEntityFieldValue.isEmpty?()
-
-                logger.debug "into cascadeSave fieldMeta.isManyToManyTarget with databaseEntity = #{databaseEntity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{fieldType}"
-
-                dbEntityFieldValueList = dbEntityFieldValue.toArray()
-                dbEntityFieldValue.clear()
-
-                for dbEntityFieldValueItem, i in dbEntityFieldValueList
-                    if !reqEntityFieldValue
-                        dbEntityFieldValue.add dbEntityFieldValueItem
-                        continue
-
-                    reqEntityFieldValueItem = reqEntityFieldValue[i]
-                    continue unless reqEntityFieldValueItem
-
-                    # 如果是删除操作则解除关联关系即可
-                    if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_TYPE__'] == 'delete'
-                        if fieldMeta.mappedBy
-                            dbEntityFieldValueItem[fieldMeta.mappedBy] = null
-                        dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
-                        continue
-
-                    # 由页面操作的数据在出现关联时继续深入级联保存
-                    if reqEntityFieldValueItem['__FORM_FLAG__'] is 'true'
-                        logger.debug "into cascadeSave fieldMeta.isManyToManyTarget if __FORM_FLAG__ with databaseEntity = #{databaseEntity} fieldName = #{fieldName} reqEntityFieldValueItem = #{JSON.stringify(reqEntityFieldValueItem)} fieldType = #{fieldType}"
-
-                        dbEntityFieldValue.add cascadeSave(fieldMgr, dbEntityFieldValueItem, reqEntityFieldValueItem, fieldType)
-                    # 不是由表单操作而来，说明数据原本就有关联关系
-                    else
-                        logger.debug "into cascadeSave fieldMeta.isManyToManyTarget else __FORM_FLAG__ with databaseEntity = #{databaseEntity} fieldName = #{fieldName} reqEntityFieldValueItem = #{JSON.stringify(reqEntityFieldValueItem)} fieldType = #{fieldType}"
-
-                        dbEntityFieldValue.add dbEntityFieldValueItem
-
-            # fieldMeta 与 databaseEntity 多对多单向关联，One处关联Many
-            else if fieldMeta.isManyToManyOwner()
-                fieldType = fieldMeta.manyToManyTargetType
-                fieldMgr = baseService.createManager fieldType
-
-                if dbEntityFieldValue.isEmpty?()
-                    delete databaseEntity[fieldName]
-                    continue
-
-                logger.debug "into cascadeSave fieldMeta.isManyToManyOwner with databaseEntity = #{databaseEntity} fieldName = #{fieldName} reqEntityFieldValue = #{JSON.stringify(reqEntityFieldValue)} fieldType = #{fieldType}"
-
-                dbEntityFieldValueList = dbEntityFieldValue.toArray()
-                dbEntityFieldValue.clear()
-
-                for dbEntityFieldValueItem, i in dbEntityFieldValueList
-                    if !reqEntityFieldValue
-                        dbEntityFieldValue.add dbEntityFieldValueItem
-                        continue
-
-                    reqEntityFieldValueItem = reqEntityFieldValue[i]
-                    continue unless reqEntityFieldValueItem
-
-                    logger.debug "into cascadeSave fieldMeta.isManyToManyOwner for each fieldName = #{fieldName} reqEntityFieldValueItem = #{JSON.stringify(reqEntityFieldValueItem)} dbEntityFieldValueItem = #{dbEntityFieldValueItem.name} fieldType = #{fieldType}"
-
-                    # 如果是删除操作则解除关联关系即可
-                    if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_TYPE__'] == 'delete'
-                        if fieldMeta.mappedBy
-                            dbEntityFieldValueItem[fieldMeta.mappedBy] = null
-                        continue
+                    if fieldMeta.isOneToMany()
+                        if fieldMeta.mappedBy # 如果不是删除操作，则说明关联关系还存在，需要保存此关系
+                            dbEntityFieldValueItem[fieldMeta.mappedBy] = databaseEntity
 
                     # 由页面操作的数据在出现关联时继续深入级联保存
                     if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_FLAG__'] is 'true'
                         dbEntityFieldValue.add cascadeSave(fieldMgr, dbEntityFieldValueItem, reqEntityFieldValueItem, fieldType)
                     # 不是由表单操作而来，说明数据原本就有关联关系
                     else
+                        if fieldMeta.isOneToMany()
+                            dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
                         dbEntityFieldValue.add dbEntityFieldValueItem
         mgr.merge databaseEntity
 
