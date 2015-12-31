@@ -1,0 +1,10 @@
+{
+  "hooks": [
+    "static",
+    "global-error-handler",
+    "i18n",
+    "body-parser",
+    "compress",
+    "etag"
+  ]
+}

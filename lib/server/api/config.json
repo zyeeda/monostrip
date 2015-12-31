@@ -1,0 +1,8 @@
+{
+  "hooks": [
+    "global-error-handler",
+    "i18n",
+    "body-parser",
+    "etag"
+  ]
+}
