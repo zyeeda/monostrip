@@ -29,7 +29,7 @@
     "web-prod": "NODE_ENV=production node --harmony ./bin/web-server.js | bunyan",
     "api-prod": "NODE_ENV=production node --harmony ./bin/api-server.js | bunyan",
     "build-prod": "webpack --verbose --colors --display-error-details --config webpack/webpack.config.prod.js",
-    "lint": "eslint bin src"
+    "lint": "eslint bin lib"
   },
   "dependencies": {
     "babel": "^5.8.29",
