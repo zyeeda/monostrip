@@ -148,10 +148,8 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                         if fieldMeta.mappedBy
                             dbEntityFieldValueItem[fieldMeta.mappedBy] = null
 
-                        if fieldMeta.isOneToMany() or fieldMeta.isManyToManyTarget()
-                            dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
+                        dbEntityFieldValueItem = fieldMgr.merge dbEntityFieldValueItem
                         continue
-
 
                     if fieldMeta.isOneToMany()
                         if fieldMeta.mappedBy # 如果不是删除操作，则说明关联关系还存在，需要保存此关系
