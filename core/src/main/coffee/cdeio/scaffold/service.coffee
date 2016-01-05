@@ -135,13 +135,18 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                 dbEntityFieldValueList = dbEntityFieldValue.toArray()
                 dbEntityFieldValue.clear()
 
-                for dbEntityFieldValueItem, i in dbEntityFieldValueList
-                    if !reqEntityFieldValue
-                        dbEntityFieldValue.add dbEntityFieldValueItem
+                dbEntityFieldValueMap = {}
+                for dbEntityFieldValueItem in dbEntityFieldValueList
+                    if !dbEntityFieldValueItem.id
+                        noIdDbEntityFieldValueItem = dbEntityFieldValueItem if !noIdDbEntityFieldValueItem
                         continue
+                    else
+                        dbEntityFieldValueMap[dbEntityFieldValueItem.id] = dbEntityFieldValueItem
 
-                    reqEntityFieldValueItem = reqEntityFieldValue[i]
-                    continue unless reqEntityFieldValueItem
+                for key, reqEntityFieldValueItem of reqEntityFieldValue
+                    dbEntityFieldValueItem = dbEntityFieldValueMap[reqEntityFieldValueItem.id]
+
+                    dbEntityFieldValueItem = noIdDbEntityFieldValueItem if _.isUndefined dbEntityFieldValueItem
 
                     # 如果是删除操作则解除关联关系即可
                     if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_TYPE__'] is 'delete'
