@@ -143,10 +143,13 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                         mergedEntityFieldValueMap[mergedEntityFieldValueItem.id] = mergedEntityFieldValueItem
 
                 for key, reqEntityFieldValueItem of reqEntityFieldValue
-                    if reqEntityFieldValueItem.id
-                        mergedEntityFieldValueItem = mergedEntityFieldValueMap[reqEntityFieldValueItem.id]
+                    if mergedEntityFieldValueList.length > 0 and mergedEntityFieldValueList[0] instanceof Attachment
+                        mergedEntityFieldValueItem = mergedEntityFieldValueMap[reqEntityFieldValueItem]
                     else
-                        mergedEntityFieldValueItem = noIdmergedEntityFieldValueList.shift()
+                        if reqEntityFieldValueItem.id
+                            mergedEntityFieldValueItem = mergedEntityFieldValueMap[reqEntityFieldValueItem.id]
+                        else
+                            mergedEntityFieldValueItem = noIdmergedEntityFieldValueList.shift()
 
                     logger.debug "into cascadeSave with reqEntityFieldValueItem = #{JSON.stringify(reqEntityFieldValueItem)} mergedEntityFieldValueItemId = #{mergedEntityFieldValueItem.id}"
 
