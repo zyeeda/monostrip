@@ -20,15 +20,8 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "dev": "concurrent --kill-others 'npm run watch-client' 'npm run web-dev' 'npm run api-dev'",
-    "watch-client": "UV_THREADPOOL_SIZE=128 node --harmony webpack/webpack-dev-server.js",
-    "web-dev": "node --harmony ./bin/web-server.js | bunyan",
-    "api-dev": "node --harmony ./bin/api-server.js | bunyan",
-    "build-dev": "webpack --verbose --colors --display-error-details --config webpack/webpack.config.dev.js",
-    "prod": "concurrent --kill-others 'npm run web-prod' 'npm run api-prod'",
-    "web-prod": "NODE_ENV=production node --harmony ./bin/web-server.js | bunyan",
-    "api-prod": "NODE_ENV=production node --harmony ./bin/api-server.js | bunyan",
-    "build-prod": "webpack --verbose --colors --display-error-details --config webpack/webpack.config.prod.js",
+    "dev": "node --harmony ./bin/server.js | bunyan",
+    "prod": "NODE_ENV=production node --harmony ./bin/server.js | bunyan",
     "lint": "eslint bin lib",
     "test": "karma start"
   },
