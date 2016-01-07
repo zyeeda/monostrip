@@ -148,7 +148,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                     else
                         mergedEntityFieldValueItem = noIdmergedEntityFieldValueList.shift()
 
-                    logger.debug "into cascadeSave with reqEntityFieldValueItem = #{JSON.stringify(reqEntityFieldValueItem)} mergedEntityFieldValueItemName = #{mergedEntityFieldValueItem.commoditySubInfo.name} mergedEntityFieldValueItemId = #{mergedEntityFieldValueItem.id}"
+                    logger.debug "into cascadeSave with reqEntityFieldValueItem = #{JSON.stringify(reqEntityFieldValueItem)} mergedEntityFieldValueItemId = #{mergedEntityFieldValueItem.id}"
 
                     # 如果是删除操作则解除关联关系即可
                     if reqEntityFieldValueItem and reqEntityFieldValueItem['__FORM_TYPE__'] is 'delete'
