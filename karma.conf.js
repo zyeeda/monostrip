@@ -7,7 +7,7 @@ module.exports = function (config) {
 
     singleRun: !!process.env.CONTINUOUS_INTEGRATION,
 
-    frameworks: ['jasmine-jquery', 'jasmine'],
+    frameworks: ['jasmine'],
 
     files: [
       './node_modules/phantomjs-polyfill/bind-polyfill.js',
@@ -23,7 +23,6 @@ module.exports = function (config) {
     plugins: [
       require("karma-webpack"),
       require("karma-jasmine"),
-      require("karma-jasmine-jquery"),
       require("karma-jasmine-ajax"),
       require("karma-phantomjs-launcher"),
       require("karma-sourcemap-loader"),
