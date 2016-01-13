@@ -9,7 +9,7 @@ module.exports = function configKarma(config) {
 
     files: [
       './node_modules/phantomjs-polyfill/bind-polyfill.js',
-      'lib/**/__tests__/**/*-test.js'
+      'src/**/__tests__/**/*-test.js'
     ],
 
     reporters: ['mocha'],
