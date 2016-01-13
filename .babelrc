@@ -1,8 +1,9 @@
 {
-  "stage": 0,
-  "optional": "runtime",
-  "loose": "all",
+  "presets": [
+    "es2015",
+    "stage-0"
+  ],
   "plugins": [
-    "typecheck"
+    "transform-runtime"
   ]
 }

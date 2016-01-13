@@ -1,7 +1,6 @@
 #!/usr/bin/env node --harmony
 
-// Enable ES6/7 features.
-require('../transpiler')
+require('babel-core/register')
 
 global.__DEVELOPMENT__ = process.env.NODE_ENV !== 'production'
 
