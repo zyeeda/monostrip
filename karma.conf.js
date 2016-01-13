@@ -1,4 +1,4 @@
-module.exports = function (config) {
+module.exports = function configKarma(config) {
   config.set({
 
     browsers: ['PhantomJS'],
@@ -12,13 +12,13 @@ module.exports = function (config) {
       'lib/**/__tests__/**/*-test.js'
     ],
 
-    reporters: [ 'mocha' ],
+    reporters: ['mocha'],
 
     plugins: [
-      require("karma-jasmine"),
-      require("karma-jasmine-ajax"),
-      require("karma-phantomjs-launcher"),
-      require("karma-mocha-reporter")
+      require('karma-jasmine'),
+      require('karma-jasmine-ajax'),
+      require('karma-phantomjs-launcher'),
+      require('karma-mocha-reporter')
     ]
-  });
-};
+  })
+}
