@@ -143,6 +143,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
                         mergedEntityFieldValueMap[mergedEntityFieldValueItem.id] = mergedEntityFieldValueItem
 
                 for key, reqEntityFieldValueItem of reqEntityFieldValue
+                    # 当 mergedEntityFieldValueList 中是附件时 mergedEntityFieldValueItem 本身便是 id，因为附件组件传到后台的数据只有在上传完之后就保存到数据库的 id
                     if mergedEntityFieldValueList.length > 0 and mergedEntityFieldValueList[0] instanceof Attachment
                         mergedEntityFieldValueItem = mergedEntityFieldValueMap[reqEntityFieldValueItem]
                     else
