@@ -2,14 +2,14 @@ import bunyan from 'bunyan'
 import path from 'path'
 import fs from 'fs-plus'
 
-import config from './config'
+const config = process.env.NODE_ENV !== 'production' ? require('./config/env/prod').default : require('./config/env/dev').default
 
-const {name: defaultName} = require('../../package.json')
+const {name: defaultName} = require('../package.json')
 
 export default (name = defaultName) => {
   const streams = []
 
-  const rootDir = path.join(__dirname, '../..')
+  const rootDir = path.join(__dirname, '..')
   const logFile = path.join(rootDir, 'logs', `${name}.log`)
 
   if (__DEVELOPMENT__) {

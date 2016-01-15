@@ -10,7 +10,9 @@ import compress from 'koa-compress'
 import fresh from 'koa-fresh'
 import etag from 'koa-etag'
 
-import createLogger from './logger'
+import createLogger from '../logger'
+
+console.log(require(path.join(__dirname, '..', 'locales', 'en')))
 
 export default (config) => {
   const app = koa()
@@ -23,7 +25,7 @@ export default (config) => {
   app.use(i18n(app, {
     directory: path.join(__dirname, '..', 'locales'),
     locales: ['en', 'zh-CN'],
-    extension: '.json',
+    extension: '.js',
     modes: [
       'header',
       'tld',

@@ -24,7 +24,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "prepublish": "gulp clean && gulp",
+    "prepublish": "babel -d lib src",
     "lint": "eslint .",
     "test": "karma start",
     "check": "npm run lint && npm run test"
