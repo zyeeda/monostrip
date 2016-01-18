@@ -1,5 +1,6 @@
 import bodyParser from 'koa-bodyparser'
+import _ from 'underdash'
 
-export default (app) => {
+export default ({app}) => {
   app.use(bodyParser())
 }

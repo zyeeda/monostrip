@@ -1,11 +1,12 @@
 import path from 'path'
 
+import _ from 'underdash'
 import locale from 'koa-locale'
 import i18n from 'koa-i18n'
 
-export default (app) => {
+export default ({app, config}) => {
   const options = {
-    directory: path.join(__dirname, '..', '..', '..', 'locales'),
+    directory: path.join(process.cwd(), 'locales'),
     locales: ['en', 'zh-CN'],
     extension: '.json',
     modes: [
@@ -19,5 +20,5 @@ export default (app) => {
   }
 
   locale(app)
-  app.use(i18n(app, options))
+  app.use(i18n(app, _.extend({}, config.hooksCfg['i18n'], options)))
 }

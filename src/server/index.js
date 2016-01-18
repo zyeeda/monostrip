@@ -6,11 +6,11 @@ import setup from './setup'
 
 import rootRouter from '../routers'
 
+import config from '../config'
+
 const app = koa()
 
-const config = process.env.NODE_ENV !== 'production' ? require('../config/env/prod').default : require('../config/env/dev').default
-
-setup(app, require('../config/hooks').default)
+setup({app, config})
 
 app.logger = createLogger(config.key)
 app.use(rootRouter.routes())

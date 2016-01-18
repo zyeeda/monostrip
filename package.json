@@ -47,7 +47,8 @@
     "mysql": "^2.10.0",
     "pretty-error": "^1.2.0",
     "sequelize": "^3.17.1",
-    "serialize-javascript": "^1.1.2"
+    "serialize-javascript": "^1.1.2",
+    "underdash": "0.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.4.0",
