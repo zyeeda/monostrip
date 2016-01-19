@@ -28,13 +28,9 @@ fs
 
     // hooks 目录
     if (dirPath === path.join(__dirname, 'env', envType, 'hooks')) {
-      if ('index' === path.basename(name, '.js')) {
-        config = _.extend({}, config, require(name).default)
-      } else {
-        hookConfig[path.basename(name, '.js')] = require(name).default
+      hookConfig[path.basename(name, '.js')] = require(name).default
 
-        config = _.extend({}, config, {hooksCfg: hookConfig})
-      }
+      config = _.extend({}, config, {hooksCfg: hookConfig})
     } else {
       config = _.extend({}, config, require(name).default)
     }
