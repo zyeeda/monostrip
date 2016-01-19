@@ -5,10 +5,10 @@ import fs from 'fs-plus'
 
 import config from './config'
 
-let [environment, streams] = [process.env.NODE_ENV || 'development', []]
-
-const rootDir = path.join(__dirname, '..')
+const [environment, rootDir] = [path.join(__dirname, '..'), process.env.NODE_ENV || 'development']
 const logFile = path.join(rootDir, 'logs', `${config.name}.log`)
+
+let streams = []
 
 if (environment === 'development' || environment === 'test') {
   streams.push({
