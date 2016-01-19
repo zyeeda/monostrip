@@ -12,11 +12,8 @@ const logFile = path.join(rootDir, 'logs', `${config.name}.log`)
 
 if (environment === 'development' || environment === 'test') {
   streams.push({
-    level: 'trace',
-    stream: process.stdout
-  }, {
     level: config.log.level,
-    stream: process.stderr
+    stream: process.stdout
   })
 } else {
   if (!fs.existsSync(logFile)) fs.writeFileSync(logFile, '')
