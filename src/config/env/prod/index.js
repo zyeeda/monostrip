@@ -18,7 +18,7 @@ const config = {
     }
   },
   log: {
-    level: 'debug'
+    level: 'error'
   }
 }
 

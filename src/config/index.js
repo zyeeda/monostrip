@@ -3,13 +3,11 @@ import _ from 'underdash'
 
 import fs from 'fs-plus'
 
-const basename = path.basename(module.filename, '.js')
+const [basename, environment] = [path.basename(module.filename, '.js'), process.env.NODE_ENV || 'development']
 
 let [envType, dirPath, hookConfig, config, excludePath] = ['', '', {}, {}, []]
 
 excludePath.push(path.join(__dirname, 'index.js'))
-
-const environment = process.env.NODE_ENV || 'development'
 
 if (environment === 'development') {
   envType = 'dev'

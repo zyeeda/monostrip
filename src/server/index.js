@@ -3,8 +3,7 @@ import path from 'path'
 import koa from 'koa'
 import PrettyError from 'pretty-error'
 
-import createLogger from '../logger'
-import setup from './setup'
+import logger from '../logger'
 
 import rootRouter from '../routers'
 
@@ -24,15 +23,14 @@ hooks
   .map(hookFileName => require(hookFileName).default)
   .forEach(hook => hook({app, config}))
 
-app.logger = createLogger(config.key)
 app.use(rootRouter.routes())
 
 app.listen(config.port, (err) => {
   if (err) {
     const pretty = new PrettyError()
-    app.logger.error(pretty.render(err))
+    logger.error(pretty.render(err))
     return
   }
 
-  app.logger.info('%s server is listening on port %d...', config.name, config.port)
+  logger.info('%s server is listening on port %d...', config.name, config.port)
 })

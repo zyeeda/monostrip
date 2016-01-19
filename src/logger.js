@@ -1,40 +1,40 @@
-import bunyan from 'bunyan'
 import path from 'path'
+
+import bunyan from 'bunyan'
 import fs from 'fs-plus'
 
-const config = process.env.NODE_ENV !== 'production' ? require('./config/env/prod').default : require('./config/env/dev').default
+import config from './config'
 
-const {name: defaultName} = require('../package.json')
+let [environment, streams] = [process.env.NODE_ENV || 'development', []]
 
-export default (name = defaultName) => {
-  const streams = []
+const rootDir = path.join(__dirname, '..')
+const logFile = path.join(rootDir, 'logs', `${config.name}.log`)
 
-  const rootDir = path.join(__dirname, '..')
-  const logFile = path.join(rootDir, 'logs', `${name}.log`)
+if (environment === 'development' || environment === 'test') {
+  streams.push({
+    level: 'trace',
+    stream: process.stdout
+  }, {
+    level: config.log.level,
+    stream: process.stderr
+  })
+} else {
+  if (!fs.existsSync(logFile)) fs.writeFileSync(logFile, '')
 
-  if (__DEVELOPMENT__) {
-    streams.push({
-      stream: process.stdout,
-      level: config.log.level
-    })
-  } else {
-    if (!fs.existsSync(logFile)) fs.writeFileSync(logFile)
-
-    streams.push({
-      type: 'rotating-file',
-      path: logFile,
-      period: '1d', // daily rotation
-      count: 15,
-      level: config.log.level
-    })
-  }
-
-  const options = {
-    src: __DEVELOPMENT__ ? true : false,
-    name,
-    streams,
-    serializers: bunyan.stdSerializers
-  }
-
-  return bunyan.createLogger(options)
+  streams.push({
+    path: logFile,
+    level: config.log.level,
+  }, {
+    level: config.log.level,
+    stream: process.stdout
+  })
 }
+
+const options = {
+  src: environment === 'development' || environment === 'test' ? true : false,
+  name: config.name,
+  streams,
+  serializers: bunyan.stdSerializers
+}
+
+export default bunyan.createLogger(options)
