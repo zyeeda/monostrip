@@ -5,15 +5,14 @@ import PrettyError from 'pretty-error'
 
 import logger from '../logger'
 
-import rootRouter from '../routers'
-
 import config from '../config'
 
 const hooks = [
   "global-error-handler",
   "i18n",
   "body-parser",
-  "etag"
+  "etag",
+  "router"
 ]
 
 const app = koa()
@@ -22,8 +21,6 @@ hooks
   .map(hookName => path.resolve(__dirname, 'hooks', hookName))
   .map(hookFileName => require(hookFileName).default)
   .forEach(hook => hook({app, config}))
-
-app.use(rootRouter.routes())
 
 app.listen(config.get('port'), (err) => {
   if (err) {
