@@ -1,12 +1,12 @@
 import path from 'path'
 
-import _ from 'underdash'
+import R from 'ramda'
 import staticServe from 'koa-static'
 
 export default ({app, config}) => {
   const options = {
-    path: path.join(__dirname, '..', '..', '..', 'static')
+    path: path.join(config.get('appPath'), 'static')
   }
 
-  app.use(staticServe(_.extend({}, config.hooksCfg['static']), options))
+  app.use(staticServe(R.merge(config.get('hooksCfg:static'), options)))
 }

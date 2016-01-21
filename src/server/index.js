@@ -25,12 +25,12 @@ hooks
 
 app.use(rootRouter.routes())
 
-app.listen(config.port, (err) => {
+app.listen(config.get('port'), (err) => {
   if (err) {
     const pretty = new PrettyError()
     logger.error(pretty.render(err))
     return
   }
 
-  logger.info('%s server is listening on port %d...', config.name, config.port)
+  logger.info('%s server is listening on port %d...', config.get('name'), config.get('port'))
 })

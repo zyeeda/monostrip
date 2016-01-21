@@ -1,37 +1,20 @@
 import path from 'path'
-import _ from 'underdash'
 
-import fs from 'fs-plus'
+import {Provider} from 'nconf/lib/nconf/provider'
 
-const [basename, environment] = [path.basename(module.filename, '.js'), process.env.NODE_ENV || 'development']
+const environment = process.env.NODE_ENV || 'development',
+      appPath = process.cwd(),
+      nconf = new Provider()
 
-let [envType, dirPath, hookConfig, config, excludePath] = ['', '', {}, {}, []]
+nconf
+  .env()
+  .argv()
+  .file('app_env', { file: path.join(appPath, 'config', environment + '.json')})
+  .file('sys_env', { file: path.join(__dirname, environment + '.json')})
+  .file('app_default', { file: path.join(appPath, 'config', 'default.json')})
+  .file('sys_default', { file: path.join(__dirname, 'default.json')})
 
-excludePath.push(path.join(__dirname, 'index.js'))
+nconf.set('appPath', appPath)
+nconf.set('environment', environment)
 
-if (environment === 'development') {
-  envType = 'dev'
-} else if (environment === 'production') {
-  envType = 'prod'
-} else if (environment === 'test') {
-  envType = 'test'
-}
-
-fs
-  .listTreeSync(path.join(__dirname, 'env', envType))
-  .filter(filePath => fs.isFileSync(filePath))
-  .filter(filePath => !_.contains(excludePath, filePath))
-  .forEach(name => {
-    dirPath = name.substr(0, (name.length - path.basename(name).length - 1))
-
-    // hooks 目录
-    if (dirPath === path.join(__dirname, 'env', envType, 'hooks')) {
-      hookConfig[path.basename(name, '.js')] = require(name).default
-
-      config = _.extend({}, config, {hooksCfg: hookConfig})
-    } else {
-      config = _.extend({}, config, require(name).default)
-    }
-  })
-
-export default config
+export default nconf

@@ -5,31 +5,29 @@ import fs from 'fs-plus'
 
 import config from './config'
 
-const [environment, rootDir] = [path.join(__dirname, '..'), process.env.NODE_ENV || 'development']
-const logFile = path.join(rootDir, 'logs', `${config.name}.log`)
+const streams = []
+const logFile = path.join(config.get('appPath'), 'logs', `${config.get('name')}.log`)
 
-let streams = []
-
-if (environment === 'development' || environment === 'test') {
-  streams.push({
-    level: config.log.level,
-    stream: process.stdout
-  })
-} else {
+if (config.get('environment') === 'production') {
   if (!fs.existsSync(logFile)) fs.writeFileSync(logFile, '')
 
   streams.push({
     path: logFile,
-    level: config.log.level,
+    level: config.get('log:level'),
   }, {
-    level: config.log.level,
+    level: config.get('log:level'),
+    stream: process.stdout
+  })
+} else {
+  streams.push({
+    level: config.get('log:level'),
     stream: process.stdout
   })
 }
 
 const options = {
-  src: environment === 'development' || environment === 'test' ? true : false,
-  name: config.name,
+  src: config.get('environment')  === 'production' ? false : true,
+  name: config.get('name'),
   streams,
   serializers: bunyan.stdSerializers
 }

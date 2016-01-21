@@ -1,12 +1,12 @@
 import path from 'path'
 
-import _ from 'underdash'
+import R from 'ramda'
 import locale from 'koa-locale'
 import i18n from 'koa-i18n'
 
 export default ({app, config}) => {
   const options = {
-    directory: path.join(process.cwd(), 'locales'),
+    directory: path.join(config.get('appPath'), 'locales'),
     locales: ['en', 'zh-CN'],
     extension: '.json',
     modes: [
@@ -20,5 +20,5 @@ export default ({app, config}) => {
   }
 
   locale(app)
-  app.use(i18n(app, _.extend({}, config.hooksCfg['i18n'], options)))
+  app.use(i18n(app, R.merge(config.get('hooksCfg:i18n'), options)))
 }
