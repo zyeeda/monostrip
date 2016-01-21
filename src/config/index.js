@@ -14,6 +14,7 @@ nconf
   .file('app_default', { file: path.join(appPath, 'config', 'default.json')})
   .file('sys_default', { file: path.join(__dirname, 'default.json')})
 
+nconf.set('rootPath', path.join(__dirname, '..', '..'))
 nconf.set('appPath', appPath)
 nconf.set('environment', environment)
 
