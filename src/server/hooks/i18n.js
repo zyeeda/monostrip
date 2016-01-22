@@ -20,5 +20,5 @@ export default ({app, config}) => {
   }
 
   locale(app)
-  app.use(i18n(app, R.merge(config.get('hooksCfg:i18n'), options)))
+  app.use(i18n(app, R.merge(config.get('hooks:i18n'), options)))
 }

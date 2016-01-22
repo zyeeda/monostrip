@@ -3,11 +3,11 @@
   "host": "localhost",
   "port": 4100,
   "db": {
-    "database": "cdeio-samples",
+    "database": "erp",
     "username": "root",
     "password": "mysecretpassword",
     "options": {
-      "host": "mysql",
+      "host": "127.0.0.1",
       "dialect": "mysql",
       "pool": {
         "port": 3306,
@@ -20,7 +20,7 @@
   "log": {
     "level": "info"
   },
-  "hooksCfg": {
+  "hooks": {
     "body-parser": {},
     "compress": {},
     "etag": {},

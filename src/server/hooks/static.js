@@ -8,5 +8,5 @@ export default ({app, config}) => {
     path: path.join(config.get('appPath'), 'static')
   }
 
-  app.use(staticServe(R.merge(config.get('hooksCfg:static'), options)))
+  app.use(staticServe(R.merge(config.get('hooks:static'), options)))
 }
