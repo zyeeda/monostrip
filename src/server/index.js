@@ -3,9 +3,8 @@ import path from 'path'
 import koa from 'koa'
 import PrettyError from 'pretty-error'
 
-import logger from '../logger'
-
 import config from '../config'
+import logger from '../logger'
 
 const hooks = [
   "global-error-handler",
@@ -17,10 +16,14 @@ const hooks = [
 
 const app = koa()
 
+logger.info('start loading hooks...')
+
 hooks
   .map(hookName => path.resolve(__dirname, 'hooks', hookName))
   .map(hookFileName => require(hookFileName).default)
   .forEach(hook => hook({app, config}))
+
+logger.info('load hooks finished...')
 
 app.listen(config.get('port'), (err) => {
   if (err) {
@@ -31,3 +34,5 @@ app.listen(config.get('port'), (err) => {
 
   logger.info('%s server is listening on port %d...', config.get('name'), config.get('port'))
 })
+
+export default app
