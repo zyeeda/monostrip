@@ -3,8 +3,6 @@ import path from 'path'
 import koa from 'koa'
 import PrettyError from 'pretty-error'
 
-import models from './models'
-
 import config from '../config'
 import logger from '../logger'
 
@@ -26,12 +24,6 @@ hooks
   .forEach(hook => hook({app, config}))
 
 logger.info('load hooks finished...')
-
-logger.info('start loading models...')
-
-models.initial()
-
-logger.info('load models finished...')
 
 app.listen(config.get('port'), (err) => {
   if (err) {

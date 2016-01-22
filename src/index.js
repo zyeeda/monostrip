@@ -1,5 +1,8 @@
 global.cdeio = {
-  start: () => require('./server')
+  start: () => {
+    require('./server/models')
+    require('./server')
+  }
 }
 
 module.exports = cdeio

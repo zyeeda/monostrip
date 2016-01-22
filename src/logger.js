@@ -8,8 +8,6 @@ import config from './config'
 const streams = []
 const logFile = path.join(config.get('appPath'), 'logs', `${config.get('name')}.log`)
 
-let logger
-
 if (config.get('environment') === 'production') {
   if (!fs.existsSync(logFile)) fs.writeFileSync(logFile, '')
 
@@ -34,4 +32,4 @@ const options = {
   serializers: bunyan.stdSerializers
 }
 
-export default logger = cdeio.logger = bunyan.createLogger(options)
+export default cdeio.logger = bunyan.createLogger(options)

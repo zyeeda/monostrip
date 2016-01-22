@@ -21,17 +21,13 @@ const importModels = (modelPath) => {
     .forEach(model => models[model.name] = model)
 }
 
-const initial = () => {
-  modelPaths.forEach((modelPath) => importModels(modelPath))
+modelPaths.forEach((modelPath) => importModels(modelPath))
 
-  R
-    .values(models)
-    .filter((model) => R.is(Function, model.associate))
-    .forEach((model) => model.associate(models))
+R
+  .values(models)
+  .filter((model) => R.is(Function, model.associate))
+  .forEach((model) => model.associate(models))
 
-  models.sequelize = sequelize
+models.sequelize = sequelize
 
-  cdeio.models = models
-}
-
-export default {initial}
+export default cdeio.models = models
