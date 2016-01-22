@@ -24,7 +24,7 @@ const loadModels = (modelPath) => {
 modelPaths.forEach((modelPath) => loadModels(modelPath))
 
 R
-  .valuse(models)
+  .values(models)
   .filter((model) => R.is(Function, model.associate))
   .forEach((model) => model.associate(models))
 
