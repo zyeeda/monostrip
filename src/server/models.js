@@ -13,7 +13,7 @@ const sequelize = new Sequelize(config.get('db:database'), config.get('db:userna
       ],
       models = {}
 
-const loadModels = (modelPath) => {
+const importModels = (modelPath) => {
   fs
     .listTreeSync(modelPath)
     .filter(filePath => fs.isFileSync(filePath))
@@ -21,13 +21,17 @@ const loadModels = (modelPath) => {
     .forEach(model => models[model.name] = model)
 }
 
-modelPaths.forEach((modelPath) => loadModels(modelPath))
+const initial = () => {
+  modelPaths.forEach((modelPath) => importModels(modelPath))
 
-R
-  .values(models)
-  .filter((model) => R.is(Function, model.associate))
-  .forEach((model) => model.associate(models))
+  R
+    .values(models)
+    .filter((model) => R.is(Function, model.associate))
+    .forEach((model) => model.associate(models))
 
-models.sequelize = sequelize
+  models.sequelize = sequelize
 
-export default models
+  cdeio.models = models
+}
+
+export default {initial}

@@ -18,4 +18,6 @@ nconf.set('sysPath', path.join(__dirname, '..', '..'))
 nconf.set('appPath', appPath)
 nconf.set('environment', environment)
 
+cdeio.config = nconf
+
 export default nconf

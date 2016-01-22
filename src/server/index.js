@@ -3,6 +3,8 @@ import path from 'path'
 import koa from 'koa'
 import PrettyError from 'pretty-error'
 
+import models from './models'
+
 import config from '../config'
 import logger from '../logger'
 
@@ -25,6 +27,12 @@ hooks
 
 logger.info('load hooks finished...')
 
+logger.info('start loading models...')
+
+models.initial()
+
+logger.info('load models finished...')
+
 app.listen(config.get('port'), (err) => {
   if (err) {
     const pretty = new PrettyError()
@@ -34,5 +42,7 @@ app.listen(config.get('port'), (err) => {
 
   logger.info('%s server is listening on port %d...', config.get('name'), config.get('port'))
 })
+
+cdeio.app = app
 
 export default app

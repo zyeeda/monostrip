@@ -4,6 +4,7 @@
   "description": "CDE.IO Platform",
   "author": "Zyeeda Corporation",
   "license": "Apache-2.0",
+  "main": "lib/index.js",
   "keywords": [
     "zyeeda",
     "platform",
@@ -29,7 +30,7 @@
     "test": "karma start",
     "check": "npm run lint && npm run test",
     "copy": "mkdir -p lib && cp -r src/config lib",
-    "compile": "babel -d lib src -L"
+    "compile": "babel -d lib src"
   },
   "dependencies": {
     "bunyan": "^1.5.1",
