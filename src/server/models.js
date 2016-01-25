@@ -17,6 +17,7 @@ const importModels = (modelPath) => {
   fs
     .listTreeSync(modelPath)
     .filter(filePath => fs.isFileSync(filePath))
+    .filter(filePath => path.extname(filePath) === '.js')
     .map(name => sequelize.import(name))
     .forEach(model => models[model.name] = model)
 }

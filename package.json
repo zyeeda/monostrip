@@ -25,11 +25,12 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "prepublish": "npm run copy && npm run compile",
+    "prepublish": "npm run clean && npm run copy && npm run compile",
     "lint": "eslint .",
     "test": "karma start",
     "check": "npm run lint && npm run test",
-    "copy": "mkdir -p lib && cp -r src/config lib",
+    "clean": "rm -rf lib",
+    "copy": "mkdir -p lib/config && cp src/config/*.json lib/config",
     "compile": "babel -d lib src"
   },
   "dependencies": {
