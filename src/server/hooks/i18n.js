@@ -5,8 +5,11 @@ import locale from 'koa-locale'
 import i18n from 'koa-i18n'
 
 import config from '../../config'
+import logger from '../../logger'
 
 export default (app) => {
+  logger.info(`Setup ${path.basename(__filename, '.js')} hook.`)
+
   const options = {
     directory: path.join(config.get('appPath'), 'locales'),
     locales: ['en', 'zh-CN'],

@@ -4,8 +4,11 @@ import fs from 'fs-plus'
 import Router from 'koa-router'
 
 import config from '../../config'
+import logger from '../../logger'
 
 export default (app) => {
+  logger.info(`Setup ${path.basename(__filename, '.js')} hook.`)
+
   const router = new Router(),
         routerRootPath = path.join(config.get('appPath'), 'routers'),
         re = new RegExp(`^${routerRootPath}/(.*).js`)
