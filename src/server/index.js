@@ -16,14 +16,14 @@ const hooks = [
 
 const app = koa()
 
-logger.info('start loading hooks...')
+logger.info('loading hooks...')
 
 hooks
   .map(hookName => path.resolve(__dirname, 'hooks', hookName))
   .map(hookFileName => require(hookFileName).default)
-  .forEach(hook => hook({app, config}))
+  .forEach(hook => hook(app))
 
-logger.info('load hooks finished...')
+logger.info('loading hooks completed.')
 
 app.listen(config.get('port'), (err) => {
   if (err) {

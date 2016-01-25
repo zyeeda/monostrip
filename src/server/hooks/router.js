@@ -3,7 +3,9 @@ import path from 'path'
 import fs from 'fs-plus'
 import Router from 'koa-router'
 
-export default ({app, config}) => {
+import config from '../../config'
+
+export default (app) => {
   const router = new Router(),
         routerRootPath = path.join(config.get('appPath'), 'routers'),
         re = new RegExp(`^${routerRootPath}/(.*).js`)

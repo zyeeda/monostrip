@@ -4,7 +4,9 @@ import R from 'ramda'
 import locale from 'koa-locale'
 import i18n from 'koa-i18n'
 
-export default ({app, config}) => {
+import config from '../../config'
+
+export default (app) => {
   const options = {
     directory: path.join(config.get('appPath'), 'locales'),
     locales: ['en', 'zh-CN'],
@@ -20,5 +22,5 @@ export default ({app, config}) => {
   }
 
   locale(app)
-  app.use(i18n(app, R.merge(config.get('hooks:i18n'), options)))
+  app.use(i18n(app, R.merge(options, config.get('hooks:i18n'))))
 }

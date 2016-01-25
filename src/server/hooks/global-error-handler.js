@@ -1,5 +1,5 @@
 import onerror from 'koa-onerror'
 
-export default ({app}) => {
+export default (app) => {
   onerror(app)
 }
