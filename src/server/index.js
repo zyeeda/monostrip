@@ -37,6 +37,4 @@ app.listen(config.get('port'), (err) => {
   logger.info('%s server is listening on port %d...', config.get('name'), config.get('port'))
 })
 
-cdeio.app = app
-
 export default app

@@ -5,8 +5,8 @@ import fs from 'fs-plus'
 
 import config from './config'
 
-const streams = []
-const logFile = path.join(config.get('appPath'), 'logs', `${config.get('name')}.log`)
+const streams = [],
+      logFile = path.join(config.get('appPath'), 'logs', `${config.get('name')}.log`)
 
 if (config.get('environment') === 'production') {
   if (!fs.existsSync(logFile)) fs.writeFileSync(logFile, '')
@@ -26,10 +26,10 @@ if (config.get('environment') === 'production') {
 }
 
 const options = {
-  src: config.get('environment')  === 'production' ? false : true,
+  src: config.get('environment') !== 'production',
   name: config.get('name'),
   streams,
   serializers: bunyan.stdSerializers
 }
 
-export default cdeio.logger = bunyan.createLogger(options)
+export default bunyan.createLogger(options)

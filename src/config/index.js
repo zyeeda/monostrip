@@ -7,8 +7,8 @@ const environment = process.env.NODE_ENV || 'development',
       nconf = new Provider()
 
 nconf
-  .env()
   .argv()
+  .env()
   .file('app_env', { file: path.join(appPath, 'config', environment + '.json')})
   .file('sys_env', { file: path.join(__dirname, environment + '.json')})
   .file('app_default', { file: path.join(appPath, 'config', 'default.json')})
@@ -17,7 +17,5 @@ nconf
 nconf.set('sysPath', path.join(__dirname, '..', '..'))
 nconf.set('appPath', appPath)
 nconf.set('environment', environment)
-
-cdeio.config = nconf
 
 export default nconf

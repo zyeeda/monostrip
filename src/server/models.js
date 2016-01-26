@@ -6,12 +6,17 @@ import Sequelize from 'sequelize'
 
 import config from '../config'
 
-const sequelize = new Sequelize(config.get('db:database'), config.get('db:username'), config.get('db:password'), config.get('db:options')),
-      modelPaths = [
-        path.join(config.get('sysPath'), 'lib', 'models'),
-        path.join(config.get('appPath'), 'models')
-      ],
-      models = {}
+const sequelize = new Sequelize(
+  config.get('db:database'),
+  config.get('db:username'),
+  config.get('db:password'),
+  config.get('db:options')
+)
+const modelPaths = [
+  path.join(config.get('sysPath'), 'lib', 'models'),
+  path.join(config.get('appPath'), 'models')
+]
+const models = {}
 
 const importModels = (modelPath) => {
   fs
@@ -29,6 +34,4 @@ R
   .filter((model) => R.is(Function, model.associate))
   .forEach((model) => model.associate(models))
 
-models.sequelize = sequelize
-
-export default cdeio.models = models
+export {sequelize, models}
