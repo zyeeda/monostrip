@@ -1,8 +1,7 @@
 {
   "extends": [
     "airbnb",
-    "import/warnings",
-    "import/es7-jsx"
+    "import/warnings"
   ],
   "parser": "babel-eslint",
   "ecmaFeatures": {
@@ -24,7 +23,6 @@
     "babel/object-shorthand": 1
   },
   "plugins": [
-    "react",
     "import",
     "babel"
   ],
@@ -32,13 +30,6 @@
     "import/parser": "babel-eslint"
   },
   "globals": {
-    "__DEVELOPMENT__": true,
-    "__CLIENT__": true,
-    "__SERVER__": true,
-    "__DISABLE_SSR__": true,
-    "__DEVTOOLS__": true,
-    "socket": true,
-    "webpackIsomorphicTools": true,
     "describe": true,
     "it": true,
     "expect": true

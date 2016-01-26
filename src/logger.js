@@ -5,8 +5,8 @@ import fs from 'fs-plus'
 
 import config from './config'
 
-const streams = [],
-      logFile = path.join(config.get('appPath'), 'logs', `${config.get('name')}.log`)
+const streams = []
+const logFile = path.join(config.get('appPath'), 'logs', `${config.get('name')}.log`)
 
 if (config.get('environment') === 'production') {
   if (!fs.existsSync(logFile)) fs.writeFileSync(logFile, '')
