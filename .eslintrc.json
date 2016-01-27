@@ -30,6 +30,7 @@
     "import/parser": "babel-eslint"
   },
   "globals": {
+    "jest": true,
     "describe": true,
     "it": true,
     "expect": true
