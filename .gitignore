@@ -10,5 +10,6 @@ npm-debug.log
 
 node_modules
 lib
+!src/config/__mocks__/nconf/lib
 
 logs
