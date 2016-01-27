@@ -1,13 +1,13 @@
 {
-  "name": "CDE.IO API",
+  "name": "CDE.IO",
   "host": "localhost",
   "port": 4100,
   "db": {
-    "database": "erp",
+    "database": "cdeio",
     "username": "root",
     "password": "mysecretpassword",
     "options": {
-      "host": "127.0.0.1",
+      "host": "mysql",
       "dialect": "mysql",
       "pool": {
         "port": 3306,
