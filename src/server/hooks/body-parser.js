@@ -2,10 +2,11 @@ import path from 'path'
 
 import bodyParser from 'koa-bodyparser'
 
+import config from '../../config'
 import logger from '../../logger'
 
 export default (app) => {
   logger.info(`Setup ${path.basename(__filename, '.js')} hook.`)
 
-  app.use(bodyParser())
+  app.use(bodyParser(config.get('hooks:body-parser')))
 }
