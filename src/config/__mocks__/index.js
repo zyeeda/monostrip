@@ -1,10 +1,6 @@
-const config = {
-  appPath: '@@/path/to/app',
-  name: `CDE.IO [${process.env.NODE_ENV === 'production' ? 'PROD' : 'TEST'}]`,
-  'log:level': process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  environment: process.env.NODE_ENV
-}
+const config = {}
 
 export default {
+  set: jest.genMockFunction().mockImplementation((key, value) => config[key] = value),
   get: jest.genMockFunction().mockImplementation((key) => config[key])
 }
