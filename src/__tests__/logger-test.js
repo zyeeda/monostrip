@@ -5,6 +5,11 @@ describe('logger', () => {
     const bunyan = require('bunyan')
     const config = require('../config').default
 
+    config.set('appPath', '/path/to/app')
+    config.set('name', 'CDE.IO [TEST]')
+    config.set('log:level', 'debug')
+    config.set('environment', 'test')
+
     require('../logger')
 
     expect(config.get.mock.calls.length).toBe(6)
@@ -29,6 +34,11 @@ describe('logger', () => {
     const fs = require('fs-plus').default
     const config = require('../config').default
 
+    config.set('appPath', '/path/to/app')
+    config.set('name', 'CDE.IO [PROD]')
+    config.set('log:level', 'info')
+    config.set('environment', 'production')
+
     require('../logger')
 
     expect(config.get.mock.calls.length).toBe(7)
@@ -40,7 +50,7 @@ describe('logger', () => {
     expect(config.get.mock.calls[5]).toEqual(['environment'])
     expect(config.get.mock.calls[6]).toEqual(['name'])
 
-    const logFile = '@@/path/to/app/logs/CDE.IO [PROD].log'
+    const logFile = '/path/to/app/logs/CDE.IO [PROD].log'
 
     expect(fs.existsSync).toBeCalledWith(logFile)
     expect(fs.writeFileSync).toBeCalledWith(logFile, '')
