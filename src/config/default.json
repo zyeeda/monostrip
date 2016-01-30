@@ -22,10 +22,10 @@
   },
   "hooks": {
     "body-parser": {},
-    "compress": {},
-    "etag": {},
-    "global-error-handler": {},
-    "i18n": {},
-    "static": {}
+    "i18n": {
+      "locales": ["en", "zh-CN"],
+      "extension": ".json",
+      "modes": ["header", "tld", "subdomain", "url", "cookie", "query"]
+    }
   }
 }
