@@ -5,7 +5,6 @@ describe('logger', () => {
     const bunyan = require('bunyan')
     const config = require('../config').default
 
-    config.set('appPath', '/path/to/app')
     config.set('name', 'CDE.IO [TEST]')
     config.set('log:level', 'debug')
     config.set('environment', 'test')
@@ -34,7 +33,6 @@ describe('logger', () => {
     const fs = require('fs-plus').default
     const config = require('../config').default
 
-    config.set('appPath', '/path/to/app')
     config.set('name', 'CDE.IO [PROD]')
     config.set('log:level', 'info')
     config.set('environment', 'production')

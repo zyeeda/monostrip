@@ -34,8 +34,6 @@ describe('models', () => {
     config.set('db:username', 'test-user')
     config.set('db:password', 'test-password')
     config.set('db:options', {})
-    config.set('sysPath', '/path/to/sys')
-    config.set('appPath', '/path/to/app')
 
     const {sequelize: sequelizeInstance, models} = require('../models')
 
