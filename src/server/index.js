@@ -1,6 +1,5 @@
 import path from 'path'
 
-import R from 'ramda'
 import koa from 'koa'
 import PrettyError from 'pretty-error'
 
@@ -19,11 +18,10 @@ const app = koa()
 
 logger.info('Loading hooks...')
 
-R.pipe(
-  R.map(hookName => path.resolve(__dirname, 'hooks', hookName)),
-  R.map(fileName => require(fileName).default),
-  R.forEach(hook => hook(app))
-)(hooks)
+hooks
+  .map(hookName => path.resolve(__dirname, 'hooks', hookName))
+  .map(fileName => require(fileName).default)
+  .forEach(hook => hook(app))
 
 logger.info('Loading hooks complete.')
 
