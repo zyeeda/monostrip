@@ -36,7 +36,10 @@
   "jest": {
     "testRunner": "<rootDir>/node_modules/jest-cli/src/testRunners/jasmine/jasmine2.js",
     "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
-    "verbose": true
+    "verbose": true,
+    "unmockedModulePathPatterns": [
+      "lodash"
+    ]
   },
   "dependencies": {
     "bunyan": "^1.5.1",
@@ -51,10 +54,12 @@
     "koa-locale": "^1.0.0",
     "koa-onerror": "^1.2.1",
     "koa-router": "^5.3.0",
+    "lodash.isfunction": "^3.0.7",
+    "lodash.merge": "^4.0.2",
+    "lodash.values": "^4.0.0",
     "mysql": "^2.10.0",
     "nconf": "^0.8.2",
     "pretty-error": "^2.0.0",
-    "ramda": "^0.19.1",
     "sequelize": "^3.17.3",
     "serialize-javascript": "^1.1.2"
   },
