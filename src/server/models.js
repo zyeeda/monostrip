@@ -1,7 +1,8 @@
 import path from 'path'
 
+import isFunction from 'lodash.isfunction'
+import values from 'lodash.values'
 import fs from 'fs-plus'
-import R from 'ramda'
 import Sequelize from 'sequelize'
 
 import config from '../config'
@@ -12,26 +13,24 @@ const sequelize = new Sequelize(
   config.get('db:password'),
   config.get('db:options')
 )
+
 const modelPaths = [
   path.join(config.get('sysPath'), 'lib', 'models'),
   path.join(config.get('appPath'), 'models')
 ]
-const models = {}
 
-const importModels = (modelPath) => {
-  fs
-    .listTreeSync(modelPath)
-    .filter(filePath => fs.isFileSync(filePath))
-    .filter(filePath => path.extname(filePath) === '.js')
-    .map(name => sequelize.import(name))
-    .forEach(model => models[model.name] = model)
-}
+const models = modelPaths
+  .map(modelPath => fs.listTreeSync(modelPath))
+  .reduce((prev, current) => prev.concat(current), [])
+  .filter(filePath => fs.isFileSync(filePath) && path.extname(filePath) === '.js')
+  .map(filePath => sequelize.import(filePath))
+  .reduce((models, model) => {
+    models[model.name] = model
+    return models
+  }, {})
 
-modelPaths.forEach((modelPath) => importModels(modelPath))
-
-R
-  .values(models)
-  .filter((model) => R.is(Function, model.associate))
-  .forEach((model) => model.associate(models))
+values(models)
+  .filter(model => isFunction(model.associate))
+  .forEach(model => model.associate(models))
 
 export {sequelize, models}
