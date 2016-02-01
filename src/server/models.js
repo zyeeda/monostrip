@@ -19,15 +19,13 @@ const modelPaths = [
   path.join(config.get('appPath'), 'models')
 ]
 
-const models = modelPaths
+const models = {}
+modelPaths
   .map(modelPath => fs.listTreeSync(modelPath))
   .reduce((prev, current) => prev.concat(current), [])
   .filter(filePath => fs.isFileSync(filePath) && path.extname(filePath) === '.js')
   .map(filePath => sequelize.import(filePath))
-  .reduce((models, model) => {
-    models[model.name] = model
-    return models
-  }, {})
+  .forEach(model => models[model.name] = model)
 
 values(models)
   .filter(model => isFunction(model.associate))

@@ -20,7 +20,7 @@ describe('logger', () => {
     expect(config.get.mock.calls[5]).toEqual(['name'])
 
     expect(bunyan.createLogger).toBeCalled()
-    const options = bunyan.createLogger.mock.calls[0/*first call*/][0/* first argument*/]
+    const options = bunyan.createLogger.mock.calls[0/* first call */][0/* first argument */]
     expect(options.src).toBe(true)
     expect(options.name).toBe('CDE.IO [TEST]')
     expect(options.streams[0].level).toBe('debug')

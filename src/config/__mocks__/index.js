@@ -1,6 +1,6 @@
 const config = {
-  'sysPath': '/path/to/sys',
-  'appPath': '/path/to/app'
+  sysPath: '/path/to/sys',
+  appPath: '/path/to/app'
 }
 
 export default {

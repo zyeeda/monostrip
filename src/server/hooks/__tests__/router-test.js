@@ -3,17 +3,13 @@ import path from 'path'
 jest.dontMock('../router')
 
 jest.setMock('fs-plus', {
-  listTreeSync: jest.genMockFunction().mockImplementation((filePath) => {
-    return [
-      `${filePath}/hello.js`,
-      `${filePath}/project/list`,
-      `${filePath}/task/create.js`,
-      `${filePath}/.DS_Store`
-    ]
-  }),
-  isFileSync: jest.genMockFunction().mockImplementation(filePath => {
-    return path.extname(filePath) !== ''
-  })
+  listTreeSync: jest.genMockFunction().mockImplementation(filePath => [
+    `${filePath}/hello.js`,
+    `${filePath}/project/list`,
+    `${filePath}/task/create.js`,
+    `${filePath}/.DS_Store`
+  ]),
+  isFileSync: jest.genMockFunction().mockImplementation(filePath => path.extname(filePath) !== '')
 })
 
 

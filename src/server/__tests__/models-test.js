@@ -6,21 +6,18 @@ jest.dontMock('../models')
 const _files = ['account.js', 'group.js', 'project/task.js', 'project/phase.js']
 let _start = 0
 const fsMock = {
-  listTreeSync: jest.genMockFunction().mockImplementation((filePath) => {
-    return [`${filePath}/${_files[_start++]}`, `${filePath}/${_files[_start++]}`]
-  }),
+  listTreeSync: jest.genMockFunction().mockImplementation(
+    filePath => [`${filePath}/${_files[_start++]}`, `${filePath}/${_files[_start++]}`]),
   isFileSync: jest.genMockFunction().mockReturnValue(true)
 }
 jest.setMock('fs-plus', fsMock)
 
 // mock sequelize
 const SequelizeMock = jest.genMockFunction()
-SequelizeMock.prototype.import = jest.genMockFunction().mockImplementation((filePath) => {
-  return {
-    name: path.basename(filePath, '.js'),
-    associate: jest.genMockFunction()
-  }
-})
+SequelizeMock.prototype.import = jest.genMockFunction().mockImplementation(filePath => ({
+  name: path.basename(filePath, '.js'),
+  associate: jest.genMockFunction()
+}))
 jest.setMock('sequelize', SequelizeMock)
 
 // test case
@@ -49,7 +46,6 @@ describe('models', () => {
     expect(fs.isFileSync.mock.calls[3][0]).toBe('/path/to/app/models/project/phase.js')
 
     expect(sequelize).toBeCalledWith('test-database', 'test-user', 'test-password', {})
-    console.log(sequelize.mock.instances[0])
     expect(sequelize.mock.instances[0]).toBe(sequelizeInstance)
     expect(sequelizeInstance.import.mock.calls.length).toBe(4)
 
