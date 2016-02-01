@@ -38,7 +38,9 @@
     "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
     "verbose": true,
     "unmockedModulePathPatterns": [
-      "lodash"
+      "lodash",
+      "core-js",
+      "regenerator"
     ]
   },
   "dependencies": {
