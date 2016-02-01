@@ -8,7 +8,7 @@ import config from '../../config'
 import logger from '../../logger'
 
 export default (app) => {
-  logger.info(`Setup ${path.basename(__filename, '.js')} hook.`)
+  logger.info(`loading ${path.basename(__filename, '.js')} hook`)
 
   const options = {
     directory: path.join(config.get('appPath'), 'locales'),

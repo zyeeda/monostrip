@@ -14,16 +14,15 @@ const hooks = [
   'router'
 ]
 
-const app = koa()
+logger.debug(`sysPath = ${config.get('sysPath')}`)
+logger.debug(`appPath = ${config.get('appPath')}`)
 
-logger.info('Loading hooks...')
+const app = koa()
 
 hooks
   .map(hookName => path.resolve(__dirname, 'hooks', hookName))
   .map(fileName => require(fileName).default)
   .forEach(hook => hook(app))
-
-logger.info('Loading hooks complete.')
 
 app.listen(config.get('port'), (err) => {
   if (err) {
@@ -32,7 +31,7 @@ app.listen(config.get('port'), (err) => {
     return
   }
 
-  logger.info('%s server is listening on port %d...', config.get('name'), config.get('port'))
+  logger.info('server is listening on port %d...', config.get('port'))
 })
 
 export default app
