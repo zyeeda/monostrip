@@ -60,7 +60,7 @@
     "lodash.merge": "^4.3.0",
     "lodash.values": "^4.1.0",
     "mysql": "^2.10.0",
-    "nconf": "^0.8.2",
+    "nconf": "^0.8.4",
     "pretty-error": "^2.0.0",
     "sequelize": "^3.17.3",
     "serialize-javascript": "^1.1.2"
