@@ -13,8 +13,8 @@ export default (app) => {
   const routerRootPath = path.join(config.get('appPath'), 'routers')
   const re = new RegExp(`^${routerRootPath}/(.*).js`)
 
-  router.use(function* setDefaultResponseMimeType(next) {
-    logger.info('set default MIME type to json')
+  router.use(function* setResponseMimeType(next) {
+    logger.info('set response MIME type to json')
     this.type = 'json'
     yield* next
   })
@@ -29,4 +29,5 @@ export default (app) => {
     })
 
   app.use(router.routes())
+  app.use(router.allowedMethods())
 }
