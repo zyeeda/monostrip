@@ -44,7 +44,7 @@
     ]
   },
   "dependencies": {
-    "bunyan": "^1.5.1",
+    "bunyan": "^1.6.0",
     "chance": "^0.8.0",
     "fs-plus": "^2.8.1",
     "koa": "^1.1.2",
