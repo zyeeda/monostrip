@@ -1,10 +1,18 @@
 import path from 'path'
 
 import koa from 'koa'
+import keys from 'lodash.keys'
+import values from 'lodash.values'
 import PrettyError from 'pretty-error'
 
 import config from '../config'
 import logger from '../logger'
+
+import loadModels from './load-models'
+import loadOutlines from './load-outlines'
+
+loadModels()
+loadOutlines()
 
 const hooks = [
   'global-error-handler',
