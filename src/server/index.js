@@ -11,9 +11,6 @@ import logger from '../logger'
 import loadModels from './load-models'
 import loadOutlines from './load-outlines'
 
-loadModels()
-loadOutlines()
-
 const hooks = [
   'global-error-handler',
   'i18n',
@@ -26,6 +23,9 @@ logger.debug(`sysPath = ${config.get('sysPath')}`)
 logger.debug(`appPath = ${config.get('appPath')}`)
 
 const app = koa()
+
+loadModels()
+loadOutlines(app)
 
 hooks
   .map(hookName => path.resolve(__dirname, 'hooks', hookName))
