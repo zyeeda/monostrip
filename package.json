@@ -1,14 +1,15 @@
 {
-  "name": "cdeio",
-  "version": "3.0.0-0.1.0",
-  "description": "CDE.IO Platform",
+  "name": "monostrip",
+  "version": "0.1.0",
+  "description": "Backend as a service(BaaS) platform powered by GraphQL.",
   "author": "Zyeeda Corporation",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "main": "lib/index.js",
   "keywords": [
-    "zyeeda",
-    "platform",
-    "ide"
+    "baas",
+    "backend",
+    "graphql",
+    "sequelize"
   ],
   "files": [
     "src",
@@ -16,10 +17,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/zyeeda/cde.io"
+    "url": "https://github.com/zyeeda/monostrip.git"
   },
   "bugs": {
-    "url": "https://github.com/zyeeda/cde.io/issues"
+    "url": "https://github.com/zyeeda/monostrip/issues"
   },
   "engines": {
     "node": ">=4.0.0"
