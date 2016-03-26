@@ -6,7 +6,7 @@ import config from '../../config'
 import logger from '../../logger'
 
 export default (app) => {
-  logger.info(`loading ${path.basename(__filename, '.js')} hook`)
+  logger.info('loading hook %s...', path.basename(__filename, '.js'))
 
   app.use(bodyParser(config.get('hooks:body-parser')))
 }

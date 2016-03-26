@@ -7,7 +7,7 @@ import config from '../../config'
 import logger from '../../logger'
 
 export default (app) => {
-  logger.info(`loading ${path.basename(__filename, '.js')} hook`)
+  logger.info('loading hook %s...', path.basename(__filename, '.js'))
 
   const router = new Router()
   const routerRootPath = path.join(config.get('appPath'), 'routers')
