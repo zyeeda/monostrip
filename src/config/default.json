@@ -1,16 +1,16 @@
 {
-  "name": "CDE.IO",
+  "name": "Monostrip",
   "host": "localhost",
   "port": 4100,
   "db": {
-    "database": "cdeio",
+    "database": "monostrip",
     "username": "root",
     "password": "mysecretpassword",
     "options": {
       "host": "mysql",
+      "port": 3306,
       "dialect": "mysql",
       "pool": {
-        "port": 3306,
         "max": 15,
         "min": 0,
         "idle": 10000
