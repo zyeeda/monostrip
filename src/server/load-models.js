@@ -24,7 +24,7 @@ export default () => {
     .reduce((prev, current) => prev.concat(current), [])
     .filter(filePath => fs.isFileSync(filePath) && path.extname(filePath) === '.js')
     .map(filePath => sequelize.import(filePath))
-    .forEach(model => models[model.name] = model)
+    .forEach(model => (models[model.name] = model))
 
   values(models)
     .filter(model => isFunction(model.associate))

@@ -7,7 +7,7 @@ ProviderMock.prototype.env = jest.genMockFunction().mockReturnThis()
 ProviderMock.prototype.file = jest.genMockFunction().mockReturnThis()
 
 ProviderMock.prototype.set =
-  jest.genMockFunction().mockImplementation((key, value) => config[key] = value)
+  jest.genMockFunction().mockImplementation((key, value) => (config[key] = value))
 
 ProviderMock.prototype.get =
   jest.genMockFunction().mockImplementation((key) => config[key])

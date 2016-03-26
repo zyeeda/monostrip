@@ -1,8 +1,6 @@
 import path from 'path'
 
 import koa from 'koa'
-import keys from 'lodash.keys'
-import values from 'lodash.values'
 import PrettyError from 'pretty-error'
 
 import config from '../config'

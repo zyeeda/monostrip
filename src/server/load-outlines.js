@@ -9,7 +9,7 @@ import logger from '../logger'
 import models from './load-models'
 import sketches from './sketches'
 
-const generateDefaultRouter = (model) => {
+const generateDefaultRouter = () => {
   const router = new Router()
 
   router.get('/', function* list() {
@@ -97,7 +97,8 @@ export default (app) => {
       const outlineRouters = new Router()
 
       logger.debug(`mount router: /${sketchName}`)
-      outlineRouters.use(`/${inflection.pluralize(sketchName)}`, generateDefaultRouter(models[outline.modelName]).routes())
+      outlineRouters.use(`/${inflection.pluralize(sketchName)}`,
+        generateDefaultRouter(models[outline.modelName]).routes())
 
       app.use(outlineRouters.routes())
       app.use(outlineRouters.allowedMethods())
