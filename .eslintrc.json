@@ -1,7 +1,7 @@
 {
   "extends": [
     "airbnb",
-    "import/warnings"
+    "plugin:import/warnings"
   ],
   "parser": "babel-eslint",
   "ecmaFeatures": {
