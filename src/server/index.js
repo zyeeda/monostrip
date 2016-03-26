@@ -37,7 +37,7 @@ app.listen(config.get('port'), (err) => {
     return
   }
 
-  logger.info('server is listening on port %d...', config.get('port'))
+  logger.info('%s server is listening on port %d...', config.get('name'), config.get('port'))
 })
 
 export default app
