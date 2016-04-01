@@ -264,10 +264,12 @@ getCurrentUser = ->
 requireScaffoldConfig = exports.requireScaffoldConfig = (path) ->
     path = path.replace /(^\/)|(\/$)/g, ''
     p = path + '.feature/scaffold'
+
     # 动态载入 feature 配置信息
     options = try
         require p
     catch e
+        log.error "require scaffold file '#{p}' with error: #{e}"
         {}
 
     options
@@ -293,7 +295,7 @@ getService = (options, entityMeta) ->
 
 mountPath = (path, meta) ->
     options = requireScaffoldConfig path
-    log.debug "find scaffolding entity:#{meta.entityClass} bind to #{meta.path}, with options:#{JSON.stringify options}"
+    log.debug "find scaffolding entity:#{meta.entityClass} bind to #{meta.path}, with options:#{JSON.stringify options} path = #{path}"
     log.debug "router --- mountPath options = #{options.doWithRouter}"
 
     doWithRouter = options.doWithRouter or ->
