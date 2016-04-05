@@ -206,6 +206,7 @@ public class AntiRobotFilter extends FormAuthenticationFilter {
 
         CookieGenerator cg = new CookieGenerator();
         cg.setCookieName(Constants.COOKIE_NAME);
+        cg.setCookiePath(httpReq.getContextPath());
         cg.setCookieMaxAge(this.cookieMaxAge);
         cg.addCookie(httpRes, token.getNonce());
 
