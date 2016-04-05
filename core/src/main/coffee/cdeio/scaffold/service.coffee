@@ -77,7 +77,7 @@ exports.createService = (entityClass, entityMeta, scaffold) ->
 
             if mergedEntityFieldValue instanceof Attachment
                 # 如果编辑操作之前有附件，并且跟编辑之后的附件不一致，则删除原附件
-                if preAttachment[fieldName] && mergedEntityFieldValue.id != preAttachment[fieldName]
+                if preAttachment && preAttachment[fieldName] && mergedEntityFieldValue.id != preAttachment[fieldName]
                     upload.deleteAttachment preAttachment[fieldName]
 
                 if mergedEntityFieldValue.id
