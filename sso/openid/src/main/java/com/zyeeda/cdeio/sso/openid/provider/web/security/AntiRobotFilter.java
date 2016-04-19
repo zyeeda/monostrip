@@ -89,21 +89,21 @@ public class AntiRobotFilter extends FormAuthenticationFilter {
     protected boolean onAccessDenied(final ServletRequest request, final ServletResponse response) throws Exception {
         // 请求登录页面
         if (this.isLoginRequest(request, response)) {
-            LOGGER.debug("Request sign-in page.");
+            LOGGER.error("Request sign-in page.");
 
             HttpServletRequest httpReq = (HttpServletRequest) request;
             HttpServletResponse httpRes = (HttpServletResponse) response;
 
             Cookie cookie = WebUtils.getCookie(httpReq, Constants.COOKIE_NAME);
             if (cookie == null || StringUtils.isBlank(cookie.getValue())) { // cookie 不存在
-                LOGGER.debug("Cookie {} does not exist.", Constants.COOKIE_NAME);
+                LOGGER.error("Cookie {} does not exist.", Constants.COOKIE_NAME);
 
                 if (this.isLoginSubmission(request, response)) {
-                    LOGGER.debug("Submit to sign-in page.");
+                    LOGGER.error("Submit to sign-in page.");
 
                     // 如果请求中携带验证码，且验证码正确匹配，则直接通过
                     if (this.captchaProvided(httpReq) && this.captchaMatches(httpReq)) {
-                        LOGGER.debug("Captcha required and matches.");
+                        LOGGER.error("Captcha required and matches.");
                         return true;
                     }
 
@@ -113,25 +113,25 @@ public class AntiRobotFilter extends FormAuthenticationFilter {
 
                 this.generateSignInToken(httpReq, httpRes);
             } else { // cookie 存在
-                LOGGER.debug("Cookie {} exists, value = {}.", Constants.COOKIE_NAME, cookie.getValue());
+                LOGGER.error("Cookie {} exists, value = {}.", Constants.COOKIE_NAME, cookie.getValue());
 
                 if (this.isLoginSubmission(request, response)) {
-                    LOGGER.debug("Submit to sign-in page.");
+                    LOGGER.error("Submit to sign-in page.");
 
                     Element e = this.cache.get(cookie.getValue());
                     if (e == null) { // token 不存在或已过期
-                        LOGGER.debug("Sign-in token does not exist or is expired.");
+                        LOGGER.error("Sign-in token does not exist or is expired.");
                         request.setAttribute(this.getFailureKeyAttribute(), "INVALID_SIGN_IN_TOKEN");
                         return true;
                     } else { // token 存在
-                        LOGGER.debug("Sign-in token exists.");
+                        LOGGER.error("Sign-in token exists.");
                         SignInToken token = (SignInToken) e.getObjectValue();
                         httpReq.setAttribute(Constants.SIGN_IN_TOKEN_ATTRIBUTE_NAME, token);
 
                         if (this.captchaRequired(httpReq)) {
-                            LOGGER.debug("Captcha required!");
+                            LOGGER.error("Captcha required!");
                             if (!this.captchaProvided(httpReq) || !this.captchaMatches(httpReq)) {
-                                LOGGER.debug("Captcha not matches.");
+                                LOGGER.error("Captcha not matches.");
                                 request.setAttribute(this.getFailureKeyAttribute(), "INVALID_CAPTCHA");
                                 return true;
                             }
@@ -139,7 +139,7 @@ public class AntiRobotFilter extends FormAuthenticationFilter {
 
                         // 登录请求间隔小于冷却时间，疑似机器人
                         if (System.currentTimeMillis() - token.getTimestamp() <= this.cooldownTime) {
-                            LOGGER.debug("Request too fast, maybe a robot.");
+                            LOGGER.error("Request too fast, maybe a robot.");
                             token.setCaptchaRequired(true);
                             request.setAttribute(this.getFailureKeyAttribute(), "REQUEST_TOO_FAST");
                             return true;
@@ -197,7 +197,7 @@ public class AntiRobotFilter extends FormAuthenticationFilter {
      * @return 生成的 SignInToken 对象
      */
     private SignInToken generateSignInToken(final HttpServletRequest httpReq, final HttpServletResponse httpRes) {
-        LOGGER.debug("Generate the sign-in token and add cookie to response.");
+        LOGGER.error("Generate the sign-in token and add cookie to response.");
 
         SignInToken token = new SignInToken();
         Element e = new Element(token.getNonce(), token);
@@ -206,7 +206,6 @@ public class AntiRobotFilter extends FormAuthenticationFilter {
 
         CookieGenerator cg = new CookieGenerator();
         cg.setCookieName(Constants.COOKIE_NAME);
-        cg.setCookiePath(httpReq.getContextPath());
         cg.setCookieMaxAge(this.cookieMaxAge);
         cg.addCookie(httpRes, token.getNonce());
 
