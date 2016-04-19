@@ -227,7 +227,7 @@ defaultHandlers = (path, options) ->
             result = {}
             config = {}
 
-            objects.extend config, {listType: options.listType, pickerFeatureName: request.params.pickerFeatureName, pickerFeatureType: request.params.pickerFeatureType, pickerFiled: request.params.pickerFiled}
+            objects.extend config, {listType: options.listType}
 
             appPath = request.env.servletRequest.getRealPath '/WEB-INF/app'
             config.appPath = appPath
@@ -240,11 +240,13 @@ defaultHandlers = (path, options) ->
                 config.fields= options[style].colModel
 
             paginationInfo = cdeio.extractPaginationInfo request.params
+
+            for paramName of request.params
+                config[paramName] = request.params[paramName]
+                paginationInfo[paramName] = request.params[paramName] if paginationInfo?
+
             if paginationInfo?
                 paginationInfo.listType = config.listType
-                paginationInfo.pickerFeatureName = config.pickerFeatureName
-                paginationInfo.pickerFeatureType = config.pickerFeatureType
-                paginationInfo.pickerFiled = config.pickerFiled
                 paginationInfo.fetchCount = true
                 pageSize = paginationInfo.maxResults
                 paginationInfo.appPath = config.appPath
