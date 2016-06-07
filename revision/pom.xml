@@ -22,7 +22,7 @@ $License: Copyright &copyright 2013 Shenzhen Zyeeda Information Technology Co. L
     <description>A simple entity data revision library.</description>
 
     <properties>
-        <shiro.version>1.2.1</shiro.version>
+        <shiro.version>1.2.5</shiro.version>
     </properties>
 
     <dependencies>
