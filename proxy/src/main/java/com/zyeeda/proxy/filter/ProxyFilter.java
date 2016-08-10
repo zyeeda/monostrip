@@ -161,10 +161,11 @@ public class ProxyFilter implements Filter {
             throw new RuntimeException(e);
 
         } finally {
-            consumeQuietly(proxyResponse.getEntity());
+            if (proxyResponse != null) {
+                consumeQuietly(proxyResponse.getEntity());
+            }
             closeQuietly(servletResponse.getOutputStream());
         }
-
     }
 
     protected boolean doResponseRedirectOrNotModifiedLogic(
