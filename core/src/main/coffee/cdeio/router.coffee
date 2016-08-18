@@ -652,7 +652,11 @@ defaultHandlers = (path, options) ->
     map = list: 'show', get: 'show', create: 'add', update: 'edit', remove: 'del', batchRemove: 'del'
     p = path.replace(/^\//, '').replace(/\/$/, '')
     for key, value of map
-        o[key] = mark('perms', "#{p}:#{value}").on o[key]
+        if key is 'list'
+            if options.listType is not 'picker' # picker does not need check permission.
+                o[key] = mark('perms', "#{p}:#{value}").on o[key]
+        else
+            o[key] = mark('perms', "#{p}:#{value}").on o[key]
     o
 
 # the reason why put the entity in the end of argument list is that,
